@@ -32,22 +32,6 @@ defmodule DepsNix do
     end
   end
 
-  @spec load(Derivation.t(), String.t()) :: String.t()
-  def load(%Derivation{} = drv, acc) do
-    """
-    #{acc}
-    #{drv.name} = #{drv.builder} rec {
-      name = "#{drv.name}";
-      version = "#{drv.version}";
-
-      src = #{drv.src};
-
-      beamDeps = #{format_beam_deps(drv.beam_deps)};
-    };
-    """
-    |> String.trim_leading()
-  end
-
   @spec indent(String.t()) :: String.t()
   def indent(str) do
     ("  " <> str)
@@ -60,13 +44,5 @@ defmodule DepsNix do
 
   defp nix_builder([:mix]) do
     "buildMix"
-  end
-
-  defp format_beam_deps([]) do
-    "[ ]"
-  end
-
-  defp format_beam_deps(deps) do
-    "[ #{Enum.join(deps, " ")} ]"
   end
 end

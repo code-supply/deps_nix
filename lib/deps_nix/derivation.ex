@@ -9,4 +9,27 @@ defmodule DepsNix.Derivation do
 
   @enforce_keys [:builder, :name, :version, :src, :beam_deps]
   defstruct [:builder, :name, :version, :src, :beam_deps]
+
+  defimpl String.Chars do
+    def to_string(drv) do
+      """
+      #{drv.name} = #{drv.builder} rec {
+        name = "#{drv.name}";
+        version = "#{drv.version}";
+
+        src = #{drv.src};
+
+        beamDeps = #{format_beam_deps(drv.beam_deps)};
+      };
+      """
+    end
+
+    defp format_beam_deps([]) do
+      "[ ]"
+    end
+
+    defp format_beam_deps(deps) do
+      "[ #{Enum.join(deps, " ")} ]"
+    end
+  end
 end
