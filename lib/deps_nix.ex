@@ -2,6 +2,7 @@ defmodule DepsNix do
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
+  @spec transform(Mix.Dep.t()) :: Derivation.t()
   def transform(%Mix.Dep{} = dep) do
     case dep.opts[:lock] do
       {:hex, name, version, _hash, beam_builders, sub_deps, _, sha256} ->
@@ -31,6 +32,7 @@ defmodule DepsNix do
     end
   end
 
+  @spec load(Derivation.t(), String.t()) :: String.t()
   def load(%Derivation{} = drv, acc) do
     """
     #{acc}
@@ -46,6 +48,7 @@ defmodule DepsNix do
     |> String.trim_leading()
   end
 
+  @spec indent(String.t()) :: String.t()
   def indent(str) do
     ("  " <> str)
     |> String.replace(~r/\n(.+)/, "\n  \\1")

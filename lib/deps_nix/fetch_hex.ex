@@ -1,4 +1,10 @@
 defmodule DepsNix.FetchHex do
+  @type t :: %__MODULE__{
+          pkg: atom(),
+          version: String.t(),
+          sha256: String.t()
+        }
+
   @enforce_keys [:pkg, :version, :sha256]
   defstruct [:pkg, :version, :sha256]
 
