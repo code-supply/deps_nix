@@ -23,7 +23,7 @@ defmodule DepsNix do
             for {name, _version, _pm_stuff} <- sub_deps do
               name
             end,
-          unpack_phase: unpack_phase(name)
+          unpack_phase: unpack_phase(name, version)
         }
 
       nil ->
@@ -37,18 +37,18 @@ defmodule DepsNix do
     end
   end
 
-  def unpack_phase(:grpcbox = name) do
+  def unpack_phase(:grpcbox = name, version) do
     """
     runHook preUnpack
     unpackFile "$src"
-    chmod -R u+w -- hex-source-#{name}-${version}
-    mv hex-source-#{name}-${version} #{name}
+    chmod -R u+w -- hex-source-#{name}-#{version}
+    mv hex-source-#{name}-#{version} #{name}
     sourceRoot=#{name}
     runHook postUnpack
     """
   end
 
-  def unpack_phase(_) do
+  def unpack_phase(_, _) do
     nil
   end
 

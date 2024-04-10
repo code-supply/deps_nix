@@ -7,12 +7,13 @@ defmodule DepsNixTest do
 
   property "sets unpackPhase for packages needing dir name to match package name" do
     check all name <- one_of([:grpcbox]),
-              dep <- dep(name: name) do
+              version <- version(),
+              dep <- dep(name: name, version: version) do
       expected_unpack_phase = """
       runHook preUnpack
       unpackFile "$src"
-      chmod -R u+w -- hex-source-#{name}-${version}
-      mv hex-source-#{name}-${version} #{name}
+      chmod -R u+w -- hex-source-#{name}-#{version}
+      mv hex-source-#{name}-#{version} #{name}
       sourceRoot=#{name}
       runHook postUnpack
       """
@@ -125,9 +126,9 @@ defmodule DepsNixTest do
   defp dep(opts \\ []) do
     builders = Keyword.get(opts, :builders, DepsNix.builders())
     name_gen = Keyword.get(opts, :name, atom(:alphanumeric))
+    version = Keyword.get(opts, :version, version())
 
     gen all name <- name_gen,
-            version <- version(),
             hash1 <- string(:alphanumeric, length: 64),
             hash2 <- string(:alphanumeric, length: 64) do
       %Mix.Dep{
