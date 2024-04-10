@@ -1,1 +1,1 @@
-nvim -d <(mix2nix | nixpkgs-fmt) <(mix deps.nix | nixpkgs-fmt)
+nvim -d <(mix2nix | nixpkgs-fmt) <(mix deps.nix)
