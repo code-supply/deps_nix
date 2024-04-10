@@ -19,10 +19,7 @@ defmodule DepsNix do
             version: version,
             sha256: sha256
           },
-          beam_deps:
-            for {name, _version, _pm_stuff} <- sub_deps do
-              name
-            end,
+          beam_deps: beam_deps(dep.opts, sub_deps),
           unpack_phase: unpack_phase(name, version)
         }
 
@@ -35,6 +32,16 @@ defmodule DepsNix do
           beam_deps: []
         }
     end
+  end
+
+  defp beam_deps(opts, sub_deps) do
+    sub_deps
+    |> Enum.map(fn {name, _version, _pm_stuff} -> name end)
+    |> Enum.reject(&(&1 in optional_apps(opts)))
+  end
+
+  defp optional_apps(opts) do
+    get_in(opts, [:app_properties, :optional_applications]) || []
   end
 
   def unpack_phase(:grpcbox = name, version) do

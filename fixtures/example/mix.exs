@@ -23,6 +23,7 @@ defmodule Example.MixProject do
     [
       {:deps_nix, path: "../..", only: [:dev]},
       {:bandit, "~> 1.2"},
+      {:eventstore, "~> 1.4"},
       {:opentelemetry_exporter, "~> 1.7.0"}
     ]
   end

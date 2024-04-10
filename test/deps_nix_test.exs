@@ -48,6 +48,55 @@ defmodule DepsNixTest do
     end
   end
 
+  test "doesn't include optional dependencies in beamDeps" do
+    eventstore =
+      %Mix.Dep{
+        app: :eventstore,
+        opts: [
+          app_properties: [
+            optional_applications: [:jason, :poolboy],
+            applications: [
+              :kernel,
+              :stdlib,
+              :elixir,
+              :crypto,
+              :eex,
+              :logger,
+              :ssl,
+              :fsm,
+              :gen_stage,
+              :postgrex,
+              :jason,
+              :poolboy
+            ]
+          ],
+          lock:
+            {:hex, :eventstore, "1.4.4",
+             "0b1e0f4af9f034210e24eb6a787006f52c3320baa863a7059d07e88654ef4334", [:mix],
+             [
+               {:fsm, "~> 0.3", [hex: :fsm, repo: "hexpm", optional: false]},
+               {:gen_stage, "~> 1.2", [hex: :gen_stage, repo: "hexpm", optional: false]},
+               {:jason, "~> 1.4", [hex: :jason, repo: "hexpm", optional: true]},
+               {:poolboy, "~> 1.5", [hex: :poolboy, repo: "hexpm", optional: true]},
+               {:postgrex, "~> 0.17", [hex: :postgrex, repo: "hexpm", optional: false]}
+             ], "hexpm", "1cb0b76199dccff9625c2317b4500f51016c7ef6010c0de60e5f89bc6f8cb811"},
+          env: :prod,
+          hex: "eventstore",
+          repo: "hexpm"
+        ],
+        deps: [
+          %Mix.Dep{app: :fsm},
+          %Mix.Dep{app: :gen_stage},
+          %Mix.Dep{app: :postgrex}
+        ],
+        top_level: true,
+        manager: :mix,
+        system_env: []
+      }
+
+    assert DepsNix.transform(eventstore).beam_deps == [:fsm, :gen_stage, :postgrex]
+  end
+
   test "uses app name as nix variable and derivation name" do
     chatterbox = %Mix.Dep{
       scm: Hex.SCM,
