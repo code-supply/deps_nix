@@ -2,6 +2,10 @@ defmodule DepsNix do
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
+  def builders do
+    [:mix, :rebar3, :make]
+  end
+
   @spec transform(Mix.Dep.t()) :: Derivation.t()
   def transform(%Mix.Dep{} = dep) do
     case dep.opts[:lock] do
@@ -18,7 +22,8 @@ defmodule DepsNix do
           beam_deps:
             for {name, _version, _pm_stuff} <- sub_deps do
               name
-            end
+            end,
+          unpack_phase: unpack_phase(name)
         }
 
       nil ->
@@ -32,17 +37,35 @@ defmodule DepsNix do
     end
   end
 
-  @spec indent(String.t()) :: String.t()
+  def unpack_phase(:grpcbox = name) do
+    """
+    runHook preUnpack
+    unpackFile "$src"
+    chmod -R u+w -- hex-source-#{name}-${version}
+    mv hex-source-#{name}-${version} #{name}
+    sourceRoot=#{name}
+    runHook postUnpack
+    """
+  end
+
+  def unpack_phase(_) do
+    nil
+  end
+
+  @spec indent(String.t() | nil) :: String.t()
+  def indent(nil) do
+    ""
+  end
+
   def indent(str) do
     ("  " <> str)
     |> String.replace(~r/\n(.+)/, "\n  \\1")
   end
 
-  defp nix_builder([:rebar3]) do
-    "buildRebar3"
-  end
-
-  defp nix_builder([:mix]) do
-    "buildMix"
+  defp nix_builder(builders) do
+    cond do
+      Enum.member?(builders, :mix) -> "buildMix"
+      Enum.member?(builders, :rebar3) -> "buildRebar3"
+    end
   end
 end

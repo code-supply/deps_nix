@@ -24,7 +24,8 @@ defmodule DepsNix.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:stream_data, "~> 0.6.0", only: [:dev, :test]}
     ]
   end
 end

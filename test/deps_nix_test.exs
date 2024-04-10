@@ -1,56 +1,50 @@
 defmodule DepsNixTest do
   use ExUnit.Case
+  use ExUnitProperties
 
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
-  test "can indent a string" do
-    assert DepsNix.indent("""
-           hi
-           there
+  property "sets unpackPhase for packages needing dir name to match package name" do
+    check all name <- one_of([:grpcbox]),
+              dep <- dep(name: name) do
+      expected_unpack_phase = """
+      runHook preUnpack
+      unpackFile "$src"
+      chmod -R u+w -- hex-source-#{name}-${version}
+      mv hex-source-#{name}-${version} #{name}
+      sourceRoot=#{name}
+      runHook postUnpack
+      """
 
-           you
-           """) == """
-             hi
-             there
-
-             you
-           """
+      assert %Derivation{unpack_phase: ^expected_unpack_phase} = DepsNix.transform(dep)
+    end
   end
 
-  test "can convert rebar3 dependencies" do
-    telemetry = %Mix.Dep{
-      scm: Hex.SCM,
-      app: :telemetry,
-      requirement: "~> 0.4 or ~> 1.0",
-      status: {:ok, "1.2.1"},
-      opts: [
-        lock:
-          {:hex, :telemetry, "1.2.1",
-           "68fdfe8d8f05a8428483a97d7aab2f268aaff24b49e0f599faa091f1d4e7f61c", [:rebar3], [],
-           "hexpm", "dad9ce9d8effc621708f99eac538ef1cbe05d6a874dd741de2e689c47feafed5"},
-        env: :prod,
-        hex: "telemetry",
-        repo: "hexpm",
-        optional: false
-      ],
-      deps: [],
-      top_level: false,
-      manager: :rebar3,
-      system_env: []
-    }
+  property "prefers mix over every other builder" do
+    check all dep <- dep(),
+              :mix in builders_from(dep) do
+      assert %Derivation{builder: "buildMix"} = DepsNix.transform(dep)
+    end
+  end
 
-    assert DepsNix.transform(telemetry) == %Derivation{
-             builder: "buildRebar3",
-             name: :telemetry,
-             version: "1.2.1",
-             src: %FetchHex{
-               pkg: :telemetry,
-               version: "1.2.1",
-               sha256: "dad9ce9d8effc621708f99eac538ef1cbe05d6a874dd741de2e689c47feafed5"
-             },
-             beam_deps: []
-           }
+  property "prefers rebar3 when mix not available" do
+    check all dep <- dep(builders: List.delete(DepsNix.builders(), :mix)),
+              :rebar3 in builders_from(dep) do
+      {:hex, _name, version, _hash, _beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
+
+      assert DepsNix.transform(dep) == %Derivation{
+               builder: "buildRebar3",
+               name: dep.app,
+               version: version,
+               src: %FetchHex{
+                 pkg: dep.app,
+                 version: version,
+                 sha256: sha256
+               },
+               beam_deps: []
+             }
+    end
   end
 
   test "can convert mix dependencies with sub dependencies" do
@@ -95,5 +89,54 @@ defmodule DepsNixTest do
              },
              beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock]
            }
+  end
+
+  test "can indent a string" do
+    assert DepsNix.indent("""
+           hi
+           there
+
+           you
+           """) == """
+             hi
+             there
+
+             you
+           """
+  end
+
+  test "attempting to indent nil results in an empty string" do
+    assert DepsNix.indent(nil) == ""
+  end
+
+  defp builders_from(%Mix.Dep{} = dep) do
+    {:hex, _name, _version, _hash, builders, _sub_deps, _, _sha256} = dep.opts[:lock]
+    builders
+  end
+
+  defp version do
+    gen all major <- non_negative_integer(),
+            minor <- non_negative_integer(),
+            patch <- non_negative_integer() do
+      "#{major}.#{minor}.#{patch}"
+    end
+  end
+
+  defp dep(opts \\ []) do
+    builders = Keyword.get(opts, :builders, DepsNix.builders())
+    name_gen = Keyword.get(opts, :name, atom(:alphanumeric))
+
+    gen all name <- name_gen,
+            version <- version(),
+            hash1 <- string(:alphanumeric, length: 64),
+            hash2 <- string(:alphanumeric, length: 64) do
+      %Mix.Dep{
+        app: name,
+        opts: [
+          lock: {:hex, name, version, hash1, builders, [], "hexpm", hash2},
+          env: :prod
+        ]
+      }
+    end
   end
 end

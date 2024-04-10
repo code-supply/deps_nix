@@ -4,11 +4,12 @@ defmodule DepsNix.Derivation do
           name: atom(),
           version: String.t(),
           src: DepsNix.FetchHex.t(),
-          beam_deps: list(atom())
+          beam_deps: list(atom()),
+          unpack_phase: String.t() | nil
         }
 
   @enforce_keys [:builder, :name, :version, :src, :beam_deps]
-  defstruct [:builder, :name, :version, :src, :beam_deps]
+  defstruct [:builder, :name, :version, :src, :beam_deps, :unpack_phase]
 
   defimpl String.Chars do
     def to_string(drv) do
@@ -20,7 +21,19 @@ defmodule DepsNix.Derivation do
         src = #{drv.src};
 
         beamDeps = #{format_beam_deps(drv.beam_deps)};
-      };
+      #{unpack_phase(drv.unpack_phase)}};
+      """
+    end
+
+    defp unpack_phase(nil) do
+    end
+
+    defp unpack_phase(script) do
+      """
+
+        unpackPhase = ''
+          #{String.trim(script)}
+        '';
       """
     end
 
