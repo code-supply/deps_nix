@@ -29,12 +29,12 @@ defmodule DepsNix.Derivation do
     end
 
     defp unpack_phase(script) do
-      """
-
+      "\n" <>
+        DepsNix.indent("""
         unpackPhase = ''
-          #{String.trim(script)}
+        #{script |> String.trim_trailing() |> DepsNix.indent()}
         '';
-      """
+        """)
     end
 
     defp format_beam_deps([]) do

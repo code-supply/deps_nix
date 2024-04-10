@@ -47,6 +47,7 @@ defmodule DepsNix.DerivationTest do
           beam_deps: [],
           unpack_phase: """
           echo "hi!"
+          how're you?
           """
         }
         |> to_string()
@@ -66,6 +67,7 @@ defmodule DepsNix.DerivationTest do
 
                unpackPhase = ''
                  echo "hi!"
+                 how're you?
                '';
              };
              """
