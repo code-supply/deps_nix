@@ -11,7 +11,7 @@ defmodule DepsNix do
     case dep.opts[:lock] do
       {:hex, name, version, _hash, beam_builders, sub_deps, _, sha256} ->
         %Derivation{
-          name: name,
+          name: dep.app,
           version: version,
           builder: nix_builder(beam_builders),
           src: %FetchHex{

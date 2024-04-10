@@ -48,6 +48,44 @@ defmodule DepsNixTest do
     end
   end
 
+  test "uses app name as nix variable and derivation name" do
+    chatterbox = %Mix.Dep{
+      scm: Hex.SCM,
+      app: :chatterbox,
+      requirement: "~> 0.15.1",
+      status: {:ok, "0.15.1"},
+      opts: [
+        lock:
+          {:hex, :ts_chatterbox, "0.15.1",
+           "5cac4d15dd7ad61fc3c4415ce4826fc563d4643dee897a558ec4ea0b1c835c9c", [:rebar3],
+           [{:hpack, "~> 0.3.0", [hex: :hpack_erl, repo: "hexpm", optional: false]}], "hexpm",
+           "4f75b91451338bc0da5f52f3480fa6ef6e3a2aeecfc33686d6b3d0a0948f31aa"},
+        env: :prod,
+        hex: "ts_chatterbox",
+        repo: "hexpm",
+        optional: false
+      ],
+      deps: [
+        %Mix.Dep{
+          app: :hpack
+        }
+      ],
+      manager: :rebar3
+    }
+
+    assert DepsNix.transform(chatterbox) == %Derivation{
+             builder: "buildRebar3",
+             name: :chatterbox,
+             version: "0.15.1",
+             src: %FetchHex{
+               pkg: :ts_chatterbox,
+               version: "0.15.1",
+               sha256: "4f75b91451338bc0da5f52f3480fa6ef6e3a2aeecfc33686d6b3d0a0948f31aa"
+             },
+             beam_deps: [:hpack]
+           }
+  end
+
   test "can convert mix dependencies with sub dependencies" do
     bandit = %Mix.Dep{
       scm: Hex.SCM,
