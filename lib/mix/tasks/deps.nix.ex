@@ -10,33 +10,8 @@ defmodule Mix.Tasks.Deps.Nix do
 
     shell = Mix.shell()
 
-    Mix.Dep.Converger.converge(loaded_opts)
-    |> Enum.sort_by(fn dep -> dep.app end)
-    |> Enum.map(&DepsNix.transform/1)
-    |> Enum.map(&to_string/1)
-    |> Enum.join("\n")
-    |> DepsNix.indent()
-    |> DepsNix.indent()
-    |> wrap()
+    (&Mix.Dep.Converger.converge/1)
+    |> DepsNix.Run.call(loaded_opts)
     |> shell.info()
-  end
-
-  defp wrap(pkgs) do
-    """
-    { lib, beamPackages, overrides ? (x: y: { }) }:
-
-    let
-      buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
-      buildMix = lib.makeOverridable beamPackages.buildMix;
-      buildErlangMk = lib.makeOverridable beamPackages.buildErlangMk;
-
-      self = packages // (overrides self packages);
-
-      packages = with beamPackages; with self; {
-    #{pkgs}  };
-    in
-    self
-    """
-    |> String.trim()
   end
 end
