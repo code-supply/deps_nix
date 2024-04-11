@@ -2,6 +2,8 @@ defmodule DepsNix do
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
+  @apps_requiring_eponymous_dir [:grpcbox, :png]
+
   def builders do
     [:mix, :rebar3, :make]
   end
@@ -44,19 +46,17 @@ defmodule DepsNix do
     get_in(opts, [:app_properties, :optional_applications]) || []
   end
 
-  def unpack_phase(:grpcbox = name, version) do
-    """
-    runHook preUnpack
-    unpackFile "$src"
-    chmod -R u+w -- hex-source-#{name}-#{version}
-    mv hex-source-#{name}-#{version} #{name}
-    sourceRoot=#{name}
-    runHook postUnpack
-    """
-  end
-
-  def unpack_phase(_, _) do
-    nil
+  defp unpack_phase(name, version) do
+    if name in @apps_requiring_eponymous_dir do
+      """
+      runHook preUnpack
+      unpackFile "$src"
+      chmod -R u+w -- hex-source-#{name}-#{version}
+      mv hex-source-#{name}-#{version} #{name}
+      sourceRoot=#{name}
+      runHook postUnpack
+      """
+    end
   end
 
   @spec indent(String.t() | nil) :: String.t()

@@ -6,7 +6,7 @@ defmodule DepsNixTest do
   alias DepsNix.FetchHex
 
   property "sets unpackPhase for packages needing dir name to match package name" do
-    check all name <- one_of([:grpcbox]),
+    check all name <- one_of([:grpcbox, :png]),
               version <- version(),
               dep <- dep(name: name, version: version) do
       expected_unpack_phase = """
