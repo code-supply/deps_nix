@@ -10,6 +10,19 @@ defmodule DepsNix.Run do
     |> wrap()
   end
 
+  def parse_args(args) do
+    {opts, _, _} = OptionParser.parse(args, strict: [env: :string])
+    [env: get_env(opts)]
+  end
+
+  defp get_env(opts) do
+    opts
+    |> Keyword.get(:env, "prod")
+    |> String.to_existing_atom()
+  rescue
+    ArgumentError -> :prod
+  end
+
   defp wrap(pkgs) do
     """
     { lib, beamPackages, overrides ? (x: y: { }) }:

@@ -5,6 +5,8 @@ defmodule DepsNixTest do
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
+  import TestHelpers
+
   property "sets unpackPhase for packages needing dir name to match package name" do
     check all name <- one_of([:grpcbox, :png]),
               version <- version(),
@@ -200,31 +202,5 @@ defmodule DepsNixTest do
   defp builders_from(%Mix.Dep{} = dep) do
     {:hex, _name, _version, _hash, builders, _sub_deps, _, _sha256} = dep.opts[:lock]
     builders
-  end
-
-  defp version do
-    gen all major <- non_negative_integer(),
-            minor <- non_negative_integer(),
-            patch <- non_negative_integer() do
-      "#{major}.#{minor}.#{patch}"
-    end
-  end
-
-  defp dep(opts \\ []) do
-    builders = Keyword.get(opts, :builders, DepsNix.builders())
-    name_gen = Keyword.get(opts, :name, atom(:alphanumeric))
-    version = Keyword.get(opts, :version, version())
-
-    gen all name <- name_gen,
-            hash1 <- string(:alphanumeric, length: 64),
-            hash2 <- string(:alphanumeric, length: 64) do
-      %Mix.Dep{
-        app: name,
-        opts: [
-          lock: {:hex, name, version, hash1, builders, [], "hexpm", hash2},
-          env: :prod
-        ]
-      }
-    end
   end
 end
