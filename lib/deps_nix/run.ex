@@ -26,13 +26,6 @@ defmodule DepsNix.Run do
     |> wrap(opts.output)
   end
 
-  defp convert_opts(%Options{envs: envs}) do
-    for {strenv, packages} <- envs do
-      env = String.to_existing_atom(strenv)
-      {[env: env], packages}
-    end
-  end
-
   @spec parse_args(list()) :: Options.t()
   def parse_args(args) do
     args
@@ -62,6 +55,13 @@ defmodule DepsNix.Run do
         end
     }
     |> add_output(opts)
+  end
+
+  defp convert_opts(%Options{envs: envs}) do
+    for {strenv, packages} <- envs do
+      env = String.to_existing_atom(strenv)
+      {[env: env], packages}
+    end
   end
 
   defp add_output(options, parsed_args) do
