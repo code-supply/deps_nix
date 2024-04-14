@@ -8,23 +8,33 @@ defmodule DepsNix.Run do
 
   @spec call(converger(), Options.t()) :: String.t()
   def call(converger, opts) do
-    for converger_opts <- convert_opts(opts), reduce: [] do
-      acc ->
-        acc ++ converger.(converger_opts)
-    end
-    |> Enum.sort_by(fn dep -> dep.app end)
+    opts
+    |> convert_opts()
+    |> Enum.flat_map(fn {converger_opts, permitted_packages} ->
+      filter_packages(converger.(converger_opts), permitted_packages)
+    end)
+    |> Enum.sort_by(& &1.app)
     |> Enum.map(&DepsNix.transform/1)
-    |> Enum.map(&to_string/1)
     |> Enum.join("\n")
     |> DepsNix.indent()
     |> DepsNix.indent()
     |> wrap()
   end
 
+  defp filter_packages(deps, :all) do
+    deps
+  end
+
+  defp filter_packages(deps, permitted_packages) do
+    Enum.filter(deps, fn dep ->
+      "#{dep.app}" in permitted_packages
+    end)
+  end
+
   defp convert_opts(%Options{envs: envs}) do
-    for {strenv, _packages} <- envs do
+    for {strenv, packages} <- envs do
       env = String.to_existing_atom(strenv)
-      [env: env]
+      {[env: env], packages}
     end
   end
 

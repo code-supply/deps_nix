@@ -32,6 +32,37 @@ defmodule RunTest do
     end
   end
 
+  test "can add packages to a base environment" do
+    check all prod_dep <- dep(),
+              dev_dep_1 <- dep(),
+              dev_dep_2 <- dep(),
+              prod_dep.app != dev_dep_1.app,
+              prod_dep.app != dev_dep_2.app,
+              dev_dep_1.app != dev_dep_2.app do
+      converger = fn
+        [env: :prod] ->
+          [prod_dep]
+
+        [env: :dev] ->
+          [prod_dep, dev_dep_1, dev_dep_2]
+      end
+
+      nix =
+        Run.call(converger, %Run.Options{
+          envs: %{"prod" => :all, "dev" => ["#{dev_dep_1.app}"]}
+        })
+
+      assert nix =~
+               ~s( #{prod_dep.app} = build)
+
+      assert nix =~
+               ~s( #{dev_dep_1.app} = build)
+
+      refute nix =~
+               ~s( #{dev_dep_2.app} = build)
+    end
+  end
+
   test "can choose environment to include" do
     check all prod_dep <- dep(),
               dev_dep <- dep(),
