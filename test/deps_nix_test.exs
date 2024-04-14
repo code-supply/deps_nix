@@ -36,17 +36,18 @@ defmodule DepsNixTest do
               :rebar3 in builders_from(dep) do
       {:hex, _name, version, _hash, _beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
 
-      assert DepsNix.transform(dep) == %Derivation{
+      expected_name = dep.app
+
+      assert %Derivation{
                builder: "buildRebar3",
-               name: dep.app,
-               version: version,
+               name: ^expected_name,
+               version: ^version,
                src: %FetchHex{
-                 pkg: dep.app,
-                 version: version,
-                 sha256: sha256
-               },
-               beam_deps: []
-             }
+                 pkg: ^expected_name,
+                 version: ^version,
+                 sha256: ^sha256
+               }
+             } = DepsNix.transform(dep)
     end
   end
 

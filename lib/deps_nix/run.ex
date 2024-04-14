@@ -10,25 +10,17 @@ defmodule DepsNix.Run do
   def call(converger, opts) do
     opts
     |> convert_opts()
-    |> Enum.flat_map(fn {converger_opts, permitted_packages} ->
-      filter_packages(converger.(converger_opts), permitted_packages)
+    |> Enum.flat_map(fn {converger_opts, permitted_package_names} ->
+      all_packages_for_env = converger.(converger_opts)
+      filter_packages(all_packages_for_env, permitted_package_names)
     end)
     |> Enum.sort_by(& &1.app)
+    |> Enum.uniq()
     |> Enum.map(&DepsNix.transform/1)
     |> Enum.join("\n")
     |> DepsNix.indent()
     |> DepsNix.indent()
     |> wrap()
-  end
-
-  defp filter_packages(deps, :all) do
-    deps
-  end
-
-  defp filter_packages(deps, permitted_packages) do
-    Enum.filter(deps, fn dep ->
-      "#{dep.app}" in permitted_packages
-    end)
   end
 
   defp convert_opts(%Options{envs: envs}) do
@@ -66,6 +58,34 @@ defmodule DepsNix.Run do
           end
         end
     }
+  end
+
+  defp filter_packages(deps, :all) do
+    deps
+  end
+
+  defp filter_packages(all_packages_for_env, permitted_package_names) do
+    permitted = permitted_packages(all_packages_for_env, permitted_package_names)
+    sub_dependency_names = Enum.flat_map(permitted, &sub_dependency_names/1)
+
+    permitted ++
+      Enum.filter(all_packages_for_env, fn dep ->
+        dep.app in sub_dependency_names
+      end)
+  end
+
+  defp permitted_packages(packages, permitted_names) do
+    Enum.filter(packages, &("#{&1.app}" in permitted_names))
+  end
+
+  defp sub_dependency_names(%Mix.Dep{opts: opts}) do
+    case opts[:lock] do
+      {_, _name, _version, _hash, _builders, sub_deps, _, _} ->
+        Enum.map(sub_deps, &elem(&1, 0))
+
+      _ ->
+        []
+    end
   end
 
   defp wrap(pkgs) do

@@ -32,19 +32,20 @@ defmodule RunTest do
     end
   end
 
-  test "can add packages to a base environment" do
-    check all prod_dep <- dep(),
-              dev_dep_1 <- dep(),
-              dev_dep_2 <- dep(),
-              prod_dep.app != dev_dep_1.app,
-              prod_dep.app != dev_dep_2.app,
-              dev_dep_1.app != dev_dep_2.app do
+  test "can add packages and their dependencies to a base environment" do
+    check all [prod_dep_name, dev_dep_1_name, sub_dep_name, dev_dep_2_name] <-
+                uniq_list_of(atom(:alphanumeric), length: 4),
+              prod_dep <- dep(name: prod_dep_name),
+              sub_dep <- dep(name: sub_dep_name),
+              dev_dep_1 <- dep(name: dev_dep_1_name, sub_deps: [sub_dep]),
+              dev_dep_2 <- dep(name: dev_dep_2_name) do
       converger = fn
+        # sub_dep included in both envs to ensure deduplication
         [env: :prod] ->
-          [prod_dep]
+          [prod_dep, sub_dep]
 
         [env: :dev] ->
-          [prod_dep, dev_dep_1, dev_dep_2]
+          [prod_dep, dev_dep_1, dev_dep_2, sub_dep]
       end
 
       nix =
@@ -52,14 +53,10 @@ defmodule RunTest do
           envs: %{"prod" => :all, "dev" => ["#{dev_dep_1.app}"]}
         })
 
-      assert nix =~
-               ~s( #{prod_dep.app} = build)
-
-      assert nix =~
-               ~s( #{dev_dep_1.app} = build)
-
-      refute nix =~
-               ~s( #{dev_dep_2.app} = build)
+      assert Regex.scan(~r( #{prod_dep.app} = build), nix) |> length() == 1
+      assert Regex.scan(~r( #{dev_dep_1.app} = build), nix) |> length() == 1
+      assert Regex.scan(~r( #{sub_dep.app} = build), nix) |> length() == 1
+      assert Regex.scan(~r( #{dev_dep_2.app} = build), nix) |> length() == 0
     end
   end
 
