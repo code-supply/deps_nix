@@ -1,4 +1,6 @@
 defmodule DepsNix.Run do
+  alias DepsNix.Find
+
   defmodule Options do
     @type t :: %Options{envs: map()}
     defstruct [:envs]
@@ -66,7 +68,11 @@ defmodule DepsNix.Run do
 
   defp filter_packages(all_packages_for_env, permitted_package_names) do
     permitted = permitted_packages(all_packages_for_env, permitted_package_names)
-    sub_dependency_names = Enum.flat_map(permitted, &sub_dependency_names/1)
+
+    sub_dependency_names =
+      Enum.flat_map(permitted, fn package ->
+        Find.dependency_names(all_packages_for_env, package.app)
+      end)
 
     permitted ++
       Enum.filter(all_packages_for_env, fn dep ->
@@ -76,16 +82,6 @@ defmodule DepsNix.Run do
 
   defp permitted_packages(packages, permitted_names) do
     Enum.filter(packages, &("#{&1.app}" in permitted_names))
-  end
-
-  defp sub_dependency_names(%Mix.Dep{opts: opts}) do
-    case opts[:lock] do
-      {_, _name, _version, _hash, _builders, sub_deps, _, _} ->
-        Enum.map(sub_deps, &elem(&1, 0))
-
-      _ ->
-        []
-    end
   end
 
   defp wrap(pkgs) do
