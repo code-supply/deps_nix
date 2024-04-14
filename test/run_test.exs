@@ -50,7 +50,7 @@ defmodule RunTest do
       end
 
       nix =
-        Run.call(converger, %Run.Options{
+        output(converger, %Run.Options{
           envs: %{"prod" => :all, "dev" => ["#{dev_dep_1.app}"]}
         })
 
@@ -74,17 +74,22 @@ defmodule RunTest do
           [prod_dep, dev_dep]
       end
 
-      assert Run.call(converger, %Run.Options{envs: %{"prod" => :all}}) =~
+      assert output(converger, %Run.Options{envs: %{"prod" => :all}}) =~
                ~s( #{prod_dep.app} = build)
 
-      refute Run.call(converger, %Run.Options{envs: %{"prod" => :all}}) =~
+      refute output(converger, %Run.Options{envs: %{"prod" => :all}}) =~
                ~s( #{dev_dep.app} = build)
 
-      assert Run.call(converger, %Run.Options{envs: %{"dev" => :all}}) =~
+      assert output(converger, %Run.Options{envs: %{"dev" => :all}}) =~
                ~s( #{dev_dep.app} = build)
 
-      assert Run.call(converger, %Run.Options{envs: %{"dev" => :all}}) =~
+      assert output(converger, %Run.Options{envs: %{"dev" => :all}}) =~
                ~s( #{prod_dep.app} = build)
     end
+  end
+
+  defp output(converger, opts) do
+    {_path, output} = Run.call(converger, opts)
+    output
   end
 end

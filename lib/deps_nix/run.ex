@@ -8,7 +8,8 @@ defmodule DepsNix.Run do
 
   @type converger :: (Keyword.t() -> list(Mix.Dep.t()))
 
-  @spec call(converger(), Options.t()) :: String.t()
+  @spec call(converger(), Options.t()) ::
+          {path :: String.t(), output :: String.t()}
   def call(converger, opts) do
     opts
     |> convert_opts()
@@ -81,21 +82,22 @@ defmodule DepsNix.Run do
   end
 
   defp wrap(pkgs) do
-    """
-    { lib, beamPackages, overrides ? (x: y: { }) }:
+    {"deps.nix",
+     """
+     { lib, beamPackages, overrides ? (x: y: { }) }:
 
-    let
-      buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
-      buildMix = lib.makeOverridable beamPackages.buildMix;
-      buildErlangMk = lib.makeOverridable beamPackages.buildErlangMk;
+     let
+       buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
+       buildMix = lib.makeOverridable beamPackages.buildMix;
+       buildErlangMk = lib.makeOverridable beamPackages.buildErlangMk;
 
-      self = packages // (overrides self packages);
+       self = packages // (overrides self packages);
 
-      packages = with beamPackages; with self; {
-    #{pkgs}  };
-    in
-    self
-    """
-    |> String.trim()
+       packages = with beamPackages; with self; {
+     #{pkgs}  };
+     in
+     self
+     """
+     |> String.trim()}
   end
 end

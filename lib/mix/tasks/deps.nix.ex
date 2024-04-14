@@ -7,10 +7,10 @@ defmodule Mix.Tasks.Deps.Nix do
   def run(args) do
     Mix.Project.get!()
 
-    shell = Mix.shell()
+    {path, output} =
+      (&Mix.Dep.Converger.converge/1)
+      |> DepsNix.Run.call(DepsNix.Run.parse_args(args))
 
-    (&Mix.Dep.Converger.converge/1)
-    |> DepsNix.Run.call(DepsNix.Run.parse_args(args))
-    |> shell.info()
+    File.write!(path, output)
   end
 end

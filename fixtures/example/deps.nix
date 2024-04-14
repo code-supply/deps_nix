@@ -60,6 +60,71 @@ let
       beamDeps = [ ];
     };
 
+    db_connection = buildMix rec {
+      name = "db_connection";
+      version = "2.6.0";
+
+      src = fetchHex {
+        pkg = "db_connection";
+        version = "${version}";
+        sha256 = "c2f992d15725e721ec7fbc1189d4ecdb8afef76648c746a8e1cad35e3b8a35f3";
+      };
+
+      beamDeps = [ telemetry ];
+    };
+
+    decimal = buildMix rec {
+      name = "decimal";
+      version = "2.1.1";
+
+      src = fetchHex {
+        pkg = "decimal";
+        version = "${version}";
+        sha256 = "53cfe5f497ed0e7771ae1a475575603d77425099ba5faef9394932b35020ffcc";
+      };
+
+      beamDeps = [ ];
+    };
+
+    eventstore = buildMix rec {
+      name = "eventstore";
+      version = "1.4.4";
+
+      src = fetchHex {
+        pkg = "eventstore";
+        version = "${version}";
+        sha256 = "1cb0b76199dccff9625c2317b4500f51016c7ef6010c0de60e5f89bc6f8cb811";
+      };
+
+      beamDeps = [ fsm gen_stage postgrex ];
+    };
+
+    fsm = buildMix rec {
+      name = "fsm";
+      version = "0.3.1";
+
+      src = fetchHex {
+        pkg = "fsm";
+        version = "${version}";
+        sha256 = "fbf0d53f89e9082b326b0b5828b94b4c549ff9d1452bbfd00b4d1ac082208e96";
+      };
+
+      beamDeps = [ ];
+    };
+
+    gen_stage = buildMix rec {
+      name = "gen_stage";
+      version = "1.2.1";
+
+      src = fetchHex {
+        pkg = "gen_stage";
+        version = "${version}";
+        sha256 = "83e8be657fa05b992ffa6ac1e3af6d57aa50aace8f691fcf696ff02f8335b001";
+      };
+
+      beamDeps = [ ];
+    };
+
     gproc = buildRebar3 rec {
       name = "gproc";
       version = "0.9.1";
@@ -212,7 +277,20 @@ let
       beamDeps = [ ];
     };
 
-    ssl_verify_fun = buildRebar3 rec {
+    postgrex = buildMix rec {
+      name = "postgrex";
+      version = "0.17.5";
+
+      src = fetchHex {
+        pkg = "postgrex";
+        version = "${version}";
+        sha256 = "50b8b11afbb2c4095a3ba675b4f055c416d0f3d7de6633a595fc131a828a67eb";
+      };
+
+      beamDeps = [ db_connection decimal ];
+    };
+
+    ssl_verify_fun = buildMix rec {
       name = "ssl_verify_fun";
       version = "1.1.7";
 
