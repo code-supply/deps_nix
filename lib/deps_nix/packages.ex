@@ -1,4 +1,4 @@
-defmodule DepsNix.Find do
+defmodule DepsNix.Packages do
   def dependency_names(packages, name) do
     case Enum.find(packages, &(&1.app == name)) do
       nil ->

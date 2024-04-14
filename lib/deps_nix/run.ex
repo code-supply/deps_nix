@@ -1,5 +1,5 @@
 defmodule DepsNix.Run do
-  alias DepsNix.Find
+  alias DepsNix.Packages
 
   defmodule Options do
     @type t :: %Options{envs: map(), output: String.t()}
@@ -82,7 +82,7 @@ defmodule DepsNix.Run do
     permitted = permitted_packages(packages, permitted_names)
 
     sub_dependency_names =
-      Enum.flat_map(permitted, &Find.dependency_names(packages, &1.app))
+      Enum.flat_map(permitted, &Packages.dependency_names(packages, &1.app))
 
     permitted ++
       Enum.filter(packages, &(&1.app in sub_dependency_names))

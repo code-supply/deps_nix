@@ -1,7 +1,7 @@
-defmodule DepsNix.FindTest do
+defmodule DepsNix.PackagesTest do
   use ExUnit.Case
 
-  alias DepsNix.Find
+  alias DepsNix.Packages
 
   test "can find all dependencies of a package" do
     packages = [
@@ -22,6 +22,6 @@ defmodule DepsNix.FindTest do
       %Mix.Dep{app: :makeup, top_level: false, deps: []}
     ]
 
-    assert Find.dependency_names(packages, :ex_doc) == [:makeup_elixir, :makeup]
+    assert Packages.dependency_names(packages, :ex_doc) == [:makeup_elixir, :makeup]
   end
 end
