@@ -15,6 +15,12 @@ defmodule RunTest do
       assert Run.parse_args(~w(--env dev)) == %Run.Options{envs: %{"dev" => :all}}
     end
 
+    test "can choose an output path" do
+      assert Run.parse_args(~w(--output foo/bar/deps.nix)) == %Run.Options{
+               output: "foo/bar/deps.nix"
+             }
+    end
+
     property "can specify extra packages from a different environment" do
       check all package_names <- list_of(package_name()) do
         assert Run.parse_args(~w(--env prod --env dev=#{Enum.join(package_names, ",")})) ==
@@ -30,6 +36,11 @@ defmodule RunTest do
     defp package_name do
       string(:alphanumeric, min_length: 1)
     end
+  end
+
+  test "sets path from options" do
+    converger = fn _ -> [] end
+    assert {"my/path.nix", _} = Run.call(converger, %Run.Options{output: "my/path.nix"})
   end
 
   test "can add packages and their dependency trees to a base environment" do

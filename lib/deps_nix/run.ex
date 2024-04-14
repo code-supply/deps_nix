@@ -2,8 +2,8 @@ defmodule DepsNix.Run do
   alias DepsNix.Find
 
   defmodule Options do
-    @type t :: %Options{envs: map()}
-    defstruct [:envs]
+    @type t :: %Options{envs: map(), output: String.t()}
+    defstruct envs: %{}, output: "deps.nix"
   end
 
   @type converger :: (Keyword.t() -> list(Mix.Dep.t()))
@@ -23,7 +23,7 @@ defmodule DepsNix.Run do
     |> Enum.join("\n")
     |> DepsNix.indent()
     |> DepsNix.indent()
-    |> wrap()
+    |> wrap(opts.output)
   end
 
   defp convert_opts(%Options{envs: envs}) do
@@ -36,7 +36,7 @@ defmodule DepsNix.Run do
   @spec parse_args(list()) :: Options.t()
   def parse_args(args) do
     args
-    |> OptionParser.parse(strict: [env: [:string, :keep]])
+    |> OptionParser.parse(strict: [env: [:string, :keep], output: :string])
     |> to_opts()
   end
 
@@ -61,6 +61,17 @@ defmodule DepsNix.Run do
           end
         end
     }
+    |> add_output(opts)
+  end
+
+  defp add_output(options, parsed_args) do
+    case Keyword.get(parsed_args, :output) do
+      nil ->
+        options
+
+      output ->
+        %Options{options | output: output}
+    end
   end
 
   defp filter_packages(deps, :all) do
@@ -81,23 +92,25 @@ defmodule DepsNix.Run do
     Enum.filter(packages, &("#{&1.app}" in permitted_names))
   end
 
-  defp wrap(pkgs) do
-    {"deps.nix",
-     """
-     { lib, beamPackages, overrides ? (x: y: { }) }:
+  defp wrap(pkgs, output) do
+    {
+      output,
+      """
+      { lib, beamPackages, overrides ? (x: y: { }) }:
 
-     let
-       buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
-       buildMix = lib.makeOverridable beamPackages.buildMix;
-       buildErlangMk = lib.makeOverridable beamPackages.buildErlangMk;
+      let
+        buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
+        buildMix = lib.makeOverridable beamPackages.buildMix;
+        buildErlangMk = lib.makeOverridable beamPackages.buildErlangMk;
 
-       self = packages // (overrides self packages);
+        self = packages // (overrides self packages);
 
-       packages = with beamPackages; with self; {
-     #{pkgs}  };
-     in
-     self
-     """
-     |> String.trim()}
+        packages = with beamPackages; with self; {
+      #{pkgs}  };
+      in
+      self
+      """
+      |> String.trim()
+    }
   end
 end
