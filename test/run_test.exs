@@ -8,15 +8,27 @@ defmodule RunTest do
 
   describe "argument parsing" do
     test "defaults to prod env" do
-      assert Run.parse_args(~w()) == [env: :prod]
+      assert Run.parse_args(~w()) == %Run.Options{envs: %{"prod" => :all}}
     end
 
     test "can pick up a single env" do
-      assert Run.parse_args(~w(--env dev)) == [env: :dev]
+      assert Run.parse_args(~w(--env dev)) == %Run.Options{envs: %{"dev" => :all}}
     end
 
-    test "made-up envs are ignored" do
-      assert Run.parse_args(~w(--env poop)) == [env: :prod]
+    property "can specify extra packages from a different environment" do
+      check all package_names <- list_of(package_name()) do
+        assert Run.parse_args(~w(--env prod --env dev=#{Enum.join(package_names, ",")})) ==
+                 %Run.Options{
+                   envs: %{
+                     "prod" => :all,
+                     "dev" => package_names
+                   }
+                 }
+      end
+    end
+
+    defp package_name do
+      string(:alphanumeric, min_length: 1)
     end
   end
 
@@ -32,11 +44,17 @@ defmodule RunTest do
           [prod_dep, dev_dep]
       end
 
-      assert Run.call(converger, env: :prod) =~ ~s( #{prod_dep.app} = build)
-      refute Run.call(converger, env: :prod) =~ ~s( #{dev_dep.app} = build)
+      assert Run.call(converger, %Run.Options{envs: %{"prod" => :all}}) =~
+               ~s( #{prod_dep.app} = build)
 
-      assert Run.call(converger, env: :dev) =~ ~s( #{dev_dep.app} = build)
-      assert Run.call(converger, env: :dev) =~ ~s( #{prod_dep.app} = build)
+      refute Run.call(converger, %Run.Options{envs: %{"prod" => :all}}) =~
+               ~s( #{dev_dep.app} = build)
+
+      assert Run.call(converger, %Run.Options{envs: %{"dev" => :all}}) =~
+               ~s( #{dev_dep.app} = build)
+
+      assert Run.call(converger, %Run.Options{envs: %{"dev" => :all}}) =~
+               ~s( #{prod_dep.app} = build)
     end
   end
 end
