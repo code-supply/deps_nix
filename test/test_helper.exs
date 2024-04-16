@@ -3,6 +3,10 @@ ExUnit.start()
 defmodule TestHelpers do
   use ExUnitProperties
 
+  def builders do
+    [:mix, :rebar3, :make]
+  end
+
   def version do
     gen all major <- non_negative_integer(),
             minor <- non_negative_integer(),
@@ -16,7 +20,7 @@ defmodule TestHelpers do
   end
 
   def dep(opts \\ []) do
-    builders = Keyword.get(opts, :builders, DepsNix.builders())
+    builders = Keyword.get(opts, :builders, builders())
     name = Keyword.get(opts, :name)
     version = Keyword.get(opts, :version)
     sub_deps = Keyword.get(opts, :sub_deps, [])

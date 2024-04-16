@@ -32,7 +32,7 @@ defmodule DepsNixTest do
   end
 
   property "prefers rebar3 when mix not available" do
-    check all dep <- dep(builders: List.delete(DepsNix.builders(), :mix)),
+    check all dep <- dep(builders: List.delete(builders(), :mix)),
               :rebar3 in builders_from(dep) do
       {:hex, _name, version, _hash, _beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
 

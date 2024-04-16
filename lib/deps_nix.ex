@@ -4,10 +4,6 @@ defmodule DepsNix do
 
   @apps_requiring_eponymous_dir [:grpcbox, :png]
 
-  def builders do
-    [:mix, :rebar3, :make]
-  end
-
   @spec transform(Mix.Dep.t()) :: Derivation.t()
   def transform(%Mix.Dep{} = dep) do
     case dep.opts[:lock] do
