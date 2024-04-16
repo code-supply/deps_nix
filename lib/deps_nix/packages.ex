@@ -9,4 +9,22 @@ defmodule DepsNix.Packages do
         dep_names ++ Enum.flat_map(dep_names, &dependency_names(packages, &1))
     end
   end
+
+  def filter(deps, :all) do
+    deps
+  end
+
+  def filter(packages, permitted_names) do
+    permitted = permitted(packages, permitted_names)
+
+    sub_dependency_names =
+      Enum.flat_map(permitted, &dependency_names(packages, &1.app))
+
+    permitted ++
+      Enum.filter(packages, &(&1.app in sub_dependency_names))
+  end
+
+  defp permitted(packages, permitted_names) do
+    Enum.filter(packages, &("#{&1.app}" in permitted_names))
+  end
 end

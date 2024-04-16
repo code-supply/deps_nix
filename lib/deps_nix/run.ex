@@ -15,7 +15,7 @@ defmodule DepsNix.Run do
     |> convert_opts()
     |> Enum.flat_map(fn {converger_opts, permitted_names} ->
       all_packages_for_env = converger.(converger_opts)
-      filter_packages(all_packages_for_env, permitted_names)
+      Packages.filter(all_packages_for_env, permitted_names)
     end)
     |> Enum.sort_by(& &1.app)
     |> Enum.uniq()
@@ -72,24 +72,6 @@ defmodule DepsNix.Run do
       output ->
         %Options{options | output: output}
     end
-  end
-
-  defp filter_packages(deps, :all) do
-    deps
-  end
-
-  defp filter_packages(packages, permitted_names) do
-    permitted = permitted_packages(packages, permitted_names)
-
-    sub_dependency_names =
-      Enum.flat_map(permitted, &Packages.dependency_names(packages, &1.app))
-
-    permitted ++
-      Enum.filter(packages, &(&1.app in sub_dependency_names))
-  end
-
-  defp permitted_packages(packages, permitted_names) do
-    Enum.filter(packages, &("#{&1.app}" in permitted_names))
   end
 
   defp wrap(pkgs, output) do
