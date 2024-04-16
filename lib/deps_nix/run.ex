@@ -1,5 +1,6 @@
 defmodule DepsNix.Run do
   alias DepsNix.Packages
+  alias DepsNix.Util
 
   defmodule Options do
     @type t :: %Options{envs: map(), output: String.t()}
@@ -21,8 +22,8 @@ defmodule DepsNix.Run do
     |> Enum.uniq()
     |> Enum.map(&DepsNix.transform/1)
     |> Enum.join("\n")
-    |> DepsNix.indent()
-    |> DepsNix.indent()
+    |> Util.indent()
+    |> Util.indent()
     |> wrap(opts.output)
   end
 

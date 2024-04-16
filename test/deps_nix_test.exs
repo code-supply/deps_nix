@@ -182,24 +182,6 @@ defmodule DepsNixTest do
            }
   end
 
-  test "can indent a string" do
-    assert DepsNix.indent("""
-           hi
-           there
-
-           you
-           """) == """
-             hi
-             there
-
-             you
-           """
-  end
-
-  test "attempting to indent nil results in an empty string" do
-    assert DepsNix.indent(nil) == ""
-  end
-
   defp builders_from(%Mix.Dep{} = dep) do
     {:hex, _name, _version, _hash, builders, _sub_deps, _, _sha256} = dep.opts[:lock]
     builders

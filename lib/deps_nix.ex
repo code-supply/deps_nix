@@ -59,16 +59,6 @@ defmodule DepsNix do
     end
   end
 
-  @spec indent(String.t() | nil) :: String.t()
-  def indent(nil) do
-    ""
-  end
-
-  def indent(str) do
-    ("  " <> str)
-    |> String.replace(~r/\n(.+)/, "\n  \\1")
-  end
-
   defp nix_builder(builders) do
     cond do
       Enum.member?(builders, :mix) -> "buildMix"

@@ -1,4 +1,6 @@
 defmodule DepsNix.Derivation do
+  alias DepsNix.Util
+
   @type t :: %__MODULE__{
           builder: String.t(),
           name: atom(),
@@ -30,9 +32,9 @@ defmodule DepsNix.Derivation do
 
     defp unpack_phase(script) do
       "\n" <>
-        DepsNix.indent("""
+        Util.indent("""
         unpackPhase = ''
-        #{script |> String.trim_trailing() |> DepsNix.indent()}
+        #{script |> String.trim_trailing() |> Util.indent()}
         '';
         """)
     end
