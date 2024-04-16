@@ -3,9 +3,24 @@ defmodule DepsNixTest do
   use ExUnitProperties
 
   alias DepsNix.Derivation
+  alias DepsNix.FetchGit
   alias DepsNix.FetchHex
 
   import TestHelpers
+
+  property "translates dependencies specified with git" do
+    check all url <- url(),
+              rev <- hash(),
+              dep <-
+                dep(scm: Mix.SCM.Git, lock: {:git, url, rev, []}, git: url) do
+      assert %Derivation{
+               src: %FetchGit{
+                 url: ^url,
+                 rev: ^rev
+               }
+             } = DepsNix.transform(dep)
+    end
+  end
 
   property "sets unpackPhase for packages needing dir name to match package name" do
     check all name <- one_of([:grpcbox, :png]),
