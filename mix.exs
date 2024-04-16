@@ -1,16 +1,19 @@
 defmodule DepsNix.MixProject do
   use Mix.Project
 
+  @scm_url "https://github.com/code-supply/deps_nix"
+
   def project do
     [
       app: :deps_nix,
-      version: "0.1.0",
-      elixir: "~> 1.16",
-      start_permanent: Mix.env() == :prod,
       deps: deps(),
-      dialyzer: [
-        plt_add_apps: [:mix]
-      ]
+      description: "Mix task that converts Mix dependencies to Nix derivations",
+      dialyzer: [plt_add_apps: [:mix]],
+      elixir: "~> 1.16",
+      package: package(),
+      source_url: @scm_url,
+      start_permanent: Mix.env() == :prod,
+      version: "0.1.0"
     ]
   end
 
@@ -26,6 +29,13 @@ defmodule DepsNix.MixProject do
     [
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:stream_data, "~> 0.6.0", only: [:dev, :test]}
+    ]
+  end
+
+  defp package do
+    [
+      links: %{"GitHub" => @scm_url},
+      licenses: ["MIT"]
     ]
   end
 end
