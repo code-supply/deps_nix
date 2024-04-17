@@ -8,8 +8,10 @@ defmodule Mix.Tasks.Deps.Nix do
     Mix.Project.get!()
 
     {path, output} =
-      (&Mix.Dep.Converger.converge/1)
-      |> DepsNix.Run.call(DepsNix.Run.parse_args(args))
+      DepsNix.Run.call(
+        DepsNix.Run.parse_args(args),
+        &Mix.Dep.Converger.converge/1
+      )
 
     File.write!(path, output)
   end

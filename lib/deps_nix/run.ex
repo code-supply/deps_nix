@@ -9,9 +9,9 @@ defmodule DepsNix.Run do
 
   @type converger :: (Keyword.t() -> list(Mix.Dep.t()))
 
-  @spec call(converger(), Options.t()) ::
+  @spec call(Options.t(), converger()) ::
           {path :: String.t(), output :: String.t()}
-  def call(converger, opts) do
+  def call(opts, converger) do
     opts
     |> convert_opts()
     |> Enum.flat_map(fn {converger_opts, permitted_names} ->

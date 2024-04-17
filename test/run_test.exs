@@ -40,7 +40,7 @@ defmodule RunTest do
 
   test "sets path from options" do
     converger = fn _ -> [] end
-    assert {"my/path.nix", _} = Run.call(converger, %Run.Options{output: "my/path.nix"})
+    assert {"my/path.nix", _} = Run.call(%Run.Options{output: "my/path.nix"}, converger)
   end
 
   test "can add packages and their dependency trees to a base environment" do
@@ -100,7 +100,7 @@ defmodule RunTest do
   end
 
   defp output(converger, opts) do
-    {_path, output} = Run.call(converger, opts)
+    {_path, output} = Run.call(opts, converger)
     output
   end
 end
