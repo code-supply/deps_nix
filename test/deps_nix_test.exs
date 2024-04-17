@@ -11,14 +11,14 @@ defmodule DepsNixTest do
   property "translates dependencies specified with git" do
     check all url <- url(),
               rev <- hash(),
+              hash <- hash(),
               dep <-
-                dep(scm: Mix.SCM.Git, lock: {:git, url, rev, []}, git: url) do
+                dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
+      prefetcher = fn ^url, ^rev -> ~s({ "hash": "#{hash}" }) end
+
       assert %Derivation{
-               src: %FetchGit{
-                 url: ^url,
-                 rev: ^rev
-               }
-             } = DepsNix.transform(dep)
+               src: %FetchGit{url: ^url, rev: ^rev, hash: ^hash}
+             } = DepsNix.transform(dep, prefetcher)
     end
   end
 
@@ -198,7 +198,12 @@ defmodule DepsNixTest do
   end
 
   defp builders_from(%Mix.Dep{} = dep) do
-    {:hex, _name, _version, _hash, builders, _sub_deps, _, _sha256} = dep.opts[:lock]
-    builders
+    case dep.opts[:lock] do
+      {:hex, _name, _version, _hash, builders, _sub_deps, _, _sha256} ->
+        builders
+
+      {:git, _url, _version, []} ->
+        [:mix]
+    end
   end
 end

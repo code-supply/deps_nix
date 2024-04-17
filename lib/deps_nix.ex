@@ -5,64 +5,39 @@ defmodule DepsNix do
 
   @apps_requiring_eponymous_dir [:grpcbox, :png]
 
-  @spec transform(Mix.Dep.t()) :: Derivation.t()
-  def transform(%Mix.Dep{scm: Mix.SCM.Git} = dep) do
-    case dep.opts[:lock] do
-      {:git, url, rev, _} ->
-        %Derivation{
-          name: dep.app,
-          version: rev,
-          builder: "buildMix",
-          src: %FetchGit{
-            url: url,
-            rev: rev,
-            hash: ""
-          },
-          beam_deps: beam_deps(dep),
-          unpack_phase: unpack_phase(dep.app, rev)
-        }
-    end
+  @spec transform(
+          Mix.Dep.t(),
+          fetcher :: (url :: String.t(), rev :: String.t() -> String.t())
+        ) :: Derivation.t()
+  def transform(dep, prefetcher \\ fn _, _ -> "{}" end)
+
+  def transform(%Mix.Dep{scm: Mix.SCM.Git} = dep, prefetcher) do
+    {:git, url, rev, _} = dep.opts[:lock]
+    json = prefetcher.(url, rev)
+    prefetch_result = Jason.decode!(json)
+    fetcher = %FetchGit{url: url, rev: rev, hash: prefetch_result["hash"]}
+    derivation(dep, rev, fetcher, "buildMix")
   end
 
-  def transform(%Mix.Dep{} = dep) do
-    case dep.opts[:lock] do
-      {:hex, name, version, _hash, beam_builders, sub_deps, _, sha256} ->
-        %Derivation{
-          name: dep.app,
-          version: version,
-          builder: nix_builder(beam_builders),
-          src: %FetchHex{
-            pkg: name,
-            version: version,
-            sha256: sha256
-          },
-          beam_deps: beam_deps(dep.opts, sub_deps),
-          unpack_phase: unpack_phase(name, version)
-        }
+  def transform(%Mix.Dep{} = dep, _prefetcher) do
+    {:hex, name, version, _hash, beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
+    fetcher = %FetchHex{pkg: name, version: version, sha256: sha256}
+    derivation(dep, version, fetcher, nix_builder(beam_builders))
+  end
 
-      nil ->
-        %Derivation{
-          name: dep.app,
-          version: dep.opts[:app_properties][:vsn],
-          builder: "buildMix",
-          src: nil,
-          beam_deps: []
-        }
-    end
+  defp derivation(dep, version, src, builder) do
+    %Derivation{
+      name: dep.app,
+      version: version,
+      builder: builder,
+      src: src,
+      beam_deps: beam_deps(dep),
+      unpack_phase: unpack_phase(dep.app, version)
+    }
   end
 
   defp beam_deps(dep) do
     Enum.map(dep.deps, & &1.app)
-  end
-
-  defp beam_deps(opts, sub_deps) do
-    sub_deps
-    |> Enum.map(fn {name, _version, _pm_stuff} -> name end)
-    |> Enum.reject(&(&1 in optional_apps(opts)))
-  end
-
-  defp optional_apps(opts) do
-    get_in(opts, [:app_properties, :optional_applications]) || []
   end
 
   defp unpack_phase(name, version) do

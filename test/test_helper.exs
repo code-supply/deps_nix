@@ -44,33 +44,45 @@ defmodule TestHelpers do
     version()
   end
 
+  def scm do
+    one_of([Mix.SCM.Hex, Mix.SCM.Git])
+  end
+
   def dep(opts \\ []) do
     builders = Keyword.get(opts, :builders, builders())
     name = Keyword.get(opts, :name)
     version = Keyword.get(opts, :version)
     sub_deps = Keyword.get(opts, :sub_deps, [])
-    scm = Keyword.get(opts, :scm, Mix.SCM.Hex)
+    scm = Keyword.get(opts, :scm)
 
     gen all name <- if(name, do: constant(name), else: atom(:alphanumeric)),
             version <- if(version, do: constant(version), else: version()),
+            scm <- if(scm, do: constant(scm), else: scm()),
+            url <- url(),
             hash1 <- string(:alphanumeric, length: 64),
             hash2 <- string(:alphanumeric, length: 64) do
       lock =
-        Keyword.get(opts, :lock, {
-          :hex,
-          name,
-          version,
-          hash1,
-          builders,
-          Enum.map(sub_deps, fn dep -> {dep.app, dep.requirement, []} end),
-          "hexpm",
-          hash2
-        })
+        case scm do
+          Mix.SCM.Hex ->
+            {
+              :hex,
+              name,
+              version,
+              hash1,
+              builders,
+              Enum.map(sub_deps, fn dep -> {dep.app, dep.requirement, []} end),
+              "hexpm",
+              hash2
+            }
+
+          Mix.SCM.Git ->
+            {:git, Keyword.get(opts, :git_url, url), version, []}
+        end
 
       %Mix.Dep{
         app: name,
         scm: scm,
-        requirement: version_constraint(),
+        requirement: version,
         opts: [
           lock: lock,
           env: :prod
