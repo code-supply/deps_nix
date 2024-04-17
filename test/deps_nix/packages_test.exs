@@ -1,5 +1,5 @@
 defmodule DepsNix.PackagesTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias DepsNix.Packages
 

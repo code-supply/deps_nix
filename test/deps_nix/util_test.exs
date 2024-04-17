@@ -1,5 +1,5 @@
 defmodule UtilTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   test "can indent a string" do
     assert DepsNix.Util.indent("""

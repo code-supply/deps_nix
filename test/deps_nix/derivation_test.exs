@@ -1,5 +1,5 @@
 defmodule DepsNix.DerivationTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
