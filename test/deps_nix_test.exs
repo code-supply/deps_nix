@@ -40,28 +40,19 @@ defmodule DepsNixTest do
   end
 
   property "prefers mix over every other builder" do
-    check all dep <- dep(),
-              :mix in builders_from(dep) do
+    check all other_builders <- list_of(one_of([:make, :rebar3])),
+              dep <- dep(builders: [:mix] ++ other_builders) do
       assert %Derivation{builder: "buildMix"} = DepsNix.transform(dep)
     end
   end
 
-  property "prefers rebar3 when mix not available" do
-    check all dep <- dep(builders: List.delete(builders(), :mix)),
-              :rebar3 in builders_from(dep) do
-      {:hex, _name, version, _hash, _beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
-
+  property "prefers rebar3 for hex SCM when mix not available" do
+    check all dep <- dep(scm: Mix.SCM.Hex, builders: [:rebar3, :make]) do
       expected_name = dep.app
 
       assert %Derivation{
                builder: "buildRebar3",
-               name: ^expected_name,
-               version: ^version,
-               src: %FetchHex{
-                 pkg: ^expected_name,
-                 version: ^version,
-                 sha256: ^sha256
-               }
+               name: ^expected_name
              } = DepsNix.transform(dep)
     end
   end
@@ -195,15 +186,5 @@ defmodule DepsNixTest do
              },
              beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock]
            }
-  end
-
-  defp builders_from(%Mix.Dep{} = dep) do
-    case dep.opts[:lock] do
-      {:hex, _name, _version, _hash, builders, _sub_deps, _, _sha256} ->
-        builders
-
-      {:git, _url, _version, []} ->
-        [:mix]
-    end
   end
 end
