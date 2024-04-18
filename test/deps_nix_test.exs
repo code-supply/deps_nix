@@ -35,14 +35,15 @@ defmodule DepsNixTest do
       runHook postUnpack
       """
 
-      assert %Derivation{unpack_phase: ^expected_unpack_phase} = DepsNix.transform(dep)
+      assert %Derivation{unpack_phase: ^expected_unpack_phase} =
+               DepsNix.transform(dep, prefetcher_stub())
     end
   end
 
   property "prefers mix over every other builder" do
     check all other_builders <- list_of(one_of([:make, :rebar3])),
               dep <- dep(builders: [:mix] ++ other_builders) do
-      assert %Derivation{builder: "buildMix"} = DepsNix.transform(dep)
+      assert %Derivation{builder: "buildMix"} = DepsNix.transform(dep, prefetcher_stub())
     end
   end
 
@@ -53,7 +54,7 @@ defmodule DepsNixTest do
       assert %Derivation{
                builder: "buildRebar3",
                name: ^expected_name
-             } = DepsNix.transform(dep)
+             } = DepsNix.transform(dep, prefetcher_stub())
     end
   end
 
@@ -103,7 +104,11 @@ defmodule DepsNixTest do
         system_env: []
       }
 
-    assert DepsNix.transform(eventstore).beam_deps == [:fsm, :gen_stage, :postgrex]
+    assert DepsNix.transform(eventstore, prefetcher_stub()).beam_deps == [
+             :fsm,
+             :gen_stage,
+             :postgrex
+           ]
   end
 
   test "uses app name as nix variable and derivation name" do
@@ -131,7 +136,7 @@ defmodule DepsNixTest do
       manager: :rebar3
     }
 
-    assert DepsNix.transform(chatterbox) == %Derivation{
+    assert DepsNix.transform(chatterbox, prefetcher_stub()) == %Derivation{
              builder: "buildRebar3",
              name: :chatterbox,
              version: "0.15.1",
@@ -175,7 +180,7 @@ defmodule DepsNixTest do
       ]
     }
 
-    assert DepsNix.transform(bandit) == %Derivation{
+    assert DepsNix.transform(bandit, prefetcher_stub()) == %Derivation{
              builder: "buildMix",
              name: :bandit,
              version: "1.4.2",

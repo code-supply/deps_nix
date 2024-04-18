@@ -3,19 +3,23 @@ ExUnit.start()
 defmodule TestHelpers do
   use ExUnitProperties
 
+  def prefetcher_stub do
+    fn _url, _rev -> "{}" end
+  end
+
   def builders do
     [:mix, :rebar3, :make]
   end
 
   def url do
-    gen all scheme <- member_of(~w(http:// git://)),
+    gen all scheme <- member_of(~w(http git)),
             fragment <- one_of([nil, string(:alphanumeric)]),
             host <- string(:alphanumeric),
             tld <- string(:alphanumeric, max_length: 10),
             path_parts <- list_of(string(:alphanumeric)),
             path <- one_of([nil, constant("/" <> Enum.join(path_parts, "/"))]),
             port <- one_of([nil, integer(0..65535)]),
-            query <- binary() do
+            query <- string(:alphanumeric) do
       %URI{
         fragment: fragment,
         host: "#{host}.#{tld}",

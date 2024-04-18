@@ -10,7 +10,10 @@ defmodule Mix.Tasks.Deps.Nix do
     {path, output} =
       DepsNix.Run.call(
         DepsNix.Run.parse_args(args),
-        &Mix.Dep.Converger.converge/1
+        &Mix.Dep.Converger.converge/1,
+        fn _url, _rev ->
+          "{}"
+        end
       )
 
     File.write!(path, output)

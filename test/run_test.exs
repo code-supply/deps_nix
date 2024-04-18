@@ -40,7 +40,9 @@ defmodule RunTest do
 
   test "sets path from options" do
     converger = fn _ -> [] end
-    assert {"my/path.nix", _} = Run.call(%Run.Options{output: "my/path.nix"}, converger)
+
+    assert {"my/path.nix", _} =
+             Run.call(%Run.Options{output: "my/path.nix"}, converger, prefetcher_stub())
   end
 
   test "can add packages and their dependency trees to a base environment" do
@@ -49,27 +51,40 @@ defmodule RunTest do
               prod_dep <- dep(name: prod_dep_name),
               sub_sub_dep <- dep(name: sub_sub_dep_name),
               sub_dep <- dep(name: sub_dep_name, sub_deps: [sub_sub_dep]),
-              dev_dep_1 <- dep(name: dev_dep_1_name, sub_deps: [sub_dep]),
-              dev_dep_2 <- dep(name: dev_dep_2_name) do
+              included_dev_dep <- dep(name: dev_dep_1_name, sub_deps: [sub_dep]),
+              excluded_dev_dep <- dep(name: dev_dep_2_name) do
       converger = fn
         # sub_dep included in both envs to ensure deduplication
         [env: :prod] ->
           [prod_dep, sub_dep]
 
         [env: :dev] ->
-          [prod_dep, dev_dep_1, dev_dep_2, sub_dep, sub_sub_dep]
+          [prod_dep, included_dev_dep, excluded_dev_dep, sub_dep, sub_sub_dep]
       end
 
+      prefetcher = fn url, rev -> ~s({ "hash": "stubbed-hash-for-#{url}-#{rev}" }) end
+
       nix =
-        output(converger, %Run.Options{
-          envs: %{"prod" => :all, "dev" => ["#{dev_dep_1.app}"]}
-        })
+        output(
+          %Run.Options{
+            envs: %{"prod" => :all, "dev" => ["#{included_dev_dep.app}"]}
+          },
+          converger,
+          prefetcher
+        )
 
       assert Regex.scan(~r( #{prod_dep.app} = build), nix) |> length() == 1
-      assert Regex.scan(~r( #{dev_dep_1.app} = build), nix) |> length() == 1
+      assert Regex.scan(~r( #{included_dev_dep.app} = build), nix) |> length() == 1
       assert Regex.scan(~r( #{sub_dep.app} = build), nix) |> length() == 1
       assert Regex.scan(~r( #{sub_sub_dep.app} = build), nix) |> length() == 1
-      assert Regex.scan(~r( #{dev_dep_2.app} = build), nix) |> length() == 0
+      assert Regex.scan(~r( #{excluded_dev_dep.app} = build), nix) |> length() == 0
+
+      [prod_dep, included_dev_dep, sub_dep, sub_sub_dep]
+      |> Enum.filter(&(&1.scm == Mix.SCM.Git))
+      |> Enum.each(fn dep ->
+        {:git, url, rev, _} = dep.opts[:lock]
+        assert nix =~ "stubbed-hash-for-#{url}-#{rev}"
+      end)
     end
   end
 
@@ -85,22 +100,22 @@ defmodule RunTest do
           [prod_dep, dev_dep]
       end
 
-      assert output(converger, %Run.Options{envs: %{"prod" => :all}}) =~
+      assert output(%Run.Options{envs: %{"prod" => :all}}, converger) =~
                ~s( #{prod_dep.app} = build)
 
-      refute output(converger, %Run.Options{envs: %{"prod" => :all}}) =~
+      refute output(%Run.Options{envs: %{"prod" => :all}}, converger) =~
                ~s( #{dev_dep.app} = build)
 
-      assert output(converger, %Run.Options{envs: %{"dev" => :all}}) =~
+      assert output(%Run.Options{envs: %{"dev" => :all}}, converger) =~
                ~s( #{dev_dep.app} = build)
 
-      assert output(converger, %Run.Options{envs: %{"dev" => :all}}) =~
+      assert output(%Run.Options{envs: %{"dev" => :all}}, converger) =~
                ~s( #{prod_dep.app} = build)
     end
   end
 
-  defp output(converger, opts) do
-    {_path, output} = Run.call(opts, converger)
+  defp output(opts, converger, prefetcher \\ prefetcher_stub()) do
+    {_path, output} = Run.call(opts, converger, prefetcher)
     output
   end
 end

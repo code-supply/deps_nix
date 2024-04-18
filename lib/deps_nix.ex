@@ -9,8 +9,6 @@ defmodule DepsNix do
           Mix.Dep.t(),
           fetcher :: (url :: String.t(), rev :: String.t() -> String.t())
         ) :: Derivation.t()
-  def transform(dep, prefetcher \\ fn _, _ -> "{}" end)
-
   def transform(%Mix.Dep{scm: Mix.SCM.Git} = dep, prefetcher) do
     {:git, url, rev, _} = dep.opts[:lock]
     json = prefetcher.(url, rev)

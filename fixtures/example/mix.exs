@@ -22,9 +22,9 @@ defmodule Example.MixProject do
   defp deps do
     [
       {:deps_nix, path: "../..", only: [:dev]},
-      {:bandit, "~> 1.2"},
+      {:bandit, github: "mtrudel/bandit", ref: "1.4.2"},
       {:eventstore, "~> 1.4"},
-      {:opentelemetry_exporter, "~> 1.7.0"}
+      {:opentelemetry_exporter, "~> 1.7.0"},
     ]
   end
 end

@@ -23,15 +23,15 @@ let
 
     bandit = buildMix rec {
       name = "bandit";
-      version = "1.4.2";
+      version = "4f15f029e7aa17f8e7f98d55b0e94c684dee0971";
 
-      src = fetchHex {
-        pkg = "bandit";
-        version = "${version}";
-        sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+      src = fetchgit {
+        url = "https://github.com/mtrudel/bandit.git";
+        rev = "4f15f029e7aa17f8e7f98d55b0e94c684dee0971";
+        hash = "";
       };
 
-      beamDeps = [ hpax plug telemetry thousand_island websock ];
+      beamDeps = [ thousand_island plug websock hpax telemetry ];
     };
 
     chatterbox = buildRebar3 rec {
