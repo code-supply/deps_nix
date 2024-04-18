@@ -4,7 +4,8 @@ defmodule Mix.Tasks.Deps.NixTest do
   test "produces a Nix function for the fixture app's dependencies" do
     assert {_, 0} =
              System.shell(~s/mix deps.nix --env prod/,
-               cd: "fixtures/example"
+               cd: "fixtures/example",
+               env: %{"EMPTY_GIT_HASHES" => "please"}
              )
 
     assert {"«lambda @ «string»:1:1»", 0} =
