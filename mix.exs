@@ -17,6 +17,7 @@ defmodule DepsNix.MixProject do
       # Docs
       source_url: @scm_url,
       docs: [
+        main: "readme",
         extras: ["README.md"]
       ]
     ]
