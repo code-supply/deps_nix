@@ -1,6 +1,11 @@
 # deps_nix
 
-A Mix task that converts Mix dependencies to Nix derivations. Inspired by mix2nix.
+A Mix task that converts Mix dependencies to Nix derivations. Inspired by
+[mix2nix](https://github.com/ydlr/mix2nix).
+
+While mix2nix is a function of a `mix.lock`, this project instead uses Mix's
+internals to allow you to choose packages from certain environments. It also
+supports git dependencies.
 
 ## Installation
 
