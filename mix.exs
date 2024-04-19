@@ -11,9 +11,14 @@ defmodule DepsNix.MixProject do
       dialyzer: [plt_add_apps: [:mix]],
       elixir: "~> 1.16",
       package: package(),
-      source_url: @scm_url,
       start_permanent: Mix.env() == :prod,
-      version: "0.1.0"
+      version: "0.1.0",
+
+      # Docs
+      source_url: @scm_url,
+      docs: [
+        extras: ["README.md"]
+      ]
     ]
   end
 
