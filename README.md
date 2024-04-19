@@ -12,7 +12,7 @@ supports git dependencies.
 ```elixir
 def deps do
   [
-    {:deps_nix, "~> 0.1.0"}
+    {:deps_nix, "~> 0.2.0"}
   ]
 end
 ```
