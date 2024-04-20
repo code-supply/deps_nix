@@ -12,8 +12,7 @@ defmodule DepsNixTest do
     check all url <- url(),
               rev <- hash(),
               hash <- hash(),
-              dep <-
-                dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
+              dep <- dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
       prefetcher = fn ^url, ^rev -> ~s({ "hash": "#{hash}" }) end
 
       assert %Derivation{
