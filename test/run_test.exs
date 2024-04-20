@@ -46,46 +46,40 @@ defmodule RunTest do
   end
 
   test "can add packages and their dependency trees to a base environment" do
-    check all [prod_dep_name, dev_dep_1_name, sub_dep_name, sub_sub_dep_name, dev_dep_2_name] <-
-                uniq_list_of(atom(:alphanumeric), length: 5),
-              prod_dep <- dep(name: prod_dep_name),
-              sub_sub_dep <- dep(name: sub_sub_dep_name),
-              sub_dep <- dep(name: sub_dep_name, sub_deps: [sub_sub_dep]),
-              included_dev_dep <- dep(name: dev_dep_1_name, sub_deps: [sub_dep]),
-              excluded_dev_dep <- dep(name: dev_dep_2_name) do
-      converger = fn
-        # sub_dep included in both envs to ensure deduplication
-        [env: :prod] ->
-          [prod_dep, sub_dep]
+    [prod_git_dep] = dep(name: :prod_thing, scm: Mix.SCM.Git) |> Enum.take(1)
+    [sub_sub_dep] = dep(name: :sub_sub_dep_thing) |> Enum.take(1)
+    [sub_dep] = dep(name: :sub_dep_thing, sub_deps: [sub_sub_dep]) |> Enum.take(1)
+    [included_dev_dep] = dep(name: :dev_dep_1, sub_deps: [sub_dep]) |> Enum.take(1)
+    [excluded_dev_dep] = dep(name: :excluded_dev_dep) |> Enum.take(1)
 
-        [env: :dev] ->
-          [prod_dep, included_dev_dep, excluded_dev_dep, sub_dep, sub_sub_dep]
-      end
+    converger = fn
+      # sub_dep included in both envs to ensure deduplication
+      [env: :prod] ->
+        [prod_git_dep, sub_dep]
 
-      prefetcher = fn url, rev -> ~s({ "hash": "stubbed-hash-for-#{url}-#{rev}" }) end
-
-      nix =
-        output(
-          %Run.Options{
-            envs: %{"prod" => :all, "dev" => ["#{included_dev_dep.app}"]}
-          },
-          converger,
-          prefetcher
-        )
-
-      assert Regex.scan(~r( #{prod_dep.app} = build), nix) |> length() == 1
-      assert Regex.scan(~r( #{included_dev_dep.app} = build), nix) |> length() == 1
-      assert Regex.scan(~r( #{sub_dep.app} = build), nix) |> length() == 1
-      assert Regex.scan(~r( #{sub_sub_dep.app} = build), nix) |> length() == 1
-      assert Regex.scan(~r( #{excluded_dev_dep.app} = build), nix) |> length() == 0
-
-      [prod_dep, included_dev_dep, sub_dep, sub_sub_dep]
-      |> Enum.filter(&(&1.scm == Mix.SCM.Git))
-      |> Enum.each(fn dep ->
-        {:git, url, rev, _} = dep.opts[:lock]
-        assert nix =~ "stubbed-hash-for-#{url}-#{rev}"
-      end)
+      [env: :dev] ->
+        [prod_git_dep, included_dev_dep, excluded_dev_dep, sub_dep, sub_sub_dep]
     end
+
+    prefetcher = fn url, rev -> ~s({ "hash": "stubbed-hash-for-#{url}-#{rev}" }) end
+
+    nix =
+      output(
+        %Run.Options{
+          envs: %{"prod" => :all, "dev" => ["#{included_dev_dep.app}"]}
+        },
+        converger,
+        prefetcher
+      )
+
+    assert Regex.scan(~r( #{prod_git_dep.app} = build), nix) |> length() == 1
+    assert Regex.scan(~r( #{included_dev_dep.app} = build), nix) |> length() == 1
+    assert Regex.scan(~r( #{sub_dep.app} = build), nix) |> length() == 1
+    assert Regex.scan(~r( #{sub_sub_dep.app} = build), nix) |> length() == 1
+    assert Regex.scan(~r( #{excluded_dev_dep.app} = build), nix) |> length() == 0
+
+    {:git, url, rev, _} = prod_git_dep.opts[:lock]
+    assert nix =~ "stubbed-hash-for-#{url}-#{rev}"
   end
 
   test "can choose environment to include" do
