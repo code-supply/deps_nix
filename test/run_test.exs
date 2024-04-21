@@ -46,11 +46,27 @@ defmodule RunTest do
   end
 
   test "can add packages and their dependency trees to a base environment" do
-    [prod_git_dep] = dep(name: :prod_thing, scm: Mix.SCM.Git) |> Enum.take(1)
     [sub_sub_dep] = dep(name: :sub_sub_dep_thing) |> Enum.take(1)
     [sub_dep] = dep(name: :sub_dep_thing, sub_deps: [sub_sub_dep]) |> Enum.take(1)
     [included_dev_dep] = dep(name: :dev_dep_1, sub_deps: [sub_dep]) |> Enum.take(1)
     [excluded_dev_dep] = dep(name: :excluded_dev_dep) |> Enum.take(1)
+
+    [prod_git_dep] =
+      dep(
+        name: :prod_thing,
+        scm: Mix.SCM.Git,
+        git_url: "https://gitstub.biz/awesome/project",
+        version: "1.2.3"
+      )
+      |> Enum.take(1)
+
+    prefetcher = fn
+      "https://gitstub.biz/awesome/project", "1.2.3" ->
+        ~s({ "hash": "stubbed-hash-for-prod-dep" })
+
+      _url, _rev ->
+        ~s({})
+    end
 
     converger = fn
       # sub_dep included in both envs to ensure deduplication
@@ -60,8 +76,6 @@ defmodule RunTest do
       [env: :dev] ->
         [prod_git_dep, included_dev_dep, excluded_dev_dep, sub_dep, sub_sub_dep]
     end
-
-    prefetcher = fn url, rev -> ~s({ "hash": "stubbed-hash-for-#{url}-#{rev}" }) end
 
     nix =
       output(
@@ -78,8 +92,7 @@ defmodule RunTest do
     assert Regex.scan(~r( #{sub_sub_dep.app} = build), nix) |> length() == 1
     assert Regex.scan(~r( #{excluded_dev_dep.app} = build), nix) |> length() == 0
 
-    {:git, url, rev, _} = prod_git_dep.opts[:lock]
-    assert nix =~ "stubbed-hash-for-#{url}-#{rev}"
+    assert nix =~ "stubbed-hash-for-prod-dep"
   end
 
   test "can choose environment to include" do
