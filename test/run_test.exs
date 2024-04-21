@@ -46,19 +46,19 @@ defmodule RunTest do
   end
 
   test "can add packages and their dependency trees to a base environment" do
-    [sub_sub_dep] = dep(name: :sub_sub_dep_thing) |> Enum.take(1)
-    [sub_dep] = dep(name: :sub_dep_thing, sub_deps: [sub_sub_dep]) |> Enum.take(1)
-    [included_dev_dep] = dep(name: :dev_dep_1, sub_deps: [sub_dep]) |> Enum.take(1)
-    [excluded_dev_dep] = dep(name: :excluded_dev_dep) |> Enum.take(1)
+    sub_sub_dep = dep(name: :sub_sub_dep_thing) |> pick()
+    sub_dep = dep(name: :sub_dep_thing, sub_deps: [sub_sub_dep]) |> pick()
+    included_dev_dep = dep(name: :dev_dep_1, sub_deps: [sub_dep]) |> pick()
+    excluded_dev_dep = dep(name: :excluded_dev_dep) |> pick()
 
-    [prod_git_dep] =
+    prod_git_dep =
       dep(
         name: :prod_thing,
         scm: Mix.SCM.Git,
         git_url: "https://gitstub.biz/awesome/project",
         version: "1.2.3"
       )
-      |> Enum.take(1)
+      |> pick()
 
     prefetcher = fn
       "https://gitstub.biz/awesome/project", "1.2.3" ->
