@@ -25,6 +25,7 @@ Docs can be found at <https://hexdocs.pm/deps_nix>.
 mix deps.nix
 ```
 
-By default, this will generate a deps.nix file in the current directory, using only the `:prod` dependencies for your project.
+By default, this will generate a `deps.nix` file in the current directory,
+using only the `:prod` dependencies for your project.
 
 See `mix help deps.nix` for more options.
