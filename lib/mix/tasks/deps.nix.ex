@@ -38,7 +38,7 @@ defmodule Mix.Tasks.Deps.Nix do
 
   `deps_nix` supports git dependencies.
 
-  builtins.fetchGit is used, which doesn't require any prefetching and relies
+  `builtins.fetchGit` is used, which doesn't require any prefetching and relies
   on the git SHA as a unique identifier.
   """
 
