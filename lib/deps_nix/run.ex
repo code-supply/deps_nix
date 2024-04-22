@@ -20,7 +20,7 @@ defmodule DepsNix.Run do
     end)
     |> Enum.sort_by(& &1.app)
     |> Enum.uniq()
-    |> Enum.map(&DepsNix.transform(&1))
+    |> Enum.map(&DepsNix.transform/1)
     |> Enum.join("\n")
     |> Util.indent()
     |> Util.indent()
@@ -82,9 +82,8 @@ defmodule DepsNix.Run do
       { lib, beamPackages, overrides ? (x: y: { }) }:
 
       let
-        buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
         buildMix = lib.makeOverridable beamPackages.buildMix;
-        buildErlangMk = lib.makeOverridable beamPackages.buildErlangMk;
+        buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
 
         self = packages // (overrides self packages);
 

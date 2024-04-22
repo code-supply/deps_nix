@@ -12,8 +12,8 @@ defmodule DepsNix.FetchHex do
     def to_string(%DepsNix.FetchHex{} = h) do
       """
       fetchHex {
+          inherit version;
           pkg = "#{h.pkg}";
-          version = "${version}";
           sha256 = "#{h.sha256}";
         }
       """
