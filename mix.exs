@@ -12,7 +12,7 @@ defmodule DepsNix.MixProject do
       elixir: "~> 1.16",
       package: package(),
       start_permanent: Mix.env() == :prod,
-      version: "0.2.0",
+      version: "0.2.1",
 
       # Docs
       source_url: @scm_url,
