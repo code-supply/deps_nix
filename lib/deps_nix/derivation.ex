@@ -24,14 +24,12 @@ defmodule DepsNix.Derivation do
           inherit version;
           name = "#{drv.name}";
 
-          src = #{indented_src(drv.src)};
-
-          beamDeps = #{format_beam_deps(drv.beam_deps)};#{unpack_phase(drv.unpack_phase)}
+          src = #{src(drv.src)};#{beam_deps(drv.beam_deps)}#{unpack_phase(drv.unpack_phase)}
         };
       """
     end
 
-    defp indented_src(src) do
+    defp src(src) do
       src
       |> Kernel.to_string()
       |> Util.indent(from: 1)
@@ -53,12 +51,18 @@ defmodule DepsNix.Derivation do
       |> Util.indent(from: 2)
     end
 
-    defp format_beam_deps([]) do
-      "[ ]"
+    defp beam_deps([]) do
+      ""
     end
 
-    defp format_beam_deps(deps) do
-      "[ #{Enum.join(deps, " ")} ]"
+    defp beam_deps(deps) do
+      """
+
+
+      beamDeps = [ #{Enum.join(deps, " ")} ];\
+      """
+      |> Util.indent(from: 2)
+      |> Util.indent(from: 2)
     end
   end
 end

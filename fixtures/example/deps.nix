@@ -20,8 +20,6 @@ let
           pkg = "acceptor_pool";
           sha256 = "0cbcd83fdc8b9ad2eee2067ef8b91a14858a5883cb7cd800e6fcd5803e158788";
         };
-
-        beamDeps = [ ];
       };
 
     bandit =
@@ -70,8 +68,6 @@ let
           pkg = "ctx";
           sha256 = "a14ed2d1b67723dbebbe423b28d7615eb0bdcba6ff28f2d1f1b0a7e1d4aa5fc2";
         };
-
-        beamDeps = [ ];
       };
 
     db_connection =
@@ -104,8 +100,6 @@ let
           pkg = "decimal";
           sha256 = "53cfe5f497ed0e7771ae1a475575603d77425099ba5faef9394932b35020ffcc";
         };
-
-        beamDeps = [ ];
       };
 
     eventstore =
@@ -138,8 +132,6 @@ let
           pkg = "fsm";
           sha256 = "fbf0d53f89e9082b326b0b5828b94b4c549ff9d1452bbfd00b4d1ac082208e96";
         };
-
-        beamDeps = [ ];
       };
 
     gen_stage =
@@ -155,8 +147,6 @@ let
           pkg = "gen_stage";
           sha256 = "83e8be657fa05b992ffa6ac1e3af6d57aa50aace8f691fcf696ff02f8335b001";
         };
-
-        beamDeps = [ ];
       };
 
     gproc =
@@ -172,8 +162,6 @@ let
           pkg = "gproc";
           sha256 = "905088e32e72127ed9466f0bac0d8e65704ca5e73ee5a62cb073c3117916d507";
         };
-
-        beamDeps = [ ];
       };
 
     grpcbox =
@@ -215,8 +203,6 @@ let
           pkg = "hpack_erl";
           sha256 = "d6137d7079169d8c485c6962dfe261af5b9ef60fbc557344511c1e65e3d95fb0";
         };
-
-        beamDeps = [ ];
       };
 
     hpax =
@@ -232,8 +218,6 @@ let
           pkg = "hpax";
           sha256 = "2c87843d5a23f5f16748ebe77969880e29809580efdaccd615cd3bed628a8c13";
         };
-
-        beamDeps = [ ];
       };
 
     mime =
@@ -249,8 +233,6 @@ let
           pkg = "mime";
           sha256 = "da0d64a365c45bc9935cc5c8a7fc5e49a0e0f9932a761c55d6c52b142780a05c";
         };
-
-        beamDeps = [ ];
       };
 
     opentelemetry =
@@ -317,8 +299,6 @@ let
           pkg = "opentelemetry_semantic_conventions";
           sha256 = "d61fa1f5639ee8668d74b527e6806e0503efc55a42db7b5f39939d84c07d6895";
         };
-
-        beamDeps = [ ];
       };
 
     plug =
@@ -351,8 +331,6 @@ let
           pkg = "plug_crypto";
           sha256 = "53695bae57cc4e54566d993eb01074e4d894b65a3766f1c43e2c61a1b0f45ea9";
         };
-
-        beamDeps = [ ];
       };
 
     postgrex =
@@ -385,8 +363,6 @@ let
           pkg = "ssl_verify_fun";
           sha256 = "fe4c190e8f37401d30167c8c405eda19469f34577987c76dde613e838bbc67f8";
         };
-
-        beamDeps = [ ];
       };
 
     telemetry =
@@ -402,8 +378,6 @@ let
           pkg = "telemetry";
           sha256 = "dad9ce9d8effc621708f99eac538ef1cbe05d6a874dd741de2e689c47feafed5";
         };
-
-        beamDeps = [ ];
       };
 
     thousand_island =
@@ -453,8 +427,6 @@ let
           pkg = "websock";
           sha256 = "6105453d7fac22c712ad66fab1d45abdf049868f253cf719b625151460b8b453";
         };
-
-        beamDeps = [ ];
       };
   };
 in

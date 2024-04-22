@@ -71,8 +71,6 @@ defmodule DepsNix.DerivationTest do
                    sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
                  };
 
-                 beamDeps = [ ];
-
                  unpackPhase = ''
                    echo "hi!"
                    how're you?
@@ -107,8 +105,6 @@ defmodule DepsNix.DerivationTest do
                    pkg = "bandit";
                    sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
                  };
-
-                 beamDeps = [ ];
                };
              """
     end
