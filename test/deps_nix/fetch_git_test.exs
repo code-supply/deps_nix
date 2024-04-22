@@ -12,9 +12,9 @@ defmodule DepsNix.FetchGitTest do
              |> to_string() ==
                """
                builtins.fetchGit {
-                   url = "https://github.com/sstoltze/tds";
-                   rev = "somehash";
-                 }\
+                 url = "https://github.com/sstoltze/tds";
+                 rev = "somehash";
+               }\
                """
     end
   end

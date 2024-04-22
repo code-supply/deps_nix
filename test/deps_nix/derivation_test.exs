@@ -18,18 +18,22 @@ defmodule DepsNix.DerivationTest do
                beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock]
              }
              |> to_string() == """
-             bandit = buildMix rec {
-               name = "bandit";
-               version = "1.4.2";
-
-               src = fetchHex {
+             bandit =
+               let
+                 version = "1.4.2";
+               in
+               buildMix {
                  inherit version;
-                 pkg = "bandit";
-                 sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-               };
+                 name = "bandit";
 
-               beamDeps = [ hpax plug telemetry thousand_island websock ];
-             };
+                 src = fetchHex {
+                   inherit version;
+                   pkg = "bandit";
+                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                 };
+
+                 beamDeps = [ hpax plug telemetry thousand_island websock ];
+               };
              """
     end
 
@@ -53,23 +57,27 @@ defmodule DepsNix.DerivationTest do
         |> to_string()
 
       assert string_rep == """
-             bandit = buildMix rec {
-               name = "bandit";
-               version = "1.4.2";
-
-               src = fetchHex {
+             bandit =
+               let
+                 version = "1.4.2";
+               in
+               buildMix {
                  inherit version;
-                 pkg = "bandit";
-                 sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                 name = "bandit";
+
+                 src = fetchHex {
+                   inherit version;
+                   pkg = "bandit";
+                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                 };
+
+                 beamDeps = [ ];
+
+                 unpackPhase = ''
+                   echo "hi!"
+                   how're you?
+                 '';
                };
-
-               beamDeps = [ ];
-
-               unpackPhase = ''
-                 echo "hi!"
-                 how're you?
-               '';
-             };
              """
     end
 
@@ -86,18 +94,22 @@ defmodule DepsNix.DerivationTest do
                beam_deps: []
              }
              |> to_string() == """
-             bandit = buildMix rec {
-               name = "bandit";
-               version = "1.4.2";
-
-               src = fetchHex {
+             bandit =
+               let
+                 version = "1.4.2";
+               in
+               buildMix {
                  inherit version;
-                 pkg = "bandit";
-                 sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-               };
+                 name = "bandit";
 
-               beamDeps = [ ];
-             };
+                 src = fetchHex {
+                   inherit version;
+                   pkg = "bandit";
+                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                 };
+
+                 beamDeps = [ ];
+               };
              """
     end
   end

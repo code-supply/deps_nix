@@ -12,10 +12,10 @@ defmodule DepsNix.FetchHex do
     def to_string(%DepsNix.FetchHex{} = h) do
       """
       fetchHex {
-          inherit version;
-          pkg = "#{h.pkg}";
-          sha256 = "#{h.sha256}";
-        }
+        inherit version;
+        pkg = "#{h.pkg}";
+        sha256 = "#{h.sha256}";
+      }
       """
       |> String.trim()
     end

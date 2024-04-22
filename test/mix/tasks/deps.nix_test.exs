@@ -10,16 +10,14 @@ defmodule Mix.Tasks.Deps.NixTest do
 
     assert {"«lambda @ " <> _, 0} =
              System.shell("nix eval --file deps.nix 2> /dev/null",
-               cd: "fixtures/example",
-               into: "",
-               lines: 1024
+               cd: "fixtures/example"
              )
 
-    assert {_, 0} =
-             System.shell("nixpkgs-fmt --check deps.nix 2> /dev/null",
-               cd: "fixtures/example",
-               into: "",
-               lines: 1024
-             )
+    {diff, diff_status} =
+      System.shell("diff --unified deps.nix <(nixpkgs-fmt < deps.nix)",
+        cd: "fixtures/example"
+      )
+
+    assert diff_status == 0, diff
   end
 end

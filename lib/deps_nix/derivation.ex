@@ -16,27 +16,41 @@ defmodule DepsNix.Derivation do
   defimpl String.Chars do
     def to_string(drv) do
       """
-      #{drv.name} = #{drv.builder} rec {
-        name = "#{drv.name}";
-        version = "#{drv.version}";
+      #{drv.name} =
+        let
+          version = "#{drv.version}";
+        in
+        #{drv.builder} {
+          inherit version;
+          name = "#{drv.name}";
 
-        src = #{drv.src};
+          src = #{indented_src(drv.src)};
 
-        beamDeps = #{format_beam_deps(drv.beam_deps)};
-      #{unpack_phase(drv.unpack_phase)}};
+          beamDeps = #{format_beam_deps(drv.beam_deps)};#{unpack_phase(drv.unpack_phase)}
+        };
       """
+    end
+
+    defp indented_src(src) do
+      src
+      |> Kernel.to_string()
+      |> Util.indent(from: 1)
+      |> Util.indent(from: 1)
     end
 
     defp unpack_phase(nil) do
     end
 
     defp unpack_phase(script) do
-      "\n" <>
-        Util.indent("""
-        unpackPhase = ''
-        #{script |> String.trim_trailing() |> Util.indent()}
-        '';
-        """)
+      """
+
+
+      unpackPhase = ''
+      #{script |> String.trim_trailing() |> Util.indent()}
+      '';\
+      """
+      |> Util.indent(from: 2)
+      |> Util.indent(from: 2)
     end
 
     defp format_beam_deps([]) do

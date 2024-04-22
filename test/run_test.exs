@@ -77,11 +77,13 @@ defmodule RunTest do
         converger
       )
 
-    assert Regex.scan(~r( #{prod_git_dep.app} = build), nix) |> length() == 1
-    assert Regex.scan(~r( #{included_dev_dep.app} = build), nix) |> length() == 1
-    assert Regex.scan(~r( #{sub_dep.app} = build), nix) |> length() == 1
-    assert Regex.scan(~r( #{sub_sub_dep.app} = build), nix) |> length() == 1
-    assert Regex.scan(~r( #{excluded_dev_dep.app} = build), nix) |> length() == 0
+    assert Regex.scan(~r( #{prod_git_dep.app} =), nix) |> length() == 1,
+           "Can't find #{prod_git_dep.app}'s build in: #{nix}"
+
+    assert Regex.scan(~r( #{included_dev_dep.app} =), nix) |> length() == 1
+    assert Regex.scan(~r( #{sub_dep.app} =), nix) |> length() == 1
+    assert Regex.scan(~r( #{sub_sub_dep.app} =), nix) |> length() == 1
+    assert Regex.scan(~r( #{excluded_dev_dep.app} =), nix) |> length() == 0
   end
 
   test "can choose environment to include" do
@@ -97,16 +99,16 @@ defmodule RunTest do
       end
 
       assert output(%Run.Options{envs: %{"prod" => :all}}, converger) =~
-               ~s( #{prod_dep.app} = build)
+               ~s( #{prod_dep.app} =)
 
       refute output(%Run.Options{envs: %{"prod" => :all}}, converger) =~
-               ~s( #{dev_dep.app} = build)
+               ~s( #{dev_dep.app} =)
 
       assert output(%Run.Options{envs: %{"dev" => :all}}, converger) =~
-               ~s( #{dev_dep.app} = build)
+               ~s( #{dev_dep.app} =)
 
       assert output(%Run.Options{envs: %{"dev" => :all}}, converger) =~
-               ~s( #{prod_dep.app} = build)
+               ~s( #{prod_dep.app} =)
     end
   end
 

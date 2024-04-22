@@ -11,9 +11,9 @@ defmodule DepsNix.FetchGit do
     def to_string(%DepsNix.FetchGit{} = g) do
       """
       builtins.fetchGit {
-          url = "#{g.url}";
-          rev = "#{g.rev}";
-        }\
+        url = "#{g.url}";
+        rev = "#{g.rev}";
+      }\
       """
     end
   end
