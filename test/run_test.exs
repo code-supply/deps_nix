@@ -110,6 +110,10 @@ defmodule RunTest do
     end
   end
 
+  test "output ends with a newline, for compatibility with other UNIX tools" do
+    assert output(%Run.Options{}, fn _ -> [dep()] end) =~ ~r/\n$/
+  end
+
   defp output(opts, converger) do
     {_path, output} = Run.call(opts, converger)
     output

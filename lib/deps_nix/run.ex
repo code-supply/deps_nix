@@ -92,7 +92,6 @@ defmodule DepsNix.Run do
       in
       self
       """
-      |> String.trim()
     }
   end
 end
