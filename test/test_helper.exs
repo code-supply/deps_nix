@@ -3,10 +3,6 @@ ExUnit.start()
 defmodule TestHelpers do
   use ExUnitProperties
 
-  def prefetcher_stub do
-    fn _url, _rev -> "{}" end
-  end
-
   def builders do
     [:mix, :rebar3, :make]
   end

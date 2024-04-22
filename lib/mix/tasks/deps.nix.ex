@@ -38,9 +38,8 @@ defmodule Mix.Tasks.Deps.Nix do
 
   `deps_nix` supports git dependencies.
 
-  If you have declared git dependencies in your `mix.exs`, you'll need to make
-  `nix-prefetch-scripts` available in the `PATH` in order to resolve their
-  hashes.
+  builtins.fetchGit is used, which doesn't require any prefetching and relies
+  on the git SHA as a unique identifier.
   """
 
   @shortdoc "Produce nix derivations for mix dependencies"
@@ -54,30 +53,9 @@ defmodule Mix.Tasks.Deps.Nix do
     {path, output} =
       DepsNix.Run.call(
         DepsNix.Run.parse_args(args),
-        &Mix.Dep.Converger.converge/1,
-        choose_prefetcher(System.get_env("EMPTY_GIT_HASHES"))
+        &Mix.Dep.Converger.converge/1
       )
 
     File.write!(path, output)
-  end
-
-  defp choose_prefetcher(nil) do
-    &prefetcher/2
-  end
-
-  defp choose_prefetcher(_) do
-    fn _url, _rev -> "{}" end
-  end
-
-  defp prefetcher(url, rev) do
-    {output, 0} = System.cmd("nix-prefetch-git", ["--quiet", url, rev])
-    output
-  rescue
-    e in ErlangError ->
-      Mix.shell().error(
-        "Git dependency encountered: #{url}\nHave you installed nix-prefetch-scripts?"
-      )
-
-      reraise e, __STACKTRACE__
   end
 end

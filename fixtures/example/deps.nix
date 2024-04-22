@@ -28,7 +28,6 @@ let
       src = fetchgit {
         url = "https://github.com/mtrudel/bandit.git";
         rev = "4f15f029e7aa17f8e7f98d55b0e94c684dee0971";
-        hash = "";
       };
 
       beamDeps = [ thousand_island plug websock hpax telemetry ];

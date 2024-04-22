@@ -11,13 +11,10 @@ defmodule DepsNixTest do
   property "translates dependencies specified with git" do
     check all url <- url(),
               rev <- hash(),
-              hash <- hash(),
               dep <- dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
-      prefetcher = fn ^url, ^rev -> ~s({ "hash": "#{hash}" }) end
-
       assert %Derivation{
-               src: %FetchGit{url: ^url, rev: ^rev, hash: ^hash}
-             } = DepsNix.transform(dep, prefetcher)
+               src: %FetchGit{url: ^url, rev: ^rev}
+             } = DepsNix.transform(dep)
     end
   end
 
@@ -35,14 +32,14 @@ defmodule DepsNixTest do
       """
 
       assert %Derivation{unpack_phase: ^expected_unpack_phase} =
-               DepsNix.transform(dep, prefetcher_stub())
+               DepsNix.transform(dep)
     end
   end
 
   property "prefers mix over every other builder" do
     check all other_builders <- list_of(one_of([:make, :rebar3])),
               dep <- dep(builders: [:mix] ++ other_builders) do
-      assert %Derivation{builder: "buildMix"} = DepsNix.transform(dep, prefetcher_stub())
+      assert %Derivation{builder: "buildMix"} = DepsNix.transform(dep)
     end
   end
 
@@ -53,7 +50,7 @@ defmodule DepsNixTest do
       assert %Derivation{
                builder: "buildRebar3",
                name: ^expected_name
-             } = DepsNix.transform(dep, prefetcher_stub())
+             } = DepsNix.transform(dep)
     end
   end
 
@@ -103,7 +100,7 @@ defmodule DepsNixTest do
         system_env: []
       }
 
-    assert DepsNix.transform(eventstore, prefetcher_stub()).beam_deps == [
+    assert DepsNix.transform(eventstore).beam_deps == [
              :fsm,
              :gen_stage,
              :postgrex
@@ -135,7 +132,7 @@ defmodule DepsNixTest do
       manager: :rebar3
     }
 
-    assert DepsNix.transform(chatterbox, prefetcher_stub()) == %Derivation{
+    assert DepsNix.transform(chatterbox) == %Derivation{
              builder: "buildRebar3",
              name: :chatterbox,
              version: "0.15.1",
@@ -179,7 +176,7 @@ defmodule DepsNixTest do
       ]
     }
 
-    assert DepsNix.transform(bandit, prefetcher_stub()) == %Derivation{
+    assert DepsNix.transform(bandit) == %Derivation{
              builder: "buildMix",
              name: :bandit,
              version: "1.4.2",

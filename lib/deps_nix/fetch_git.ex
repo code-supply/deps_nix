@@ -1,23 +1,20 @@
 defmodule DepsNix.FetchGit do
   @type t :: %__MODULE__{
           url: String.t(),
-          rev: String.to(),
-          hash: String.t()
+          rev: String.to()
         }
 
-  @enforce_keys [:url, :rev, :hash]
-  defstruct [:url, :rev, :hash]
+  @enforce_keys [:url, :rev]
+  defstruct [:url, :rev]
 
   defimpl String.Chars do
     def to_string(%DepsNix.FetchGit{} = g) do
       """
-      fetchgit {
+      builtins.fetchGit {
           url = "#{g.url}";
           rev = "#{g.rev}";
-          hash = "#{g.hash}";
-        }
+        }\
       """
-      |> String.trim()
     end
   end
 end

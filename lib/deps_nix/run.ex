@@ -8,11 +8,10 @@ defmodule DepsNix.Run do
   end
 
   @type converger :: (Keyword.t() -> list(Mix.Dep.t()))
-  @type prefetcher :: (String.t(), String.t() -> String.t())
 
-  @spec call(Options.t(), converger(), prefetcher()) ::
+  @spec call(Options.t(), converger()) ::
           {path :: String.t(), output :: String.t()}
-  def call(opts, converger, prefetcher) do
+  def call(opts, converger) do
     opts
     |> convert_opts()
     |> Enum.flat_map(fn {converger_opts, permitted_names} ->
@@ -21,7 +20,7 @@ defmodule DepsNix.Run do
     end)
     |> Enum.sort_by(& &1.app)
     |> Enum.uniq()
-    |> Enum.map(&DepsNix.transform(&1, prefetcher))
+    |> Enum.map(&DepsNix.transform(&1))
     |> Enum.join("\n")
     |> Util.indent()
     |> Util.indent()

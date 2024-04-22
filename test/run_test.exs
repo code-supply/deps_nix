@@ -42,7 +42,7 @@ defmodule RunTest do
     converger = fn _ -> [] end
 
     assert {"my/path.nix", _} =
-             Run.call(%Run.Options{output: "my/path.nix"}, converger, prefetcher_stub())
+             Run.call(%Run.Options{output: "my/path.nix"}, converger)
   end
 
   test "can add packages and their dependency trees to a base environment" do
@@ -60,14 +60,6 @@ defmodule RunTest do
       )
       |> pick()
 
-    prefetcher = fn
-      "https://gitstub.biz/awesome/project", "1.2.3" ->
-        ~s({ "hash": "stubbed-hash-for-prod-dep" })
-
-      _url, _rev ->
-        ~s({})
-    end
-
     converger = fn
       # sub_dep included in both envs to ensure deduplication
       [env: :prod] ->
@@ -82,8 +74,7 @@ defmodule RunTest do
         %Run.Options{
           envs: %{"prod" => :all, "dev" => ["#{included_dev_dep.app}"]}
         },
-        converger,
-        prefetcher
+        converger
       )
 
     assert Regex.scan(~r( #{prod_git_dep.app} = build), nix) |> length() == 1
@@ -91,8 +82,6 @@ defmodule RunTest do
     assert Regex.scan(~r( #{sub_dep.app} = build), nix) |> length() == 1
     assert Regex.scan(~r( #{sub_sub_dep.app} = build), nix) |> length() == 1
     assert Regex.scan(~r( #{excluded_dev_dep.app} = build), nix) |> length() == 0
-
-    assert nix =~ "stubbed-hash-for-prod-dep"
   end
 
   test "can choose environment to include" do
@@ -121,8 +110,8 @@ defmodule RunTest do
     end
   end
 
-  defp output(opts, converger, prefetcher \\ prefetcher_stub()) do
-    {_path, output} = Run.call(opts, converger, prefetcher)
+  defp output(opts, converger) do
+    {_path, output} = Run.call(opts, converger)
     output
   end
 end
