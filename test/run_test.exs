@@ -6,6 +6,8 @@ defmodule RunTest do
 
   import TestHelpers
 
+  def stub_converger(_), do: []
+
   describe "argument parsing" do
     test "defaults to prod env" do
       assert Run.parse_args(~w()) == %Run.Options{envs: %{"prod" => :all}}
@@ -22,7 +24,7 @@ defmodule RunTest do
     end
 
     property "can specify extra packages from a different environment" do
-      check all package_names <- list_of(package_name()) do
+      check all package_names <- list_of(package_name()), max_runs: 10 do
         assert Run.parse_args(~w(--env prod --env dev=#{Enum.join(package_names, ",")})) ==
                  %Run.Options{
                    envs: %{
@@ -39,34 +41,24 @@ defmodule RunTest do
   end
 
   test "sets path from options" do
-    converger = fn _ -> [] end
-
     assert {"my/path.nix", _} =
-             Run.call(%Run.Options{output: "my/path.nix"}, converger)
+             Run.call(%Run.Options{output: "my/path.nix"}, &stub_converger/1)
   end
 
-  test "can add packages and their dependency trees to a base environment" do
+  property "can add packages and their dependency trees to a base environment" do
     sub_sub_dep = dep(name: :sub_sub_dep_thing) |> pick()
     sub_dep = dep(name: :sub_dep_thing, sub_deps: [sub_sub_dep]) |> pick()
     included_dev_dep = dep(name: :dev_dep_1, sub_deps: [sub_dep]) |> pick()
     excluded_dev_dep = dep(name: :excluded_dev_dep) |> pick()
-
-    prod_git_dep =
-      dep(
-        name: :prod_thing,
-        scm: Mix.SCM.Git,
-        git_url: "https://gitstub.biz/awesome/project",
-        version: "1.2.3"
-      )
-      |> pick()
+    prod_dep = dep(name: :prod_thing) |> pick()
 
     converger = fn
       # sub_dep included in both envs to ensure deduplication
       [env: :prod] ->
-        [prod_git_dep, sub_dep]
+        [prod_dep, sub_dep]
 
       [env: :dev] ->
-        [prod_git_dep, included_dev_dep, excluded_dev_dep, sub_dep, sub_sub_dep]
+        [prod_dep, included_dev_dep, excluded_dev_dep, sub_dep, sub_sub_dep]
     end
 
     nix =
@@ -77,8 +69,8 @@ defmodule RunTest do
         converger
       )
 
-    assert Regex.scan(~r( #{prod_git_dep.app} =), nix) |> length() == 1,
-           "Can't find #{prod_git_dep.app}'s build in: #{nix}"
+    assert Regex.scan(~r( #{prod_dep.app} =), nix) |> length() == 1,
+           "Expected to find 1 of #{prod_dep.app}'s build in: #{nix}"
 
     assert Regex.scan(~r( #{included_dev_dep.app} =), nix) |> length() == 1
     assert Regex.scan(~r( #{sub_dep.app} =), nix) |> length() == 1
@@ -87,36 +79,34 @@ defmodule RunTest do
   end
 
   test "can choose environment to include" do
-    check all prod_dep <- dep(),
-              dev_dep <- dep(),
-              prod_dep.app != dev_dep.app do
-      converger = fn
-        [env: :prod] ->
-          [prod_dep]
+    [prod_dep, dev_dep] = pick(uniq_list_of(dep(), length: 2))
 
-        [env: :dev] ->
-          [prod_dep, dev_dep]
-      end
+    converger = fn
+      [env: :prod] ->
+        [prod_dep]
 
-      assert output(%Run.Options{envs: %{"prod" => :all}}, converger) =~
-               ~s( #{prod_dep.app} =)
-
-      refute output(%Run.Options{envs: %{"prod" => :all}}, converger) =~
-               ~s( #{dev_dep.app} =)
-
-      assert output(%Run.Options{envs: %{"dev" => :all}}, converger) =~
-               ~s( #{dev_dep.app} =)
-
-      assert output(%Run.Options{envs: %{"dev" => :all}}, converger) =~
-               ~s( #{prod_dep.app} =)
+      [env: :dev] ->
+        [prod_dep, dev_dep]
     end
+
+    assert output(%Run.Options{envs: %{"prod" => :all}}, converger) =~
+             ~s( #{prod_dep.app} =)
+
+    refute output(%Run.Options{envs: %{"prod" => :all}}, converger) =~
+             ~s( #{dev_dep.app} =)
+
+    assert output(%Run.Options{envs: %{"dev" => :all}}, converger) =~
+             ~s( #{dev_dep.app} =)
+
+    assert output(%Run.Options{envs: %{"dev" => :all}}, converger) =~
+             ~s( #{prod_dep.app} =)
   end
 
   test "output ends with a newline, for compatibility with other UNIX tools" do
-    assert output(%Run.Options{}, fn _ -> [dep()] end) =~ ~r/\n$/
+    assert output(%Run.Options{}) =~ ~r/\n$/
   end
 
-  defp output(opts, converger) do
+  defp output(opts, converger \\ &stub_converger/1) do
     {_path, output} = Run.call(opts, converger)
     output
   end

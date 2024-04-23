@@ -76,7 +76,12 @@ defmodule TestHelpers do
             }
 
           Mix.SCM.Git ->
-            {:git, Keyword.get(opts, :git_url, url), version, []}
+            {
+              :git,
+              Keyword.get(opts, :git_url, url),
+              version,
+              []
+            }
         end
 
       %Mix.Dep{
