@@ -15,9 +15,8 @@ defmodule DepsNix.FetchHex do
         inherit version;
         pkg = "#{h.pkg}";
         sha256 = "#{h.sha256}";
-      }
+      };\
       """
-      |> String.trim()
     end
   end
 end

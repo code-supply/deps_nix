@@ -24,7 +24,7 @@ defmodule DepsNix.Derivation do
           inherit version;
           name = "#{drv.name}";
 
-          src = #{src(drv.src)};#{beam_deps(drv.beam_deps)}#{unpack_phase(drv.unpack_phase)}
+          src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}#{unpack_phase(drv.unpack_phase)}
         };
       """
     end

@@ -14,7 +14,7 @@ defmodule DepsNix.FetchGitTest do
                builtins.fetchGit {
                  url = "https://github.com/sstoltze/tds";
                  rev = "somehash";
-               }\
+               };\
                """
     end
   end

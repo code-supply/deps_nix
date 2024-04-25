@@ -1,7 +1,7 @@
 defmodule DepsNix.FetchGit do
   @type t :: %__MODULE__{
           url: String.t(),
-          rev: String.to()
+          rev: String.t()
         }
 
   @enforce_keys [:url, :rev]
@@ -13,7 +13,7 @@ defmodule DepsNix.FetchGit do
       builtins.fetchGit {
         url = "#{g.url}";
         rev = "#{g.rev}";
-      }\
+      };\
       """
     end
   end
