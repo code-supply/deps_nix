@@ -6,8 +6,6 @@ defmodule RunTest do
 
   import TestHelpers
 
-  def stub_converger(_), do: []
-
   describe "argument parsing" do
     test "defaults to prod env" do
       assert Run.parse_args(~w()) == %Run.Options{envs: %{"prod" => :all}}
@@ -45,7 +43,11 @@ defmodule RunTest do
              Run.call(%Run.Options{output: "my/path.nix"}, &stub_converger/1)
   end
 
-  property "can add packages and their dependency trees to a base environment" do
+  test "empty deps list formats output correctly" do
+    assert output(%Run.Options{}, &stub_converger/1) =~ "with self; { };"
+  end
+
+  test "can add packages and their dependency trees to a base environment" do
     sub_sub_dep = dep(name: :sub_sub_dep_thing) |> pick()
     sub_dep = dep(name: :sub_dep_thing, sub_deps: [sub_sub_dep]) |> pick()
     included_dev_dep = dep(name: :dev_dep_1, sub_deps: [sub_dep]) |> pick()
@@ -110,4 +112,6 @@ defmodule RunTest do
     {_path, output} = Run.call(opts, converger)
     output
   end
+
+  defp stub_converger(_), do: []
 end

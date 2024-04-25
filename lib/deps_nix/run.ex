@@ -22,8 +22,7 @@ defmodule DepsNix.Run do
     |> Enum.uniq()
     |> Enum.map(&DepsNix.transform/1)
     |> Enum.join("\n")
-    |> Util.indent()
-    |> Util.indent()
+    |> indent_deps()
     |> wrap(opts.output)
   end
 
@@ -87,11 +86,20 @@ defmodule DepsNix.Run do
 
         self = packages // (overrides self packages);
 
-        packages = with beamPackages; with self; {
-      #{pkgs}  };
+        packages = with beamPackages; with self; {#{pkgs}};
       in
       self
       """
     }
+  end
+
+  defp indent_deps("") do
+    " "
+  end
+
+  defp indent_deps(s) do
+    ("\n#{s}"
+     |> Util.indent(from: 1)
+     |> Util.indent(from: 1)) <> "  "
   end
 end
