@@ -22,6 +22,10 @@
         ));
     in
     {
+      packages = forAllSystems ({ pkgs, ... }: {
+        fixture = pkgs.callPackages ./fixtures/example/deps.nix { };
+      });
+
       devShells = forAllSystems ({ callPackage, ... }: {
         default = callPackage ./shell.nix { };
       });
