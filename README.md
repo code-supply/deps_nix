@@ -12,7 +12,22 @@ supports git dependencies.
 ```elixir
 def deps do
   [
-    {:deps_nix, "~> 0.2.0"}
+    {:deps_nix, "~> 0.2.0", only: :dev}
+  ]
+end
+```
+
+Optional: add aliases for `deps.get` and `deps.update`. This helps to keep your
+Nix dependencies in sync with what's declared in `mix.exs`:
+
+```elixir
+def project do
+  [
+    ...
+    aliases: [
+      "deps.get": ["deps.get", "deps.nix"],
+      "deps.update": ["deps.update", "deps.nix"]
+    ]
   ]
 end
 ```
