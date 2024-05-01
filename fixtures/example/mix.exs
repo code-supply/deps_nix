@@ -21,10 +21,12 @@ defmodule Example.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:deps_nix, path: "../..", only: [:dev]},
       {:bandit, github: "mtrudel/bandit", ref: "1.4.2"},
+      {:deps_nix, path: "../..", only: [:dev]},
       {:eventstore, "~> 1.4"},
-      {:opentelemetry_exporter, "~> 1.7.0"},
+      {:ex_cldr_numbers, "~> 2.33"},
+      {:jason, "~> 1.4.1"},
+      {:opentelemetry_exporter, "~> 1.7.0"}
     ]
   end
 end
