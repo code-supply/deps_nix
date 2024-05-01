@@ -11,7 +11,6 @@ mkShell {
         text = ''
           tag=$1
 
-          gh auth login
           gh release create "$tag" --draft --generate-notes
           mix hex.publish
         '';
