@@ -14,12 +14,15 @@
         (system: generate ({ pkgs = nixpkgs.legacyPackages.${system}; }));
     in
     {
-      packages = forAllSystems ({ pkgs, ... }: {
-        fixture = pkgs.callPackages ./fixtures/example/deps.nix { };
-      });
+      packages = forAllSystems ({ pkgs, ... }:
+        (pkgs.callPackages ./fixtures/example/deps.nix { }));
 
       devShells = forAllSystems ({ pkgs, ... }: {
         default = pkgs.callPackage ./shell.nix { };
+      });
+
+      checks = forAllSystems ({ pkgs, ... }: {
+        default = pkgs.linkFarmFromDrvs "fixtures" (builtins.attrValues self.packages.${pkgs.system});
       });
     };
 }
