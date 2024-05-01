@@ -11,23 +11,15 @@
         "aarch64-linux"
         "x86_64-linux"
       ]
-        (system: generate (
-          let
-            pkgs = nixpkgs.legacyPackages.${system};
-            callPackage = pkgs.lib.callPackageWith pkgs;
-          in
-          {
-            inherit pkgs callPackage;
-          }
-        ));
+        (system: generate ({ pkgs = nixpkgs.legacyPackages.${system}; }));
     in
     {
       packages = forAllSystems ({ pkgs, ... }: {
         fixture = pkgs.callPackages ./fixtures/example/deps.nix { };
       });
 
-      devShells = forAllSystems ({ callPackage, ... }: {
-        default = callPackage ./shell.nix { };
+      devShells = forAllSystems ({ pkgs, ... }: {
+        default = pkgs.callPackage ./shell.nix { };
       });
     };
 }
