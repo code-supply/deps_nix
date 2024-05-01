@@ -2,7 +2,9 @@ final: prev:
 
 let
   apps = {
+    ex_cldr_calendars = [ "cldrData" ];
     ex_cldr_currencies = [ "cldrData" ];
+    ex_cldr_dates_times = [ "cldrData" "devEnv" ];
     ex_cldr_numbers = [ "cldrData" ];
     grpcbox = [ "eponymousDir" ];
     png = [ "eponymousDir" ];
@@ -15,6 +17,10 @@ let
         mkdir -p "$(dirname "$data_dir")"
         ln -sfv ${prev.ex_cldr}/src/priv/cldr "$(dirname "$data_dir")"
       '';
+    };
+
+    devEnv = _: {
+      mixEnv = "dev";
     };
 
     eponymousDir = { name, ... }: {

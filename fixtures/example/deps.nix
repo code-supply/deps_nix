@@ -8,7 +8,9 @@ let
 
     let
       apps = {
+        ex_cldr_calendars = [ "cldrData" ];
         ex_cldr_currencies = [ "cldrData" ];
+        ex_cldr_dates_times = [ "cldrData" "devEnv" ];
         ex_cldr_numbers = [ "cldrData" ];
         grpcbox = [ "eponymousDir" ];
         png = [ "eponymousDir" ];
@@ -21,6 +23,10 @@ let
             mkdir -p "$(dirname "$data_dir")"
             ln -sfv ${prev.ex_cldr}/src/priv/cldr "$(dirname "$data_dir")"
           '';
+        };
+
+        devEnv = _: {
+          mixEnv = "dev";
         };
 
         eponymousDir = { name, ... }: {
@@ -218,6 +224,23 @@ let
         beamDeps = [ cldr_utils decimal jason ];
       };
 
+    ex_cldr_calendars =
+      let
+        version = "1.23.1";
+      in
+      buildMix {
+        inherit version;
+        name = "ex_cldr_calendars";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "ex_cldr_calendars";
+          sha256 = "2983f002016c283d14ee838d1950d2f9a1e58e8b19a2145d95079874fe6de10d";
+        };
+
+        beamDeps = [ ex_cldr_numbers jason ];
+      };
+
     ex_cldr_currencies =
       let
         version = "2.16.1";
@@ -233,6 +256,23 @@ let
         };
 
         beamDeps = [ ex_cldr jason ];
+      };
+
+    ex_cldr_dates_times =
+      let
+        version = "2.17.0";
+      in
+      buildMix {
+        inherit version;
+        name = "ex_cldr_dates_times";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "ex_cldr_dates_times";
+          sha256 = "8377501cc6245ad235ee765bcab455e9e8c3f53cc5d775c094bf2cebb641e7ed";
+        };
+
+        beamDeps = [ ex_cldr_calendars ex_cldr_numbers jason ];
       };
 
     ex_cldr_numbers =
