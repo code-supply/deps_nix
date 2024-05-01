@@ -27,7 +27,8 @@ defmodule Example.MixProject do
       {:ex_cldr_dates_times, "~> 2.17"},
       {:ex_cldr_numbers, "~> 2.33"},
       {:jason, "~> 1.4.1"},
-      {:opentelemetry_exporter, "~> 1.7.0"}
+      {:opentelemetry_exporter, "~> 1.7.0"},
+      {:png, "~> 0.2.1"}
     ]
   end
 end

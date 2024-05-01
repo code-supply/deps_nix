@@ -514,6 +514,21 @@ let
         };
       };
 
+    png =
+      let
+        version = "0.2.1";
+      in
+      buildRebar3 {
+        inherit version;
+        name = "png";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "png";
+          sha256 = "279345e07108c604871a21f1c91f716810ab559af2b20d6f302e0a98265ef72e";
+        };
+      };
+
     postgrex =
       let
         version = "0.17.5";
