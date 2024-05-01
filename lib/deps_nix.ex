@@ -25,7 +25,7 @@ defmodule DepsNix do
       builder: builder,
       src: src,
       beam_deps: beam_deps(dep),
-      unpack_phase: unpack_phase(dep.app, version)
+      workarounds: workarounds(dep.app)
     }
   end
 
@@ -33,18 +33,12 @@ defmodule DepsNix do
     Enum.map(dep.deps, & &1.app)
   end
 
-  defp unpack_phase(name, version) when name in @apps_requiring_eponymous_dir do
-    """
-    runHook preUnpack
-    unpackFile "$src"
-    chmod -R u+w -- hex-source-#{name}-#{version}
-    mv hex-source-#{name}-#{version} #{name}
-    sourceRoot=#{name}
-    runHook postUnpack
-    """
+  defp workarounds(name) when name in @apps_requiring_eponymous_dir do
+    ["eponymousDir"]
   end
 
-  defp unpack_phase(_name, _version) do
+  defp workarounds(_name) do
+    []
   end
 
   defp nix_builder(builders) do

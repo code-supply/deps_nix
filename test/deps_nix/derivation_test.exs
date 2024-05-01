@@ -21,23 +21,24 @@ defmodule DepsNix.DerivationTest do
              bandit =
                let
                  version = "1.4.2";
-               in
-               buildMix {
-                 inherit version;
-                 name = "bandit";
-
-                 src = fetchHex {
+                 pkg = {
                    inherit version;
-                   pkg = "bandit";
-                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-                 };
+                   name = "bandit";
 
-                 beamDeps = [ hpax plug telemetry thousand_island websock ];
-               };
+                   src = fetchHex {
+                     inherit version;
+                     pkg = "bandit";
+                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                   };
+
+                   beamDeps = [ hpax plug telemetry thousand_island websock ];
+                 };
+               in
+               buildMix (pkg);
              """
     end
 
-    test "converts unpack phase" do
+    test "applies workarounds" do
       string_rep =
         %Derivation{
           builder: "buildMix",
@@ -49,10 +50,7 @@ defmodule DepsNix.DerivationTest do
             sha256: "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f"
           },
           beam_deps: [],
-          unpack_phase: """
-          echo "hi!"
-          how're you?
-          """
+          workarounds: ~w(someWorkaround someOtherWorkaround)
         }
         |> to_string()
 
@@ -60,22 +58,18 @@ defmodule DepsNix.DerivationTest do
              bandit =
                let
                  version = "1.4.2";
-               in
-               buildMix {
-                 inherit version;
-                 name = "bandit";
-
-                 src = fetchHex {
+                 pkg = {
                    inherit version;
-                   pkg = "bandit";
-                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-                 };
+                   name = "bandit";
 
-                 unpackPhase = ''
-                   echo "hi!"
-                   how're you?
-                 '';
-               };
+                   src = fetchHex {
+                     inherit version;
+                     pkg = "bandit";
+                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                   };
+                 };
+               in
+               buildMix (pkg // mergeWorkarounds pkg [ "someWorkaround" "someOtherWorkaround" ]);
              """
     end
 
@@ -95,17 +89,18 @@ defmodule DepsNix.DerivationTest do
              bandit =
                let
                  version = "1.4.2";
-               in
-               buildMix {
-                 inherit version;
-                 name = "bandit";
-
-                 src = fetchHex {
+                 pkg = {
                    inherit version;
-                   pkg = "bandit";
-                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                   name = "bandit";
+
+                   src = fetchHex {
+                     inherit version;
+                     pkg = "bandit";
+                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                   };
                  };
-               };
+               in
+               buildMix (pkg);
              """
     end
   end

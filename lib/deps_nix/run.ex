@@ -84,6 +84,22 @@ defmodule DepsNix.Run do
         buildMix = lib.makeOverridable beamPackages.buildMix;
         buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
 
+        workarounds = {
+          eponymousDir = { name, version, ... }: {
+            unpackPhase = ''
+              runHook preUnpack
+              unpackFile "$src"
+              chmod -R u+w -- hex-source-${name}-${version}
+              mv hex-source-${name}-${version} ${name}
+              sourceRoot=${name}
+              runHook postUnpack
+            '';
+          };
+        };
+
+        mergeWorkarounds = pkg: ws:
+          builtins.foldl' (acc: w: acc // (workarounds.${w} pkg)) { } ws;
+
         self = packages // (overrides self packages);
 
         packages = with beamPackages; with self; {#{pkgs}};

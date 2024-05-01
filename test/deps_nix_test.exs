@@ -22,17 +22,7 @@ defmodule DepsNixTest do
     check all name <- one_of([:grpcbox, :png]),
               version <- version(),
               dep <- dep(name: name, version: version) do
-      expected_unpack_phase = """
-      runHook preUnpack
-      unpackFile "$src"
-      chmod -R u+w -- hex-source-#{name}-#{version}
-      mv hex-source-#{name}-#{version} #{name}
-      sourceRoot=#{name}
-      runHook postUnpack
-      """
-
-      assert %Derivation{unpack_phase: ^expected_unpack_phase} =
-               DepsNix.transform(dep)
+      assert "eponymousDir" in DepsNix.transform(dep).workarounds
     end
   end
 
