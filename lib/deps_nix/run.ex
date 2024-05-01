@@ -84,29 +84,23 @@ defmodule DepsNix.Run do
         buildMix = lib.makeOverridable beamPackages.buildMix;
         buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
 
-        workarounds = {
-          eponymousDir = { name, version, ... }: {
-            unpackPhase = ''
-              runHook preUnpack
-              unpackFile "$src"
-              chmod -R u+w -- hex-source-${name}-${version}
-              mv hex-source-${name}-${version} ${name}
-              sourceRoot=${name}
-              runHook postUnpack
-            '';
-          };
-        };
+        defaultOverrides = (#{default_overrides()});
 
-        mergeWorkarounds = pkg: ws:
-          builtins.foldl' (acc: w: acc // (workarounds.${w} pkg)) { } ws;
-
-        self = packages // (overrides self packages);
+        self = packages // (defaultOverrides self packages) // (overrides self packages);
 
         packages = with beamPackages; with self; {#{pkgs}};
       in
       self
       """
     }
+  end
+
+  defp default_overrides do
+    "#{:code.priv_dir(:deps_nix)}/default-overrides.nix"
+    |> File.read!()
+    |> String.trim_trailing()
+    |> Util.indent(from: 1)
+    |> Util.indent(from: 1)
   end
 
   defp indent_deps("") do

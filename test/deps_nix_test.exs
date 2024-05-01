@@ -18,14 +18,6 @@ defmodule DepsNixTest do
     end
   end
 
-  property "sets unpackPhase for packages needing dir name to match package name" do
-    check all name <- one_of([:grpcbox, :png]),
-              version <- version(),
-              dep <- dep(name: name, version: version) do
-      assert "eponymousDir" in DepsNix.transform(dep).workarounds
-    end
-  end
-
   property "prefers mix over every other builder" do
     check all other_builders <- list_of(one_of([:make, :rebar3])),
               dep <- dep(builders: [:mix] ++ other_builders) do

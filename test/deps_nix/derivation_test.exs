@@ -21,55 +21,19 @@ defmodule DepsNix.DerivationTest do
              bandit =
                let
                  version = "1.4.2";
-                 pkg = {
-                   inherit version;
-                   name = "bandit";
-
-                   src = fetchHex {
-                     inherit version;
-                     pkg = "bandit";
-                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-                   };
-
-                   beamDeps = [ hpax plug telemetry thousand_island websock ];
-                 };
                in
-               buildMix (pkg);
-             """
-    end
+               buildMix {
+                 inherit version;
+                 name = "bandit";
 
-    test "applies workarounds" do
-      string_rep =
-        %Derivation{
-          builder: "buildMix",
-          name: :bandit,
-          version: "1.4.2",
-          src: %FetchHex{
-            pkg: :bandit,
-            version: "1.4.2",
-            sha256: "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f"
-          },
-          beam_deps: [],
-          workarounds: ~w(someWorkaround someOtherWorkaround)
-        }
-        |> to_string()
-
-      assert string_rep == """
-             bandit =
-               let
-                 version = "1.4.2";
-                 pkg = {
+                 src = fetchHex {
                    inherit version;
-                   name = "bandit";
-
-                   src = fetchHex {
-                     inherit version;
-                     pkg = "bandit";
-                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-                   };
+                   pkg = "bandit";
+                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
                  };
-               in
-               buildMix (pkg // mergeWorkarounds pkg [ "someWorkaround" "someOtherWorkaround" ]);
+
+                 beamDeps = [ hpax plug telemetry thousand_island websock ];
+               };
              """
     end
 
@@ -89,18 +53,17 @@ defmodule DepsNix.DerivationTest do
              bandit =
                let
                  version = "1.4.2";
-                 pkg = {
-                   inherit version;
-                   name = "bandit";
-
-                   src = fetchHex {
-                     inherit version;
-                     pkg = "bandit";
-                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-                   };
-                 };
                in
-               buildMix (pkg);
+               buildMix {
+                 inherit version;
+                 name = "bandit";
+
+                 src = fetchHex {
+                   inherit version;
+                   pkg = "bandit";
+                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                 };
+               };
              """
     end
   end

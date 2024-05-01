@@ -3,8 +3,6 @@ defmodule DepsNix do
   alias DepsNix.FetchGit
   alias DepsNix.FetchHex
 
-  @apps_requiring_eponymous_dir [:grpcbox, :png]
-
   @spec transform(Mix.Dep.t()) :: Derivation.t()
   def transform(%Mix.Dep{scm: Mix.SCM.Git} = dep) do
     {:git, url, rev, _} = dep.opts[:lock]
@@ -24,21 +22,12 @@ defmodule DepsNix do
       version: version,
       builder: builder,
       src: src,
-      beam_deps: beam_deps(dep),
-      workarounds: workarounds(dep.app)
+      beam_deps: beam_deps(dep)
     }
   end
 
   defp beam_deps(dep) do
     Enum.map(dep.deps, & &1.app)
-  end
-
-  defp workarounds(name) when name in @apps_requiring_eponymous_dir do
-    ["eponymousDir"]
-  end
-
-  defp workarounds(_name) do
-    []
   end
 
   defp nix_builder(builders) do

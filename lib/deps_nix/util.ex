@@ -7,16 +7,17 @@ defmodule DepsNix.Util do
   def indent(str) do
     ("  " <> str)
     |> String.replace(~r/\n(.+)/, "\n  \\1")
+    |> String.replace(~r/^ +$/, "")
   end
 
   def indent(str, from: start_line) do
     lines = String.split(str, "\n")
-    no_indent = Enum.take(lines, start_line)
-    indent = Enum.drop(lines, start_line)
+    not_indented = Enum.take(lines, start_line)
+    indented = Enum.drop(lines, start_line)
 
-    no_indent_result = no_indent |> Enum.join("\n")
-    indent_result = indent |> Enum.join("\n") |> indent()
+    not_indented_result = not_indented |> Enum.join("\n")
+    indent_result = indented |> Enum.map_join("\n", &indent/1)
 
-    [no_indent_result, indent_result] |> Enum.join("\n")
+    [not_indented_result, indent_result] |> Enum.join("\n")
   end
 end

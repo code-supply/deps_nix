@@ -1,8 +1,10 @@
 defmodule UtilTest do
   use ExUnit.Case, async: true
 
+  alias DepsNix.Util
+
   test "can indent a string" do
-    assert DepsNix.Util.indent("""
+    assert Util.indent("""
            hi
            there
 
@@ -16,11 +18,11 @@ defmodule UtilTest do
   end
 
   test "attempting to indent nil results in an empty string" do
-    assert DepsNix.Util.indent(nil) == ""
+    assert Util.indent(nil) == ""
   end
 
   test "can indent from a given line" do
-    assert DepsNix.Util.indent(
+    assert Util.indent(
              """
              hi
              there
@@ -39,12 +41,14 @@ defmodule UtilTest do
              """
              hi
              there
+
              you
              """,
              from: 2
            ) == """
            hi
            there
+
              you
            """
   end
