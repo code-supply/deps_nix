@@ -8,16 +8,11 @@ let
 
     let
       apps = {
-        ex_cldr_dates_times = [ "devEnv" ];
         grpcbox = [ "eponymousDir" ];
         png = [ "eponymousDir" ];
       };
 
       workarounds = {
-        devEnv = _: {
-          mixEnv = "dev";
-        };
-
         eponymousDir = { name, ... }: {
           unpackPhase = ''
             runHook preUnpack
@@ -249,7 +244,7 @@ let
 
     ex_cldr_dates_times =
       let
-        version = "2.17.0";
+        version = "2.17.1";
       in
       buildMix {
         inherit version;
@@ -258,7 +253,7 @@ let
         src = fetchHex {
           inherit version;
           pkg = "ex_cldr_dates_times";
-          sha256 = "8377501cc6245ad235ee765bcab455e9e8c3f53cc5d775c094bf2cebb641e7ed";
+          sha256 = "6819cd84aaa0a2142ee660cbfb8aae2af95b8acb30492b0607ad723904b07e1e";
         };
 
         beamDeps = [ ex_cldr_calendars ex_cldr_numbers jason ];

@@ -2,16 +2,11 @@ final: prev:
 
 let
   apps = {
-    ex_cldr_dates_times = [ "devEnv" ];
     grpcbox = [ "eponymousDir" ];
     png = [ "eponymousDir" ];
   };
 
   workarounds = {
-    devEnv = _: {
-      mixEnv = "dev";
-    };
-
     eponymousDir = { name, ... }: {
       unpackPhase = ''
         runHook preUnpack
