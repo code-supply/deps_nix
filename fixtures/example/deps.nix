@@ -8,23 +8,12 @@ let
 
     let
       apps = {
-        ex_cldr_calendars = [ "cldrData" ];
-        ex_cldr_currencies = [ "cldrData" ];
-        ex_cldr_dates_times = [ "cldrData" "devEnv" ];
-        ex_cldr_numbers = [ "cldrData" ];
+        ex_cldr_dates_times = [ "devEnv" ];
         grpcbox = [ "eponymousDir" ];
         png = [ "eponymousDir" ];
       };
 
       workarounds = {
-        cldrData = { name, ... }: {
-          preBuild = ''
-            data_dir="$(mix eval --no-compile --no-deps-check "Cldr.Config.cldr_data_dir() |> IO.puts")"
-            mkdir -p "$(dirname "$data_dir")"
-            ln -sfv ${prev.ex_cldr}/src/priv/cldr "$(dirname "$data_dir")"
-          '';
-        };
-
         devEnv = _: {
           mixEnv = "dev";
         };
@@ -209,7 +198,7 @@ let
 
     ex_cldr =
       let
-        version = "2.38.0";
+        version = "2.38.1";
       in
       buildMix {
         inherit version;
@@ -218,7 +207,7 @@ let
         src = fetchHex {
           inherit version;
           pkg = "ex_cldr";
-          sha256 = "8758000c97bdf4b2583c3fedd7cfa35896567a7f8351248b2faa33ba73841cc7";
+          sha256 = "1e083be8d5f7e5d2cc993967c5d99864bacd3456b5f74d4a50985e102ad9c449";
         };
 
         beamDeps = [ cldr_utils decimal jason ];

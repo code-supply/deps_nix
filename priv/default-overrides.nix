@@ -2,23 +2,12 @@ final: prev:
 
 let
   apps = {
-    ex_cldr_calendars = [ "cldrData" ];
-    ex_cldr_currencies = [ "cldrData" ];
-    ex_cldr_dates_times = [ "cldrData" "devEnv" ];
-    ex_cldr_numbers = [ "cldrData" ];
+    ex_cldr_dates_times = [ "devEnv" ];
     grpcbox = [ "eponymousDir" ];
     png = [ "eponymousDir" ];
   };
 
   workarounds = {
-    cldrData = { name, ... }: {
-      preBuild = ''
-        data_dir="$(mix eval --no-compile --no-deps-check "Cldr.Config.cldr_data_dir() |> IO.puts")"
-        mkdir -p "$(dirname "$data_dir")"
-        ln -sfv ${prev.ex_cldr}/src/priv/cldr "$(dirname "$data_dir")"
-      '';
-    };
-
     devEnv = _: {
       mixEnv = "dev";
     };
