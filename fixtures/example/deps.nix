@@ -7,23 +7,9 @@ let
   defaultOverrides = (final: prev:
 
     let
-      apps = {
-        grpcbox = [ "eponymousDir" ];
-        png = [ "eponymousDir" ];
-      };
+      apps = { };
 
-      workarounds = {
-        eponymousDir = { name, ... }: {
-          unpackPhase = ''
-            runHook preUnpack
-            unpackFile "$src"
-            chmod -R u+w -- hex-source-${name}
-            mv hex-source-${name} ${name}
-            sourceRoot=${name}
-            runHook postUnpack
-          '';
-        };
-      };
+      workarounds = { };
 
       applyOverrides = appName: drv:
         let
