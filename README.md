@@ -7,6 +7,16 @@ While mix2nix is a function of a `mix.lock`, this project instead uses Mix's
 internals to allow you to choose packages from certain environments. It also
 supports git dependencies.
 
+## Why?
+
+You want this if you plan to release your Elixir project using nixpkgs' [mixRelease](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/beam-modules/mix-release.nix), or have other uses for wrapping each of your Mix dependencies in derivations.
+
+Using separate Nix derivations for each dependency:
+
+- Avoids downloading and compiling all of your dependencies for each release, which is what happens when you use a Fixed-Output Derivation (`mixFodDeps` in `mixRelease`).
+- Lets you cache compiled dependencies and reuse them when they don't change, making your release faster. This is especially important when your dependencies take a while to compile.
+- Gives you loads of geek points.
+
 ## Installation
 
 ```elixir
