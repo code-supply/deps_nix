@@ -20,7 +20,6 @@ mkShell {
       elixir_1_16
       (elixir_ls.override { elixir = elixir_1_16; })
       gh
-      mix2nix # for comparison
       release
     ];
 }
