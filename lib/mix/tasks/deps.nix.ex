@@ -51,8 +51,8 @@ defmodule Mix.Tasks.Deps.Nix do
     Mix.Project.get!()
 
     {path, output} =
-      DepsNix.Run.call(
-        DepsNix.Run.parse_args(args),
+      DepsNix.run(
+        DepsNix.parse_args(args),
         &Mix.Dep.Converger.converge/1
       )
 
