@@ -20,7 +20,7 @@ defmodule DepsNix.Run do
     end)
     |> Enum.sort_by(& &1.app)
     |> Enum.uniq()
-    |> Enum.map(&DepsNix.transform/1)
+    |> Enum.map(&DepsNix.Derivation.from/1)
     |> Enum.join("\n")
     |> indent_deps()
     |> wrap(opts.output)

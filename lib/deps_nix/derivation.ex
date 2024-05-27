@@ -1,4 +1,6 @@
 defmodule DepsNix.Derivation do
+  alias DepsNix.FetchGit
+  alias DepsNix.FetchHex
   alias DepsNix.Util
 
   @type t :: %__MODULE__{
@@ -11,6 +13,36 @@ defmodule DepsNix.Derivation do
 
   @enforce_keys [:builder, :name, :version, :src, :beam_deps]
   defstruct [:builder, :name, :version, :src, :beam_deps]
+
+  def new(dep, version, src, builder) do
+    %__MODULE__{
+      name: dep.app,
+      version: version,
+      builder: builder,
+      src: src,
+      beam_deps: Enum.map(dep.deps, & &1.app)
+    }
+  end
+
+  @spec from(Mix.Dep.t()) :: t()
+  def from(%Mix.Dep{scm: Mix.SCM.Git} = dep) do
+    {:git, url, rev, _} = dep.opts[:lock]
+    fetcher = %FetchGit{url: url, rev: rev}
+    new(dep, rev, fetcher, "buildMix")
+  end
+
+  def from(%Mix.Dep{} = dep) do
+    {:hex, name, version, _hash, beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
+    fetcher = %FetchHex{pkg: name, version: version, sha256: sha256}
+    new(dep, version, fetcher, nix_builder(beam_builders))
+  end
+
+  defp nix_builder(builders) do
+    cond do
+      Enum.member?(builders, :mix) -> "buildMix"
+      Enum.member?(builders, :rebar3) -> "buildRebar3"
+    end
+  end
 
   defimpl String.Chars do
     def to_string(drv) do
