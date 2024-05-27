@@ -1,5 +1,5 @@
 defmodule Mix.Tasks.Deps.NixTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case, async: true
 
   @tag timeout: 120_000
   test "produces a formatted Nix function for the fixture app's dependencies" do
