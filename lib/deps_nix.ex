@@ -18,6 +18,7 @@ defmodule DepsNix do
       all_packages_for_env = converger.(converger_opts)
       Packages.filter(all_packages_for_env, permitted_names)
     end)
+    |> Enum.reject(&(&1.scm == Mix.SCM.Path))
     |> Enum.sort_by(& &1.app)
     |> Enum.uniq()
     |> Enum.map(&DepsNix.Derivation.from/1)

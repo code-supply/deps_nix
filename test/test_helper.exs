@@ -82,6 +82,9 @@ defmodule TestHelpers do
               version,
               []
             }
+
+          Mix.SCM.Path ->
+            nil
         end
 
       %Mix.Dep{

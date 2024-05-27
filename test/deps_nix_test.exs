@@ -45,6 +45,20 @@ defmodule DepsNixTest do
     assert output(%DepsNix.Options{}, &stub_converger/1) =~ "with self; { };"
   end
 
+  test "doesn't create derivations for :path dependencies" do
+    dep = dep(name: :a_path_dep, scm: Mix.SCM.Path) |> pick()
+
+    converger = fn
+      [env: :prod] ->
+        [dep]
+    end
+
+    nix = output(%DepsNix.Options{envs: %{"prod" => :all}}, converger)
+
+    refute Regex.scan(~r(#{dep.app}), nix) |> length() == 1,
+           "Shouldn't be including :path dependencies, found #{dep.app}."
+  end
+
   test "can add packages and their dependency trees to a base environment" do
     sub_sub_dep = dep(name: :sub_sub_dep_thing) |> pick()
     sub_dep = dep(name: :sub_dep_thing, sub_deps: [sub_sub_dep]) |> pick()
