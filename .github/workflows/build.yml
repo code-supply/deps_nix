@@ -9,8 +9,8 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@v10
       - uses: DeterminateSystems/magic-nix-cache-action@v4
       - name: Get dependencies
-        run: nix develop --command -- mix deps.get
+        run: nix develop .#ci --command -- mix deps.get
       - name: Run tests
-        run: nix develop --command -- mix test
+        run: nix develop .#ci --command -- mix test
       - name: Check fixture derivations
         run: nix flake check

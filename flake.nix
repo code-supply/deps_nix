@@ -18,7 +18,8 @@
         (pkgs.callPackages ./fixtures/example/deps.nix { }));
 
       devShells = forAllSystems ({ pkgs, ... }: {
-        default = pkgs.callPackage ./shell.nix { };
+        default = pkgs.callPackage ./shells/local.nix { };
+        ci = pkgs.callPackage ./shells/ci.nix { };
       });
 
       checks = forAllSystems ({ pkgs, ... }: {
