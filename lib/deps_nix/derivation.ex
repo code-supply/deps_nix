@@ -7,7 +7,7 @@ defmodule DepsNix.Derivation do
           builder: String.t(),
           name: atom(),
           version: String.t(),
-          src: DepsNix.FetchHex.t(),
+          src: DepsNix.FetchGit.t() | DepsNix.FetchHex.t(),
           beam_deps: list(atom())
         }
 
