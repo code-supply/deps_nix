@@ -35,7 +35,7 @@ defmodule DepsNix.MixProject do
     [
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:stream_data, "~> 0.6.0", only: [:dev, :test]}
+      {:stream_data, "~> 1.1", only: [:dev, :test]}
     ]
   end
 
