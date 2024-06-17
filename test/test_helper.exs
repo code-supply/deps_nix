@@ -54,6 +54,7 @@ defmodule TestHelpers do
     version = Keyword.get(opts, :version)
     sub_deps = Keyword.get(opts, :sub_deps, [])
     scm = Keyword.get(opts, :scm)
+    dep_opts = Keyword.get(opts, :dep_opts, [])
 
     gen all name <- if(name, do: constant(name), else: atom(:alphanumeric)),
             version <- if(version, do: constant(version), else: version()),
@@ -91,10 +92,12 @@ defmodule TestHelpers do
         app: name,
         scm: scm,
         requirement: version,
-        opts: [
-          lock: lock,
-          env: :prod
-        ],
+        opts:
+          [
+            lock: lock,
+            env: :prod
+          ]
+          |> Keyword.merge(dep_opts),
         deps: sub_deps
       }
     end

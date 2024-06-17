@@ -45,6 +45,16 @@ defmodule DepsNixTest do
     assert output(%DepsNix.Options{}, &stub_converger/1) =~ "with self; { };"
   end
 
+  property "doesn't create derivations marked both app: false and compile: false" do
+    check all dep <- dep(name: :not_a_mix_dep, dep_opts: [app: false, compile: false]) do
+      converger = fn [env: :prod] -> [dep] end
+      nix = output(%DepsNix.Options{envs: %{"prod" => :all}}, converger)
+
+      refute Regex.scan(~r(not_a_mix_dep), nix) |> length() >= 1,
+             "Shouldn't be including app: false, compile: false dependencies, found #{dep.app}."
+    end
+  end
+
   test "doesn't create derivations for :path dependencies" do
     dep = dep(name: :a_path_dep, scm: Mix.SCM.Path) |> pick()
 
@@ -55,7 +65,7 @@ defmodule DepsNixTest do
 
     nix = output(%DepsNix.Options{envs: %{"prod" => :all}}, converger)
 
-    refute Regex.scan(~r(#{dep.app}), nix) |> length() == 1,
+    refute Regex.scan(~r(a_path_dep), nix) |> length() >= 1,
            "Shouldn't be including :path dependencies, found #{dep.app}."
   end
 

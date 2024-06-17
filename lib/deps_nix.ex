@@ -18,7 +18,7 @@ defmodule DepsNix do
       all_packages_for_env = converger.(converger_opts)
       Packages.filter(all_packages_for_env, permitted_names)
     end)
-    |> Enum.reject(&(&1.scm == Mix.SCM.Path))
+    |> Enum.reject(&unwanted/1)
     |> Enum.sort_by(& &1.app)
     |> Enum.uniq()
     |> Enum.map(&DepsNix.Derivation.from/1)
@@ -63,6 +63,13 @@ defmodule DepsNix do
       env = String.to_existing_atom(strenv)
       {[env: env], packages}
     end
+  end
+
+  defp unwanted(dep) do
+    dep.scm == Mix.SCM.Path or
+      Enum.all?([:app, :compile], fn opt ->
+        Keyword.fetch(dep.opts, opt) == {:ok, false}
+      end)
   end
 
   defp add_output(options, parsed_args) do

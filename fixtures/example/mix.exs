@@ -27,6 +27,13 @@ defmodule Example.MixProject do
       {:ex_cldr, "~> 2.38"},
       {:ex_cldr_dates_times, "~> 2.17"},
       {:ex_cldr_numbers, "~> 2.33"},
+      {:heroicons,
+       github: "tailwindlabs/heroicons",
+       tag: "v2.1.1",
+       sparse: "optimized",
+       app: false,
+       compile: false,
+       depth: 1},
       {:jason, "~> 1.4.1"},
       {:opentelemetry_exporter, "~> 1.7.0"},
       {:png, "~> 0.2.1"}
