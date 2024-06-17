@@ -6,7 +6,7 @@ mkShell {
   packages =
     [
       beamPackages.hex
-      elixir_1_17
+      elixir
       nixpkgs-fmt
     ];
 }
