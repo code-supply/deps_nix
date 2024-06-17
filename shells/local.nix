@@ -5,7 +5,6 @@ with pkgs;
 mkShell {
   packages =
     let
-      elixir = elixir_1_17;
       release = writeShellApplication {
         name = "release";
         runtimeInputs = [ elixir gh ];
@@ -20,7 +19,7 @@ mkShell {
     [
       beamPackages.hex
       elixir
-      (elixir_ls.override { inherit elixir; })
+      elixir_ls
       gh
       nixpkgs-fmt
       release
