@@ -13,6 +13,7 @@ defmodule DepsNix.FetchGit do
       builtins.fetchGit {
         url = "#{g.url}";
         rev = "#{g.rev}";
+        allRefs = true;
       };\
       """
     end
