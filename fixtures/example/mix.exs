@@ -27,6 +27,8 @@ defmodule Example.MixProject do
       {:ex_cldr, "~> 2.38"},
       {:ex_cldr_dates_times, "~> 2.17"},
       {:ex_cldr_numbers, "~> 2.33"},
+      {:explorer, "~> 0.9.0"},
+      {:rustler, ">= 0.0.0", optional: true},
       {:heroicons,
        github: "tailwindlabs/heroicons",
        tag: "v2.1.1",

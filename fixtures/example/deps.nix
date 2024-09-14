@@ -1,4 +1,4 @@
-{ lib, beamPackages, overrides ? (x: y: { }) }:
+{ pkgs, lib, beamPackages, overrides ? (x: y: { }) }:
 
 let
   buildMix = lib.makeOverridable beamPackages.buildMix;
@@ -7,9 +7,60 @@ let
   defaultOverrides = (final: prev:
 
     let
-      apps = { };
+      apps = {
+        explorer = [ "rustlerPrecompiled" ];
+      };
 
-      workarounds = { };
+      workarounds = {
+        rustlerPrecompiled = old:
+          let
+            extendedPkgs = pkgs.extend fenixOverlay;
+            fenixOverlay = import
+              "${fetchTarball {
+                url = "https://github.com/nix-community/fenix/archive/43efa7a3a97f290441bd75b18defcd4f7b8df220.tar.gz";
+                sha256 = "sha256:1b9v45cafixpbj6iqjw3wr0yfpcrh3p11am7v0cjpjq5n8bhs8v3";
+              }}/overlay.nix";
+            nativeDir = "${old.src}/native/${old.packageName}";
+            native = (extendedPkgs.makeRustPlatform {
+              inherit (extendedPkgs.fenix.fromToolchainName {
+                name = (extendedPkgs.lib.importTOML "${nativeDir}/rust-toolchain.toml").toolchain.channel;
+                sha256 = "sha256-5icy5hSaQy6/fUim9L2vz2GeZNC3fX1N5T2MjnkTplc=";
+              }) cargo rustc;
+            }).buildRustPackage {
+              pname = "${old.packageName}-native";
+              version = old.version;
+              src = nativeDir;
+              cargoLock = {
+                lockFile = "${nativeDir}/Cargo.lock";
+              };
+              nativeBuildInputs = [ extendedPkgs.cmake ];
+              doCheck = false;
+            };
+            elixirConfig = extendedPkgs.writeTextDir "config/config.exs"
+              ''
+                import Config
+
+                config :explorer, Explorer.PolarsBackend.Native,
+                  skip_compilation?: true
+              '';
+          in
+          {
+            nativeBuildInputs = [ extendedPkgs.cargo ];
+
+            appConfigPath = "${elixirConfig}/config";
+
+            env.RUSTLER_PRECOMPILED_FORCE_BUILD_ALL = "true";
+            env.RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH = "unused-but-required";
+
+            preConfigure = ''
+              mkdir -p priv/native
+              for lib in ${native}/lib/*
+              do
+                ln -s "$lib" "priv/native/$(basename "$lib")"
+              done
+            '';
+          };
+      };
 
       applyOverrides = appName: drv:
         let
@@ -46,6 +97,21 @@ let
         };
       };
 
+    aws_signature =
+      let
+        version = "0.3.2";
+      in
+      buildRebar3 {
+        inherit version;
+        name = "aws_signature";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "aws_signature";
+          sha256 = "b0daf61feb4250a8ab0adea60db3e336af732ff71dd3fb22e45ae3dcbd071e44";
+        };
+      };
+
     bandit =
       let
         version = "4f15f029e7aa17f8e7f98d55b0e94c684dee0971";
@@ -61,6 +127,21 @@ let
         };
 
         beamDeps = [ thousand_island plug websock hpax telemetry ];
+      };
+
+    castore =
+      let
+        version = "1.0.8";
+      in
+      buildMix {
+        inherit version;
+        name = "castore";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "castore";
+          sha256 = "0b2b66d2ee742cb1d9cb8c8be3b43c3a70ee8651f37b75a8b982e036752983f1";
+        };
       };
 
     chatterbox =
@@ -94,7 +175,7 @@ let
           sha256 = "9041660356ffa1129e0d87d110e188f5da0e0bba94fb915e11275e04ace066e1";
         };
 
-        beamDeps = [ decimal ];
+        beamDeps = [ castore decimal ];
       };
 
     ctx =
@@ -263,6 +344,40 @@ let
         beamDeps = [ decimal digital_token ex_cldr ex_cldr_currencies jason ];
       };
 
+    explorer =
+      let
+        version = "0.9.2";
+      in
+      buildMix {
+        inherit version;
+        name = "explorer";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "explorer";
+          sha256 = "63057e318d613c1819bd8bee2d8ed4f7061c3136edc6832ad18243d28e6344eb";
+        };
+
+        beamDeps = [ aws_signature castore fss rustler rustler_precompiled table table_rex ];
+      };
+
+    finch =
+      let
+        version = "0.18.0";
+      in
+      buildMix {
+        inherit version;
+        name = "finch";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "finch";
+          sha256 = "69f5045b042e531e53edc2574f15e25e735b522c37e2ddb766e15b979e03aa65";
+        };
+
+        beamDeps = [ castore mime mint nimble_options nimble_pool telemetry ];
+      };
+
     fsm =
       let
         version = "0.3.1";
@@ -275,6 +390,21 @@ let
           inherit version;
           pkg = "fsm";
           sha256 = "fbf0d53f89e9082b326b0b5828b94b4c549ff9d1452bbfd00b4d1ac082208e96";
+        };
+      };
+
+    fss =
+      let
+        version = "0.1.1";
+      in
+      buildMix {
+        inherit version;
+        name = "fss";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "fss";
+          sha256 = "78ad5955c7919c3764065b21144913df7515d52e228c09427a004afe9c1a16b0";
         };
       };
 
@@ -384,6 +514,53 @@ let
           inherit version;
           pkg = "mime";
           sha256 = "da0d64a365c45bc9935cc5c8a7fc5e49a0e0f9932a761c55d6c52b142780a05c";
+        };
+      };
+
+    mint =
+      let
+        version = "1.6.2";
+      in
+      buildMix {
+        inherit version;
+        name = "mint";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "mint";
+          sha256 = "5ee441dffc1892f1ae59127f74afe8fd82fda6587794278d924e4d90ea3d63f9";
+        };
+
+        beamDeps = [ castore hpax ];
+      };
+
+    nimble_options =
+      let
+        version = "1.1.1";
+      in
+      buildMix {
+        inherit version;
+        name = "nimble_options";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "nimble_options";
+          sha256 = "821b2470ca9442c4b6984882fe9bb0389371b8ddec4d45a9504f00a66f650b44";
+        };
+      };
+
+    nimble_pool =
+      let
+        version = "1.1.0";
+      in
+      buildMix {
+        inherit version;
+        name = "nimble_pool";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "nimble_pool";
+          sha256 = "af2e4e6b34197db81f7aad230c1118eac993acc0dae6bc83bac0126d4ae0813a";
         };
       };
 
@@ -514,7 +691,58 @@ let
           sha256 = "50b8b11afbb2c4095a3ba675b4f055c416d0f3d7de6633a595fc131a828a67eb";
         };
 
-        beamDeps = [ db_connection decimal jason ];
+        beamDeps = [ db_connection decimal jason table ];
+      };
+
+    req =
+      let
+        version = "0.5.1";
+      in
+      buildMix {
+        inherit version;
+        name = "req";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "req";
+          sha256 = "7ea96a1a95388eb0fefa92d89466cdfedba24032794e5c1147d78ec90db7edca";
+        };
+
+        beamDeps = [ finch jason mime plug ];
+      };
+
+    rustler =
+      let
+        version = "0.34.0";
+      in
+      buildMix {
+        inherit version;
+        name = "rustler";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "rustler";
+          sha256 = "1d0c7449482b459513003230c0e2422b0252245776fe6fd6e41cb2b11bd8e628";
+        };
+
+        beamDeps = [ jason req toml ];
+      };
+
+    rustler_precompiled =
+      let
+        version = "0.8.0";
+      in
+      buildMix {
+        inherit version;
+        name = "rustler_precompiled";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "rustler_precompiled";
+          sha256 = "00b1711d8d828200fe931e23bb0e72c2672a3a0ef76740e3c50433afda1965fb";
+        };
+
+        beamDeps = [ castore rustler ];
       };
 
     ssl_verify_fun =
@@ -529,6 +757,36 @@ let
           inherit version;
           pkg = "ssl_verify_fun";
           sha256 = "fe4c190e8f37401d30167c8c405eda19469f34577987c76dde613e838bbc67f8";
+        };
+      };
+
+    table =
+      let
+        version = "0.1.2";
+      in
+      buildMix {
+        inherit version;
+        name = "table";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "table";
+          sha256 = "7e99bc7efef806315c7e65640724bf165c3061cdc5d854060f74468367065029";
+        };
+      };
+
+    table_rex =
+      let
+        version = "4.0.0";
+      in
+      buildMix {
+        inherit version;
+        name = "table_rex";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "table_rex";
+          sha256 = "c35c4d5612ca49ebb0344ea10387da4d2afe278387d4019e4d8111e815df8f55";
         };
       };
 
@@ -579,6 +837,21 @@ let
         };
 
         beamDeps = [ ssl_verify_fun ];
+      };
+
+    toml =
+      let
+        version = "0.7.0";
+      in
+      buildMix {
+        inherit version;
+        name = "toml";
+
+        src = fetchHex {
+          inherit version;
+          pkg = "toml";
+          sha256 = "0690246a2478c1defd100b0c9b89b4ea280a22be9a7b313a8a058a2408a2fa70";
+        };
       };
 
     websock =

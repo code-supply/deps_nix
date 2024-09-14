@@ -86,7 +86,7 @@ defmodule DepsNix do
     {
       output,
       """
-      { lib, beamPackages, overrides ? (x: y: { }) }:
+      { pkgs, lib, beamPackages, overrides ? (x: y: { }) }:
 
       let
         buildMix = lib.makeOverridable beamPackages.buildMix;
