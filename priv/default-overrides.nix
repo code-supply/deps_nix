@@ -3,7 +3,21 @@ final: prev:
 let
   apps = {
     explorer = [ "rustlerPrecompiled" ];
+    tokenizers = [ "rustlerPrecompiled" ];
   };
+
+  elixirConfig = pkgs.writeTextDir "config/config.exs"
+    ''
+      import Config
+
+      config :explorer, Explorer.PolarsBackend.Native,
+        skip_compilation?: true
+
+      config :tokenizers, Tokenizers.Native,
+        skip_compilation?: true
+    '';
+
+  buildNativeDir = src: "${src}/native/${with builtins; head (attrNames (readDir "${src}/native"))}";
 
   workarounds = {
     rustlerPrecompiled = old:
@@ -14,12 +28,20 @@ let
             url = "https://github.com/nix-community/fenix/archive/43efa7a3a97f290441bd75b18defcd4f7b8df220.tar.gz";
             sha256 = "sha256:1b9v45cafixpbj6iqjw3wr0yfpcrh3p11am7v0cjpjq5n8bhs8v3";
           }}/overlay.nix";
-        nativeDir = "${old.src}/native/${old.packageName}";
+        nativeDir = buildNativeDir old.src;
+        rustToolchainPath = "${nativeDir}/rust-toolchain.toml";
+        fenix =
+          if builtins.pathExists rustToolchainPath
+          then
+            extendedPkgs.fenix.fromToolchainName
+              {
+                name = (extendedPkgs.lib.importTOML rustToolchainPath).toolchain.channel;
+                sha256 = "sha256-5icy5hSaQy6/fUim9L2vz2GeZNC3fX1N5T2MjnkTplc=";
+              }
+          else
+            extendedPkgs.fenix.stable;
         native = (extendedPkgs.makeRustPlatform {
-          inherit (extendedPkgs.fenix.fromToolchainName {
-            name = (extendedPkgs.lib.importTOML "${nativeDir}/rust-toolchain.toml").toolchain.channel;
-            sha256 = "sha256-5icy5hSaQy6/fUim9L2vz2GeZNC3fX1N5T2MjnkTplc=";
-          }) cargo rustc;
+          inherit (fenix) cargo rustc;
         }).buildRustPackage {
           pname = "${old.packageName}-native";
           version = old.version;
@@ -30,13 +52,6 @@ let
           nativeBuildInputs = [ extendedPkgs.cmake ];
           doCheck = false;
         };
-        elixirConfig = extendedPkgs.writeTextDir "config/config.exs"
-          ''
-            import Config
-
-            config :explorer, Explorer.PolarsBackend.Native,
-              skip_compilation?: true
-          '';
       in
       {
         nativeBuildInputs = [ extendedPkgs.cargo ];
