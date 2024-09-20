@@ -49,7 +49,7 @@ let
           cargoLock = {
             lockFile = "${nativeDir}/Cargo.lock";
           };
-          nativeBuildInputs = [ extendedPkgs.cmake ];
+          nativeBuildInputs = [ extendedPkgs.cmake ] ++ extendedPkgs.lib.lists.optional extendedPkgs.stdenv.isDarwin extendedPkgs.darwin.IOKit;
           doCheck = false;
         };
       in
