@@ -8,11 +8,24 @@ let
 
     let
       apps = {
-        explorer = [ "rustlerPrecompiled" ];
-        tokenizers = [ "rustlerPrecompiled" ];
+        explorer = [
+          {
+            name = "rustlerPrecompiled";
+            toolchain = {
+              name = "nightly-2024-07-26";
+              sha256 = "sha256-5icy5hSaQy6/fUim9L2vz2GeZNC3fX1N5T2MjnkTplc=";
+            };
+          }
+        ];
+        tokenizers = [
+          {
+            name = "rustlerPrecompiled";
+          }
+        ];
       };
 
-      elixirConfig = pkgs.writeTextDir "config/config.exs"
+      elixirConfig = pkgs.writeTextDir
+        "config/config.exs"
         ''
           import Config
 
@@ -26,7 +39,7 @@ let
       buildNativeDir = src: "${src}/native/${with builtins; head (attrNames (readDir "${src}/native"))}";
 
       workarounds = {
-        rustlerPrecompiled = old:
+        rustlerPrecompiled = { toolchain ? null, ... }: old:
           let
             extendedPkgs = pkgs.extend fenixOverlay;
             fenixOverlay = import
@@ -35,17 +48,10 @@ let
                 sha256 = "sha256:1b9v45cafixpbj6iqjw3wr0yfpcrh3p11am7v0cjpjq5n8bhs8v3";
               }}/overlay.nix";
             nativeDir = buildNativeDir old.src;
-            rustToolchainPath = "${nativeDir}/rust-toolchain.toml";
             fenix =
-              if builtins.pathExists rustToolchainPath
-              then
-                extendedPkgs.fenix.fromToolchainName
-                  {
-                    name = (extendedPkgs.lib.importTOML rustToolchainPath).toolchain.channel;
-                    sha256 = "sha256-5icy5hSaQy6/fUim9L2vz2GeZNC3fX1N5T2MjnkTplc=";
-                  }
-              else
-                extendedPkgs.fenix.stable;
+              if toolchain == null
+              then extendedPkgs.fenix.stable
+              else extendedPkgs.fenix.fromToolchainName toolchain;
             native = (extendedPkgs.makeRustPlatform {
               inherit (fenix) cargo rustc;
             }).buildRustPackage {
@@ -80,7 +86,7 @@ let
       applyOverrides = appName: drv:
         let
           allOverridesForApp = builtins.foldl'
-            (acc: workaround: acc // workarounds.${workaround} drv)
+            (acc: workaround: acc // (workarounds.${workaround.name} workaround) drv)
             { }
             apps.${appName};
 
@@ -92,7 +98,9 @@ let
           drv;
 
     in
-    builtins.mapAttrs applyOverrides prev);
+    builtins.mapAttrs
+      applyOverrides
+      prev);
 
   self = packages // (defaultOverrides self packages) // (overrides self packages);
 
