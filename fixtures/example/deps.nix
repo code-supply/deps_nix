@@ -44,8 +44,8 @@ let
             extendedPkgs = pkgs.extend fenixOverlay;
             fenixOverlay = import
               "${fetchTarball {
-                url = "https://github.com/nix-community/fenix/archive/43efa7a3a97f290441bd75b18defcd4f7b8df220.tar.gz";
-                sha256 = "sha256:1b9v45cafixpbj6iqjw3wr0yfpcrh3p11am7v0cjpjq5n8bhs8v3";
+                url = "https://github.com/nix-community/fenix/archive/280efe0e9b7b824518091a5aff76065785f81649.tar.gz";
+                sha256 = "sha256:07qi34kbz9hyxp0cjh2r37ix0jc849rd5c9cxw1ad3l4r92f4fcg";
               }}/overlay.nix";
             nativeDir = buildNativeDir old.src;
             fenix =
