@@ -4,30 +4,42 @@ defmodule DepsNixTest do
 
   import TestHelpers
 
+  # swap the order of operands and use matching!!!!!111111
+
   describe "argument parsing" do
     test "defaults to prod env" do
-      assert DepsNix.parse_args(~w()) == %DepsNix.Options{envs: %{"prod" => :all}}
+      assert %DepsNix.Options{envs: %{"prod" => :all}} = DepsNix.parse_args(~w())
     end
 
     test "can pick up a single env" do
-      assert DepsNix.parse_args(~w(--env dev)) == %DepsNix.Options{envs: %{"dev" => :all}}
+      assert %DepsNix.Options{envs: %{"dev" => :all}} = DepsNix.parse_args(~w(--env dev))
     end
 
     test "can choose an output path" do
-      assert DepsNix.parse_args(~w(--output foo/bar/deps.nix)) == %DepsNix.Options{
+      assert %DepsNix.Options{
                output: "foo/bar/deps.nix"
-             }
+             } = DepsNix.parse_args(~w(--output foo/bar/deps.nix))
     end
 
     property "can specify extra packages from a different environment" do
       check all package_names <- list_of(package_name()), max_runs: 10 do
-        assert DepsNix.parse_args(~w(--env prod --env dev=#{Enum.join(package_names, ",")})) ==
-                 %DepsNix.Options{
-                   envs: %{
-                     "prod" => :all,
-                     "dev" => package_names
-                   }
+        assert %DepsNix.Options{
+                 envs: %{
+                   "prod" => :all,
+                   "dev" => ^package_names
                  }
+               } = DepsNix.parse_args(~w(--env prod --env dev=#{Enum.join(package_names, ",")}))
+      end
+    end
+
+    property "can specify extra packages from path dependencies" do
+      check all package_names <- list_of(package_name()), max_runs: 10 do
+        assert %DepsNix.Options{
+                 envs: %{
+                   "prod" => :all
+                 },
+                 path: ^package_names
+               } = DepsNix.parse_args(~w(--env prod --path=#{Enum.join(package_names, ",")}))
       end
     end
 
@@ -55,18 +67,44 @@ defmodule DepsNixTest do
     end
   end
 
-  test "doesn't create derivations for :path dependencies" do
-    dep = dep(name: :a_path_dep, scm: Mix.SCM.Path) |> pick()
+  describe ":path dependencies" do
+    test "are excluded by default" do
+      dep = dep(name: :a_path_dep, scm: Mix.SCM.Path) |> pick()
 
-    converger = fn
-      [env: :prod] ->
-        [dep]
+      converger = fn
+        [env: :prod] ->
+          [dep]
+      end
+
+      nix = output(%DepsNix.Options{envs: %{"prod" => :all}}, converger)
+
+      assert Regex.scan(~r(a_path_dep), nix) |> length() == 0,
+             "Shouldn't be including :path dependencies, found #{dep.app}."
     end
 
-    nix = output(%DepsNix.Options{envs: %{"prod" => :all}}, converger)
+    test "can be included" do
+      dep =
+        dep(
+          name: :a_path_dep,
+          scm: Mix.SCM.Path,
+          dep_opts: [dest: "/home/andrew/workspace/great_project"]
+        )
+        |> pick()
 
-    refute Regex.scan(~r(a_path_dep), nix) |> length() >= 1,
-           "Shouldn't be including :path dependencies, found #{dep.app}."
+      converger = fn
+        [env: :prod] ->
+          [dep]
+      end
+
+      nix =
+        output(
+          %DepsNix.Options{envs: %{"prod" => :all}, path: ["#{dep.app}"], cwd: "some/place"},
+          converger
+        )
+
+      assert Regex.scan(~r(a_path_dep), nix) |> length() >= 1,
+             "Should be including selected :path dependencies."
+    end
   end
 
   test "can add packages and their dependency trees to a base environment" do

@@ -24,14 +24,30 @@ defmodule DepsNix.Derivation do
     }
   end
 
-  @spec from(Mix.Dep.t()) :: t()
-  def from(%Mix.Dep{scm: Mix.SCM.Git} = dep) do
+  @spec from(Mix.Dep.t(), DepsNix.Options.t()) :: t()
+  def from(%Mix.Dep{scm: Mix.SCM.Git} = dep, _opts) do
     {:git, url, rev, _} = dep.opts[:lock]
     fetcher = %FetchGit{url: url, rev: rev}
     new(dep, rev, fetcher, "buildMix")
   end
 
-  def from(%Mix.Dep{} = dep) do
+  def from(%Mix.Dep{scm: Mix.SCM.Path} = dep, opts) do
+    new(
+      dep,
+      get_in(dep.opts, [:app_properties, :vsn]),
+      %DepsNix.Path{
+        path:
+          Elixir.Path.relative_to(
+            dep.opts[:dest],
+            Elixir.Path.join(opts.cwd, Elixir.Path.dirname(opts.output)),
+            force: true
+          )
+      },
+      nix_builder([:mix])
+    )
+  end
+
+  def from(%Mix.Dep{} = dep, _opts) do
     {:hex, name, version, _hash, beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
     fetcher = %FetchHex{pkg: name, version: version, sha256: sha256}
     new(dep, version, fetcher, nix_builder(beam_builders))

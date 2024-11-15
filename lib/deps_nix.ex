@@ -3,8 +3,8 @@ defmodule DepsNix do
   alias DepsNix.Util
 
   defmodule Options do
-    @type t :: %Options{envs: map(), output: String.t()}
-    defstruct envs: %{}, output: "deps.nix"
+    @type t :: %Options{envs: map(), output: String.t(), path: list(), cwd: String.t()}
+    defstruct envs: %{}, output: "deps.nix", path: [], cwd: nil
   end
 
   @type converger :: (Keyword.t() -> list(Mix.Dep.t()))
@@ -16,12 +16,12 @@ defmodule DepsNix do
     |> convert_opts()
     |> Enum.flat_map(fn {converger_opts, permitted_names} ->
       all_packages_for_env = converger.(converger_opts)
-      Packages.filter(all_packages_for_env, permitted_names)
+      Packages.filter(all_packages_for_env, permitted_names, opts.path)
     end)
     |> Enum.reject(&unwanted/1)
     |> Enum.sort_by(& &1.app)
     |> Enum.uniq()
-    |> Enum.map(&DepsNix.Derivation.from/1)
+    |> Enum.map(&DepsNix.Derivation.from(&1, opts))
     |> Enum.join("\n")
     |> indent_deps()
     |> wrap(opts.output)
@@ -30,17 +30,18 @@ defmodule DepsNix do
   @spec parse_args(list()) :: Options.t()
   def parse_args(args) do
     args
-    |> OptionParser.parse(strict: [env: [:string, :keep], output: :string])
+    |> OptionParser.parse(strict: [env: [:string, :keep], output: :string, path: :string])
     |> to_opts()
   end
 
   @spec to_opts({list(), any(), any()}) :: Options.t()
   defp to_opts({[], _, _}) do
-    %Options{envs: %{"prod" => :all}}
+    %Options{cwd: File.cwd!, envs: %{"prod" => :all}}
   end
 
   defp to_opts({opts, _, _}) do
     %Options{
+      cwd: File.cwd!,
       envs:
         for {:env, env} <- opts, into: %{} do
           case String.split(env, "=", parts: 2) do
@@ -53,6 +54,14 @@ defmodule DepsNix do
             [env, packages] ->
               {env, String.split(packages, ",")}
           end
+        end,
+      path:
+        case Keyword.get(opts, :path, "") do
+          "" ->
+            []
+
+          s ->
+            String.split(s, ",")
         end
     }
     |> add_output(opts)
@@ -66,10 +75,9 @@ defmodule DepsNix do
   end
 
   defp unwanted(dep) do
-    dep.scm == Mix.SCM.Path or
-      Enum.all?([:app, :compile], fn opt ->
-        Keyword.fetch(dep.opts, opt) == {:ok, false}
-      end)
+    Enum.all?([:app, :compile], fn opt ->
+      Keyword.fetch(dep.opts, opt) == {:ok, false}
+    end)
   end
 
   defp add_output(options, parsed_args) do

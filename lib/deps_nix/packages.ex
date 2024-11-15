@@ -10,12 +10,13 @@ defmodule DepsNix.Packages do
     end
   end
 
-  def filter(deps, :all) do
+  def filter(deps, :all, path_permitted_names) do
     deps
+    |> reject_paths(path_permitted_names)
   end
 
-  def filter(packages, permitted_names) do
-    permitted = permitted(packages, permitted_names)
+  def filter(packages, permitted_names, path_permitted_names) do
+    permitted = permitted(packages, permitted_names) |> reject_paths(path_permitted_names)
 
     sub_dependency_names =
       Enum.flat_map(permitted, &dependency_names(packages, &1.app))
@@ -26,5 +27,12 @@ defmodule DepsNix.Packages do
 
   defp permitted(packages, permitted_names) do
     Enum.filter(packages, &("#{&1.app}" in permitted_names))
+  end
+
+  defp reject_paths(deps, path_permitted_names) do
+    deps
+    |> Enum.reject(fn dep ->
+      dep.scm == Mix.SCM.Path && to_string(dep.app) not in path_permitted_names
+    end)
   end
 end

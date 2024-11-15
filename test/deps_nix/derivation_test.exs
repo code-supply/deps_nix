@@ -5,8 +5,35 @@ defmodule DepsNix.DerivationTest do
   alias DepsNix.Derivation
   alias DepsNix.FetchGit
   alias DepsNix.FetchHex
+  alias DepsNix.Path
 
   import TestHelpers
+
+  property "translates dependencies specified with path" do
+    check all dep <-
+                dep(
+                  scm: Mix.SCM.Path,
+                  dep_opts: [
+                    dest: "/Users/andrew.bruce/workspace/nrg/pkgs/infrastructure",
+                    path: "../infrastructure",
+                    app_properties: [
+                      vsn: ~c"0.1.2"
+                    ]
+                  ]
+                ) do
+      assert %Derivation{
+               version: ~c"0.1.2",
+               src: %Path{path: "../../infrastructure"}
+             } =
+               Derivation.from(
+                 dep,
+                 %DepsNix.Options{
+                   output: "nix/deps.nix",
+                   cwd: "/Users/andrew.bruce/workspace/nrg/pkgs/workbench"
+                 }
+               )
+    end
+  end
 
   property "translates dependencies specified with git" do
     check all url <- url(),
@@ -14,14 +41,14 @@ defmodule DepsNix.DerivationTest do
               dep <- dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
       assert %Derivation{
                src: %FetchGit{url: ^url, rev: ^rev}
-             } = Derivation.from(dep)
+             } = Derivation.from(dep, %DepsNix.Options{})
     end
   end
 
   property "prefers mix over every other builder" do
     check all other_builders <- list_of(one_of([:make, :rebar3])),
               dep <- dep(builders: [:mix] ++ other_builders) do
-      assert %Derivation{builder: "buildMix"} = Derivation.from(dep)
+      assert %Derivation{builder: "buildMix"} = Derivation.from(dep, %DepsNix.Options{})
     end
   end
 
@@ -32,7 +59,7 @@ defmodule DepsNix.DerivationTest do
       assert %Derivation{
                builder: "buildRebar3",
                name: ^expected_name
-             } = Derivation.from(dep)
+             } = Derivation.from(dep, %DepsNix.Options{})
     end
   end
 
@@ -82,7 +109,7 @@ defmodule DepsNix.DerivationTest do
         system_env: []
       }
 
-    assert Derivation.from(eventstore).beam_deps == [
+    assert Derivation.from(eventstore, %DepsNix.Options{}).beam_deps == [
              :fsm,
              :gen_stage,
              :postgrex
@@ -114,7 +141,7 @@ defmodule DepsNix.DerivationTest do
       manager: :rebar3
     }
 
-    assert Derivation.from(chatterbox) == %Derivation{
+    assert Derivation.from(chatterbox, %DepsNix.Options{}) == %Derivation{
              builder: "buildRebar3",
              name: :chatterbox,
              version: "0.15.1",
@@ -158,7 +185,7 @@ defmodule DepsNix.DerivationTest do
       ]
     }
 
-    assert Derivation.from(bandit) == %Derivation{
+    assert Derivation.from(bandit, %DepsNix.Options{}) == %Derivation{
              builder: "buildMix",
              name: :bandit,
              version: "1.4.2",
@@ -172,6 +199,33 @@ defmodule DepsNix.DerivationTest do
   end
 
   describe "string representation" do
+    test "paths get special treatment" do
+      assert %Derivation{
+               builder: "buildMix",
+               name: :my_project,
+               version: "6.6.6",
+               src: %Path{
+                 path: "../in/ur/repoz"
+               },
+               beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock]
+             }
+             |> to_string() == """
+             my_project =
+               let
+                 version = "6.6.6";
+               in
+               buildMix {
+                 inherit version;
+                 name = "my_project";
+
+                 src = ../in/ur/repoz;
+
+
+                 beamDeps = [ hpax plug telemetry thousand_island websock ];
+               };
+             """
+    end
+
     test "is a Nix expression" do
       assert %Derivation{
                builder: "buildMix",
