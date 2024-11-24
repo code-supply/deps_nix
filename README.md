@@ -5,7 +5,7 @@ A Mix task that converts Mix dependencies to Nix derivations. Inspired by
 
 While mix2nix is a function of a `mix.lock`, this project instead uses Mix's
 internals to allow you to choose packages from certain environments. It also
-supports git dependencies.
+supports git and path dependencies.
 
 ## Why?
 

@@ -17,21 +17,25 @@ defmodule Mix.Tasks.Deps.Nix do
 
   ```
   pkgs.callPackages ./deps.nix {
-    overrides = (final: prev: with pkgs.beamPackages; {
-      some_mix_dep = prev.some_mix_dep.override {
-        mixEnv = "dev";
+    overrides = (
+      final: prev: {
+        some_mix_dep = prev.some_mix_dep.override {
+          mixEnv = "dev";
+        };
       }
-    };
+    );
   }
   ```
 
   ## Example with all options
 
   This command creates derivations for everything in `:prod`, and only `ex_doc`
-  and `credo` in `:dev`. It outputs the Nix expression to `nix/deps.nix`.
+  and `credo` in `:dev`. It will include `:path` dependencies (this option is
+  useful for repos with multiple Mix projects). It outputs the Nix expression
+  to `nix/deps.nix`.
 
   ```
-  mix deps.nix --env prod --env dev=ex_doc,credo --output nix/deps.nix
+  mix deps.nix --include-paths --env prod --env dev=ex_doc,credo --output nix/deps.nix
   ```
 
   ## Git dependencies
