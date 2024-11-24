@@ -23,7 +23,7 @@ mkShell {
       elixir
       elixir_ls
       gh
-      nixpkgs-fmt
+      nixfmt-rfc-style
       release
     ];
 }

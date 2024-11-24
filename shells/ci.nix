@@ -3,10 +3,9 @@
 with pkgs;
 
 mkShell {
-  packages =
-    [
-      beamPackages.hex
-      elixir
-      nixpkgs-fmt
-    ];
+  packages = [
+    beamPackages.hex
+    elixir
+    nixfmt-rfc-style
+  ];
 }
