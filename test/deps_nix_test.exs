@@ -59,7 +59,7 @@ defmodule DepsNixTest do
   end
 
   test "empty deps list formats output correctly" do
-    assert output(%DepsNix.Options{}, &stub_converger/1) =~ "with self; { };"
+    assert output(%DepsNix.Options{}, &stub_converger/1) =~ "with self;\n    {\n \n    };"
   end
 
   property "doesn't create derivations marked both app: false and compile: false" do

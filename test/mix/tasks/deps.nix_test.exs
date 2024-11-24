@@ -16,7 +16,7 @@ defmodule Mix.Tasks.Deps.NixTest do
              )
 
     {diff, diff_status} =
-      System.shell("diff --unified deps.nix <(nixpkgs-fmt < deps.nix)",
+      System.shell("diff --unified deps.nix <(nixfmt < deps.nix)",
         cd: "fixtures/example"
       )
 

@@ -104,17 +104,29 @@ defmodule DepsNix do
     {
       output,
       """
-      { pkgs, lib, beamPackages, overrides ? (x: y: { }) }:
+      {
+        pkgs,
+        lib,
+        beamPackages,
+        overrides ? (x: y: { }),
+      }:
 
       let
         buildMix = lib.makeOverridable beamPackages.buildMix;
         buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
 
-        defaultOverrides = (#{default_overrides()});
+        defaultOverrides = (
+      #{default_overrides()}
+        );
 
         self = packages // (defaultOverrides self packages) // (overrides self packages);
 
-        packages = with beamPackages; with self; {#{pkgs}};
+        packages =
+          with beamPackages;
+          with self;
+          {
+      #{pkgs}
+          };
       in
       self
       """
@@ -125,8 +137,8 @@ defmodule DepsNix do
     "#{:code.priv_dir(:deps_nix)}/default-overrides.nix"
     |> File.read!()
     |> String.trim_trailing()
-    |> Util.indent(from: 1)
-    |> Util.indent(from: 1)
+    |> Util.indent()
+    |> Util.indent()
   end
 
   defp indent_deps("") do
@@ -134,8 +146,9 @@ defmodule DepsNix do
   end
 
   defp indent_deps(s) do
-    ("\n#{s}"
-     |> Util.indent(from: 1)
-     |> Util.indent(from: 1)) <> "  "
+    "\n#{s}"
+    |> Util.indent(from: 1)
+    |> Util.indent(from: 1)
+    |> Util.indent(from: 1)
   end
 end

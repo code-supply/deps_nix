@@ -18,46 +18,55 @@ let
     ];
   };
 
-  elixirConfig = pkgs.writeTextDir
-    "config/config.exs"
-    ''
-      import Config
+  elixirConfig = pkgs.writeTextDir "config/config.exs" ''
+    import Config
 
-      config :explorer, Explorer.PolarsBackend.Native,
-        skip_compilation?: true
+    config :explorer, Explorer.PolarsBackend.Native,
+      skip_compilation?: true
 
-      config :tokenizers, Tokenizers.Native,
-        skip_compilation?: true
-    '';
+    config :tokenizers, Tokenizers.Native,
+      skip_compilation?: true
+  '';
 
   buildNativeDir = src: "${src}/native/${with builtins; head (attrNames (readDir "${src}/native"))}";
 
   workarounds = {
-    rustlerPrecompiled = { toolchain ? null, ... }: old:
+    rustlerPrecompiled =
+      {
+        toolchain ? null,
+        ...
+      }:
+      old:
       let
         extendedPkgs = pkgs.extend fenixOverlay;
-        fenixOverlay = import
-          "${fetchTarball {
+        fenixOverlay = import "${
+          fetchTarball {
             url = "https://github.com/nix-community/fenix/archive/280efe0e9b7b824518091a5aff76065785f81649.tar.gz";
             sha256 = "sha256:07qi34kbz9hyxp0cjh2r37ix0jc849rd5c9cxw1ad3l4r92f4fcg";
-          }}/overlay.nix";
+          }
+        }/overlay.nix";
         nativeDir = buildNativeDir old.src;
         fenix =
-          if toolchain == null
-          then extendedPkgs.fenix.stable
-          else extendedPkgs.fenix.fromToolchainName toolchain;
-        native = (extendedPkgs.makeRustPlatform {
-          inherit (fenix) cargo rustc;
-        }).buildRustPackage {
-          pname = "${old.packageName}-native";
-          version = old.version;
-          src = nativeDir;
-          cargoLock = {
-            lockFile = "${nativeDir}/Cargo.lock";
-          };
-          nativeBuildInputs = [ extendedPkgs.cmake ] ++ extendedPkgs.lib.lists.optional extendedPkgs.stdenv.isDarwin extendedPkgs.darwin.IOKit;
-          doCheck = false;
-        };
+          if toolchain == null then
+            extendedPkgs.fenix.stable
+          else
+            extendedPkgs.fenix.fromToolchainName toolchain;
+        native =
+          (extendedPkgs.makeRustPlatform {
+            inherit (fenix) cargo rustc;
+          }).buildRustPackage
+            {
+              pname = "${old.packageName}-native";
+              version = old.version;
+              src = nativeDir;
+              cargoLock = {
+                lockFile = "${nativeDir}/Cargo.lock";
+              };
+              nativeBuildInputs = [
+                extendedPkgs.cmake
+              ] ++ extendedPkgs.lib.lists.optional extendedPkgs.stdenv.isDarwin extendedPkgs.darwin.IOKit;
+              doCheck = false;
+            };
       in
       {
         nativeBuildInputs = [ extendedPkgs.cargo ];
@@ -77,21 +86,15 @@ let
       };
   };
 
-  applyOverrides = appName: drv:
+  applyOverrides =
+    appName: drv:
     let
-      allOverridesForApp = builtins.foldl'
-        (acc: workaround: acc // (workarounds.${workaround.name} workaround) drv)
-        { }
-        apps.${appName};
+      allOverridesForApp = builtins.foldl' (
+        acc: workaround: acc // (workarounds.${workaround.name} workaround) drv
+      ) { } apps.${appName};
 
     in
-    if builtins.hasAttr appName apps
-    then
-      drv.override allOverridesForApp
-    else
-      drv;
+    if builtins.hasAttr appName apps then drv.override allOverridesForApp else drv;
 
 in
-builtins.mapAttrs
-  applyOverrides
-  prev
+builtins.mapAttrs applyOverrides prev

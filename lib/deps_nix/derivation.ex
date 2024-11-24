@@ -91,7 +91,9 @@ defmodule DepsNix.Derivation do
       """
 
 
-      beamDeps = [ #{Enum.join(deps, " ")} ];\
+      beamDeps = [
+        #{Enum.join(deps, "\n  ")}
+      ];\
       """
       |> Util.indent(from: 2)
       |> Util.indent(from: 2)

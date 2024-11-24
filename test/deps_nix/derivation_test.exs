@@ -221,7 +221,13 @@ defmodule DepsNix.DerivationTest do
                  src = ../in/ur/repoz;
 
 
-                 beamDeps = [ hpax plug telemetry thousand_island websock ];
+                 beamDeps = [
+                   hpax
+                   plug
+                   telemetry
+                   thousand_island
+                   websock
+                 ];
                };
              """
     end
@@ -253,7 +259,13 @@ defmodule DepsNix.DerivationTest do
                    sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
                  };
 
-                 beamDeps = [ hpax plug telemetry thousand_island websock ];
+                 beamDeps = [
+                   hpax
+                   plug
+                   telemetry
+                   thousand_island
+                   websock
+                 ];
                };
              """
     end
