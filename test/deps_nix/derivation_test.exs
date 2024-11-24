@@ -15,7 +15,7 @@ defmodule DepsNix.DerivationTest do
                   scm: Mix.SCM.Path,
                   dep_opts: [
                     dest: "/Users/andrew.bruce/workspace/nrg/pkgs/infrastructure",
-                    path: "../infrastructure",
+                    include_paths: true,
                     app_properties: [
                       vsn: ~c"0.1.2"
                     ]

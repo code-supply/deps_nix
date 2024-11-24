@@ -4,8 +4,6 @@ defmodule DepsNixTest do
 
   import TestHelpers
 
-  # swap the order of operands and use matching!!!!!111111
-
   describe "argument parsing" do
     test "defaults to prod env" do
       assert %DepsNix.Options{envs: %{"prod" => :all}} = DepsNix.parse_args(~w())
@@ -32,15 +30,22 @@ defmodule DepsNixTest do
       end
     end
 
-    property "can specify extra packages from path dependencies" do
-      check all package_names <- list_of(package_name()), max_runs: 10 do
-        assert %DepsNix.Options{
-                 envs: %{
-                   "prod" => :all
-                 },
-                 path: ^package_names
-               } = DepsNix.parse_args(~w(--env prod --path=#{Enum.join(package_names, ",")}))
-      end
+    test "can request inclusion of path dependencies" do
+      assert %DepsNix.Options{
+               envs: %{
+                 "prod" => :all
+               },
+               include_paths: true
+             } = DepsNix.parse_args(~w(--env prod --include-paths))
+    end
+
+    test "requesting inclusion of path dependencies doesn't affect default options" do
+      assert %DepsNix.Options{
+               envs: %{
+                 "prod" => :all
+               },
+               include_paths: true
+             } = DepsNix.parse_args(~w(--include-paths))
     end
 
     defp package_name do
@@ -67,7 +72,7 @@ defmodule DepsNixTest do
     end
   end
 
-  describe ":path dependencies" do
+  describe "path dependencies" do
     test "are excluded by default" do
       dep = dep(name: :a_path_dep, scm: Mix.SCM.Path) |> pick()
 
@@ -98,7 +103,7 @@ defmodule DepsNixTest do
 
       nix =
         output(
-          %DepsNix.Options{envs: %{"prod" => :all}, path: ["#{dep.app}"], cwd: "some/place"},
+          %DepsNix.Options{envs: %{"prod" => :all}, include_paths: true, cwd: "some/place"},
           converger
         )
 

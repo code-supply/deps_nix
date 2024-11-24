@@ -3,8 +3,13 @@ defmodule DepsNix do
   alias DepsNix.Util
 
   defmodule Options do
-    @type t :: %Options{envs: map(), output: String.t(), path: list(), cwd: String.t()}
-    defstruct envs: %{}, output: "deps.nix", path: [], cwd: nil
+    @type t :: %Options{
+            envs: map(),
+            output: String.t(),
+            include_paths: boolean(),
+            cwd: String.t()
+          }
+    defstruct envs: %{}, output: "deps.nix", include_paths: false, cwd: nil
   end
 
   @type converger :: (Keyword.t() -> list(Mix.Dep.t()))
@@ -16,7 +21,15 @@ defmodule DepsNix do
     |> convert_opts()
     |> Enum.flat_map(fn {converger_opts, permitted_names} ->
       all_packages_for_env = converger.(converger_opts)
-      Packages.filter(all_packages_for_env, permitted_names, opts.path)
+
+      Packages.filter(all_packages_for_env, permitted_names)
+      |> then(fn packages ->
+        if opts.include_paths do
+          packages
+        else
+          Packages.reject_paths(packages)
+        end
+      end)
     end)
     |> Enum.reject(&unwanted/1)
     |> Enum.sort_by(& &1.app)
@@ -30,20 +43,24 @@ defmodule DepsNix do
   @spec parse_args(list()) :: Options.t()
   def parse_args(args) do
     args
-    |> OptionParser.parse(strict: [env: [:string, :keep], output: :string, path: :string])
+    |> OptionParser.parse(
+      strict: [env: [:string, :keep], output: :string, include_paths: :boolean]
+    )
     |> to_opts()
   end
 
   @spec to_opts({list(), any(), any()}) :: Options.t()
   defp to_opts({[], _, _}) do
-    %Options{cwd: File.cwd!, envs: %{"prod" => :all}}
+    %Options{cwd: File.cwd!(), envs: %{"prod" => :all}}
   end
 
   defp to_opts({opts, _, _}) do
+    default = to_opts({[], [], []})
+
     %Options{
-      cwd: File.cwd!,
+      cwd: default.cwd,
       envs:
-        for {:env, env} <- opts, into: %{} do
+        for {:env, env} <- opts, into: default.envs do
           case String.split(env, "=", parts: 2) do
             [env] ->
               {env, :all}
@@ -55,14 +72,7 @@ defmodule DepsNix do
               {env, String.split(packages, ",")}
           end
         end,
-      path:
-        case Keyword.get(opts, :path, "") do
-          "" ->
-            []
-
-          s ->
-            String.split(s, ",")
-        end
+      include_paths: Keyword.get(opts, :include_paths, false)
     }
     |> add_output(opts)
   end
