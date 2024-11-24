@@ -7,7 +7,10 @@ mkShell {
     let
       release = writeShellApplication {
         name = "release";
-        runtimeInputs = [ elixir gh ];
+        runtimeInputs = [
+          elixir
+          gh
+        ];
         text = ''
           tag=$1
 
@@ -17,7 +20,6 @@ mkShell {
       };
     in
     [
-      beamPackages.hex
       elixir
       elixir_ls
       gh
