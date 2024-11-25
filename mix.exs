@@ -26,7 +26,7 @@ defmodule DepsNix.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:inets, :logger, :ssl]
     ]
   end
 
@@ -35,6 +35,7 @@ defmodule DepsNix.MixProject do
     [
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:jason, "~> 1.4"},
       {:stream_data, "~> 1.1", only: [:dev, :test]}
     ]
   end

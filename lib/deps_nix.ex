@@ -5,11 +5,20 @@ defmodule DepsNix do
   defmodule Options do
     @type t :: %Options{
             envs: map(),
+            github_prefetcher: (String.t(), String.t(), String.t() -> String.t()),
             output: String.t(),
             include_paths: boolean(),
             cwd: String.t()
           }
-    defstruct envs: %{}, output: "deps.nix", include_paths: false, cwd: nil
+    defstruct envs: %{},
+              github_prefetcher: nil,
+              output: "deps.nix",
+              include_paths: false,
+              cwd: nil
+  end
+
+  defmodule InvalidGitHubReference do
+    defexception [:message]
   end
 
   @type converger :: (Keyword.t() -> list(Mix.Dep.t()))
@@ -49,30 +58,70 @@ defmodule DepsNix do
     |> to_opts()
   end
 
+  def github_prefetcher(owner, repo, rev) do
+    dir = System.tmp_dir()
+    body = github_archive(owner, repo, rev)
+    body = IO.iodata_to_binary(body)
+    extract(body, dir)
+    {output, 0} = System.cmd("nix", ["hash", "path", "#{dir}/#{repo}-#{rev}"])
+    String.trim_trailing(output)
+  end
+
+  defp extract(body, dir) do
+    try do
+      :erl_tar.extract({:binary, body}, [:compressed, cwd: dir])
+    rescue
+      _e ->
+        :error
+    end
+  end
+
+  defp github_archive(owner, repo, rev) do
+    url = "https://github.com/#{owner}/#{repo}/archive/#{rev}.tar.gz"
+
+    case :httpc.request(
+           :get,
+           {String.to_charlist(url), []},
+           [],
+           []
+         ) do
+      {:ok, {{_version, 200, _reason_phrase}, _headers, body}} ->
+        body
+
+      {:ok, {{_version, 404, _}, _headers, _body}} ->
+        raise InvalidGitHubReference,
+              "404 when getting archive for #{url}"
+    end
+  end
+
   @spec to_opts({list(), any(), any()}) :: Options.t()
   defp to_opts({[], _, _}) do
-    %Options{cwd: File.cwd!(), envs: %{"prod" => :all}}
+    %Options{
+      cwd: File.cwd!(),
+      envs: %{"prod" => :all},
+      github_prefetcher: &github_prefetcher/3
+    }
   end
 
   defp to_opts({opts, _, _}) do
     default = to_opts({[], [], []})
 
     %Options{
-      cwd: default.cwd,
-      envs:
-        for {:env, env} <- opts, into: default.envs do
-          case String.split(env, "=", parts: 2) do
-            [env] ->
-              {env, :all}
+      default
+      | envs:
+          for {:env, env} <- opts, into: default.envs do
+            case String.split(env, "=", parts: 2) do
+              [env] ->
+                {env, :all}
 
-            [env, ""] ->
-              {env, []}
+              [env, ""] ->
+                {env, []}
 
-            [env, packages] ->
-              {env, String.split(packages, ",")}
-          end
-        end,
-      include_paths: Keyword.get(opts, :include_paths, false)
+              [env, packages] ->
+                {env, String.split(packages, ",")}
+            end
+          end,
+        include_paths: Keyword.get(opts, :include_paths, false)
     }
     |> add_output(opts)
   end

@@ -4,6 +4,26 @@ defmodule DepsNixTest do
 
   import TestHelpers
 
+  describe "prefetching GitHub hash" do
+    test "works for this repo" do
+      assert DepsNix.github_prefetcher(
+               "code-supply",
+               "deps_nix",
+               "8a6c3537c958fe3fd1810d56bdee6c13fb35d089"
+             ) == "sha256-zJOkGOSBBA0Y9HPRmwPmBpqaqsoRa0oR7VjMMyukvX4="
+    end
+
+    test "fails for nonsense repos" do
+      assert_raise(DepsNix.InvalidGitHubReference, fn ->
+        DepsNix.github_prefetcher(
+          "not",
+          "theright",
+          "args"
+        )
+      end)
+    end
+  end
+
   describe "argument parsing" do
     test "defaults to prod env" do
       assert %DepsNix.Options{envs: %{"prod" => :all}} = DepsNix.parse_args(~w())

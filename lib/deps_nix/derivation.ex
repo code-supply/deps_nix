@@ -1,4 +1,5 @@
 defmodule DepsNix.Derivation do
+  alias DepsNix.FetchFromGitHub
   alias DepsNix.FetchGit
   alias DepsNix.FetchHex
   alias DepsNix.Util
@@ -7,7 +8,10 @@ defmodule DepsNix.Derivation do
           builder: String.t(),
           name: atom(),
           version: String.t(),
-          src: DepsNix.FetchGit.t() | DepsNix.FetchHex.t(),
+          src:
+            DepsNix.FetchFromGitHub.t()
+            | DepsNix.FetchGit.t()
+            | DepsNix.FetchHex.t(),
           beam_deps: list(atom())
         }
 
@@ -25,10 +29,28 @@ defmodule DepsNix.Derivation do
   end
 
   @spec from(Mix.Dep.t(), DepsNix.Options.t()) :: t()
-  def from(%Mix.Dep{scm: Mix.SCM.Git} = dep, _opts) do
+  def from(%Mix.Dep{scm: Mix.SCM.Git} = dep, options) do
     {:git, url, rev, _} = dep.opts[:lock]
-    fetcher = %FetchGit{url: url, rev: rev}
-    new(dep, rev, fetcher, "buildMix")
+
+    prefetcher = options.github_prefetcher
+
+    if String.contains?(url, "github.com") do
+      [owner, repo | _] = URI.parse(url).path |> String.split("/", trim: true)
+
+      repo = String.replace_suffix(repo, ".git", "")
+
+      fetcher = %FetchFromGitHub{
+        owner: owner,
+        repo: repo,
+        rev: rev,
+        hash: prefetcher.(owner, repo, rev)
+      }
+
+      new(dep, rev, fetcher, "buildMix")
+    else
+      fetcher = %FetchGit{url: url, rev: rev}
+      new(dep, rev, fetcher, "buildMix")
+    end
   end
 
   def from(%Mix.Dep{scm: Mix.SCM.Path} = dep, opts) do

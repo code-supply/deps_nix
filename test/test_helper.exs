@@ -7,13 +7,14 @@ defmodule TestHelpers do
     [:mix, :rebar3, :make]
   end
 
-  def url do
+  def url(opts \\ []) do
     gen all scheme <- member_of(~w(http git)),
             fragment <- one_of([nil, string(:alphanumeric)]),
-            host <- string(:alphanumeric),
-            tld <- string(:alphanumeric, max_length: 10),
+            host <- overridable(opts, :host, string(:alphanumeric)),
+            tld <- overridable(opts, :tld, string(:alphanumeric, max_length: 10)),
             path_parts <- list_of(string(:alphanumeric)),
-            path <- one_of([nil, constant("/" <> Enum.join(path_parts, "/"))]),
+            path <-
+              overridable(opts, :path, one_of([nil, constant("/" <> Enum.join(path_parts, "/"))])),
             port <- one_of([nil, integer(0..65535)]),
             query <- string(:alphanumeric) do
       %URI{
@@ -100,6 +101,13 @@ defmodule TestHelpers do
           |> Keyword.merge(dep_opts),
         deps: sub_deps
       }
+    end
+  end
+
+  defp overridable(opts, key, default) do
+    case Keyword.fetch(opts, key) do
+      {:ok, val} -> constant(val)
+      :error -> default
     end
   end
 end

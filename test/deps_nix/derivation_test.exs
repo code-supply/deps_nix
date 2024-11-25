@@ -3,6 +3,7 @@ defmodule DepsNix.DerivationTest do
   use ExUnitProperties
 
   alias DepsNix.Derivation
+  alias DepsNix.FetchFromGitHub
   alias DepsNix.FetchGit
   alias DepsNix.FetchHex
   alias DepsNix.Path
@@ -42,6 +43,28 @@ defmodule DepsNix.DerivationTest do
       assert %Derivation{
                src: %FetchGit{url: ^url, rev: ^rev}
              } = Derivation.from(dep, %DepsNix.Options{})
+    end
+  end
+
+  property "translates GitHub dependencies to use fetchFromGitHub" do
+    check all url <- url(host: "github", tld: "com", path: "/code-supply/mudbrick.git"),
+              rev <- hash(),
+              generated_hash <- hash(),
+              dep <- dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
+      assert %Derivation{
+               src: %FetchFromGitHub{
+                 owner: "code-supply",
+                 repo: "mudbrick",
+                 rev: ^rev,
+                 hash: ^generated_hash
+               }
+             } =
+               Derivation.from(dep, %DepsNix.Options{
+                 github_prefetcher: fn
+                   "code-supply", "mudbrick", ^rev ->
+                     generated_hash
+                 end
+               })
     end
   end
 
