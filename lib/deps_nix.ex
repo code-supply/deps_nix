@@ -59,12 +59,25 @@ defmodule DepsNix do
   end
 
   def github_prefetcher(owner, repo, rev) do
-    dir = System.tmp_dir()
+    dir = System.tmp_dir() |> realpath()
     body = github_archive(owner, repo, rev)
     body = IO.iodata_to_binary(body)
     extract(body, dir)
-    {output, 0} = System.cmd("nix", ["hash", "path", "#{dir}/#{repo}-#{rev}"])
+    path = "#{dir}/#{repo}-#{rev}"
+    {output, 0} = System.cmd("nix", ["hash", "path", path])
     String.trim_trailing(output)
+  end
+
+  defp realpath(path) do
+    for subpath <- Path.split(path), reduce: "/" do
+      acc ->
+        new_path = Path.join(acc, subpath)
+
+        case File.read_link(new_path) do
+          {:ok, resolved} -> Path.join("/", resolved)
+          {:error, _} -> new_path
+        end
+    end
   end
 
   defp extract(body, dir) do
