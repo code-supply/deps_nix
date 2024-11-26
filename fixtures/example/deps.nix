@@ -684,7 +684,7 @@ let
 
       opentelemetry =
         let
-          version = "1.4.1";
+          version = "1.5.0";
         in
         buildRebar3 {
           inherit version;
@@ -693,7 +693,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "opentelemetry";
-            sha256 = "6b946dddbc00c1ef4a9961d1830b1da25f4636ad4cb1bb6a481c5232fb8ff7d6";
+            sha256 = "cdf4f51d17b592fc592b9a75f86a6f808c23044ba7cf7b9534debbcc5c23b0ee";
           };
 
           beamDeps = [
@@ -703,7 +703,7 @@ let
 
       opentelemetry_api =
         let
-          version = "1.3.2";
+          version = "1.4.0";
         in
         buildMix {
           inherit version;
@@ -712,13 +712,13 @@ let
           src = fetchHex {
             inherit version;
             pkg = "opentelemetry_api";
-            sha256 = "d374b2ed29f0047513ce9747f07b2a6489625898c7708885cad2471fc960d596";
+            sha256 = "3dfbbfaa2c2ed3121c5c483162836c4f9027def469c41578af5ef32589fcfc58";
           };
         };
 
       opentelemetry_exporter =
         let
-          version = "1.7.0";
+          version = "1.8.0";
         in
         buildRebar3 {
           inherit version;
@@ -727,7 +727,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "opentelemetry_exporter";
-            sha256 = "d0f25f6439ec43f2561537c3fabbe177b38547cddaa3a692cbb8f4770dbefc1e";
+            sha256 = "a1f9f271f8d3b02b81462a6bfef7075fd8457fdb06adff5d2537df5e2264d9af";
           };
 
           beamDeps = [

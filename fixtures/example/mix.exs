@@ -37,7 +37,7 @@ defmodule Example.MixProject do
        compile: false,
        depth: 1},
       {:jason, "~> 1.4.1"},
-      {:opentelemetry_exporter, "~> 1.7.0"},
+      {:opentelemetry_exporter, "~> 1.7"},
       {:plug, "~> 1.13", override: true},
       {:png, "~> 0.2.1"},
       {:rustler, ">= 0.0.0", optional: true},
