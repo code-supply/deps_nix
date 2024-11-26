@@ -59,13 +59,15 @@ defmodule DepsNix do
   end
 
   def github_prefetcher(owner, repo, rev) do
-    dir = System.tmp_dir() |> realpath()
-    body = github_archive(owner, repo, rev)
-    body = IO.iodata_to_binary(body)
-    extract(body, dir)
-    path = "#{dir}/#{repo}-#{rev}"
-    {output, 0} = System.cmd("nix", ["hash", "path", path])
-    String.trim_trailing(output)
+    with dir <- System.tmp_dir() |> realpath(),
+         body <- github_archive(owner, repo, rev),
+         _body <- IO.iodata_to_binary(body) |> tap(fn body -> extract(body, dir) end),
+         path <- "#{dir}/#{repo}-#{rev}",
+         {output, 0} <- System.cmd("nix", ["hash", "path", path]) do
+      String.trim_trailing(output)
+    else
+      :error -> ""
+    end
   end
 
   defp realpath(path) do
@@ -104,6 +106,9 @@ defmodule DepsNix do
       {:ok, {{_version, 404, _}, _headers, _body}} ->
         raise InvalidGitHubReference,
               "404 when getting archive for #{url}"
+
+      {:error, {:shutdown, {{:error, :undef}, _backtrace}}} ->
+        :error
     end
   end
 
