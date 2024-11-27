@@ -66,7 +66,7 @@ defmodule DepsNix do
          {output, 0} <- System.cmd("nix", ["hash", "path", path]) do
       String.trim_trailing(output)
     else
-      :error -> ""
+      {_, _} -> ""
     end
   end
 
@@ -94,21 +94,24 @@ defmodule DepsNix do
   defp github_archive(owner, repo, rev) do
     url = "https://github.com/#{owner}/#{repo}/archive/#{rev}.tar.gz"
 
+    http_options = []
+    options = [full_result: false]
+
     case :httpc.request(
            :get,
            {String.to_charlist(url), []},
-           [],
-           []
+           http_options,
+           options
          ) do
-      {:ok, {{_version, 200, _reason_phrase}, _headers, body}} ->
+      {:ok, {200, body}} ->
         body
 
-      {:ok, {{_version, 404, _}, _headers, _body}} ->
+      {:ok, {404, _body}} ->
         raise InvalidGitHubReference,
               "404 when getting archive for #{url}"
 
       {:error, {:shutdown, {{:error, :undef}, _backtrace}}} ->
-        :error
+        ""
     end
   end
 
