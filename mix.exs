@@ -26,7 +26,7 @@ defmodule DepsNix.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:inets, :logger, :ssl]
+      extra_applications: []
     ]
   end
 

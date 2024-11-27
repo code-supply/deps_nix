@@ -2,8 +2,6 @@ defmodule DepsNix do
   alias DepsNix.Packages
   alias DepsNix.Util
 
-  require Logger
-
   defmodule Options do
     @type t :: %Options{
             envs: map(),
