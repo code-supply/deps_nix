@@ -62,13 +62,12 @@ defmodule DepsNix do
 
   def github_prefetcher(owner, repo, rev) do
     with dir <- System.tmp_dir() |> realpath(),
+         path <- "#{dir}/#{repo}-#{rev}",
+         {:ok, _deletions} <- File.rm_rf(path),
          body <- github_archive(owner, repo, rev),
          _body <- IO.iodata_to_binary(body) |> tap(fn body -> extract(body, dir) end),
-         path <- "#{dir}/#{repo}-#{rev}",
          {output, 0} <- System.cmd("nix", ["hash", "path", path]) do
       String.trim_trailing(output)
-    else
-      {_, _} -> ""
     end
   end
 
@@ -93,34 +92,42 @@ defmodule DepsNix do
     end
   end
 
-  defp github_archive(owner, repo, rev, tries \\ 0) do
-    url = "https://github.com/#{owner}/#{repo}/archive/#{rev}.tar.gz"
+  defp github_archive(owner, repo, rev) do
+    {:ok, conn} = Mint.HTTP.connect(:https, "codeload.github.com", 443)
 
-    http_options = []
-    options = [full_result: false]
+    {:ok, conn, request_ref} =
+      Mint.HTTP.request(conn, "GET", "/#{owner}/#{repo}/tar.gz/#{rev}", [], "")
 
-    case :httpc.request(
-           :get,
-           {String.to_charlist(url), []},
-           http_options,
-           options
-         ) do
-      {:ok, {200, body}} ->
-        body
+    receive_archive(conn, request_ref)
+  end
 
-      {:ok, {404, _body}} ->
-        raise InvalidGitHubReference,
-              "404 when getting archive for #{url}"
+  defp receive_archive(conn, request_ref, data \\ []) do
+    receive do
+      message ->
+        case Mint.HTTP.stream(conn, message) do
+          {:ok, conn, responses} ->
+            case Enum.reduce(responses, data, fn
+                   {:status, ^request_ref, 200}, acc ->
+                     acc
 
-      {:error, {:shutdown, {{:error, :undef}, _backtrace}}} ->
-        if tries > 3 do
-          Logger.error("Giving up retrieval of #{url}.")
-          #  prefer 'valid' hash over exception for now
-          ""
-        else
-          Logger.error("Attempt to retrieve #{url} failed. Retry #{tries + 1}!")
-          :timer.sleep(1000)
-          github_archive(owner, repo, rev, tries + 1)
+                   {:status, ^request_ref, 404}, _acc ->
+                     raise InvalidGitHubReference
+
+                   {:headers, ^request_ref, _headers}, acc ->
+                     acc
+
+                   {:data, ^request_ref, data}, acc ->
+                     [data | acc]
+
+                   {:done, ^request_ref}, acc ->
+                     {:ok, acc}
+                 end) do
+              {:ok, data} ->
+                Enum.reverse(data)
+
+              data ->
+                receive_archive(conn, request_ref, data)
+            end
         end
     end
   end
