@@ -2,6 +2,8 @@ defmodule DepsNix do
   alias DepsNix.Packages
   alias DepsNix.Util
 
+  require Logger
+
   defmodule Options do
     @type t :: %Options{
             envs: map(),
@@ -91,7 +93,7 @@ defmodule DepsNix do
     end
   end
 
-  defp github_archive(owner, repo, rev) do
+  defp github_archive(owner, repo, rev, tries \\ 0) do
     url = "https://github.com/#{owner}/#{repo}/archive/#{rev}.tar.gz"
 
     http_options = []
@@ -111,7 +113,15 @@ defmodule DepsNix do
               "404 when getting archive for #{url}"
 
       {:error, {:shutdown, {{:error, :undef}, _backtrace}}} ->
-        ""
+        if tries > 3 do
+          Logger.error("Giving up retrieval of #{url}.")
+          #  prefer 'valid' hash over exception for now
+          ""
+        else
+          Logger.error("Attempt to retrieve #{url} failed. Retry #{tries + 1}!")
+          :timer.sleep(1000)
+          github_archive(owner, repo, rev, tries + 1)
+        end
     end
   end
 
