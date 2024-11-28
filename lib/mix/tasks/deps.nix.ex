@@ -52,6 +52,8 @@ defmodule Mix.Tasks.Deps.Nix do
 
   @impl Mix.Task
   def run(args) do
+    {:ok, _started_apps} = Application.ensure_all_started(:mint)
+
     Mix.Project.get!()
 
     {path, output} =
