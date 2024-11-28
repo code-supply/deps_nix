@@ -50,6 +50,7 @@ defmodule Mix.Tasks.Deps.Nix do
 
   use Mix.Task
 
+  @requirements ["app.config"]
   @impl Mix.Task
   def run(args) do
     {:ok, _started_apps} = Application.ensure_all_started(:mint)
