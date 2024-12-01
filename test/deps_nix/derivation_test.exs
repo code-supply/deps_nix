@@ -10,6 +10,18 @@ defmodule DepsNix.DerivationTest do
 
   import TestHelpers
 
+  property "configures app config path based on cwd" do
+    check all dep <- dep() do
+      assert %Derivation{
+               app_config_path: "../../config"
+             } =
+               Derivation.from(dep, %DepsNix.Options{
+                 output: "some/place/deps.nix",
+                 cwd: "/home/andrew/workspace/my_project/subdir/subproj"
+               })
+    end
+  end
+
   property "translates dependencies specified with path" do
     check all dep <-
                 dep(
@@ -37,7 +49,7 @@ defmodule DepsNix.DerivationTest do
   end
 
   property "translates dependencies specified with git" do
-    check all url <- url(),
+    check all url <- string(:alphanumeric),
               rev <- hash(),
               dep <- dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
       assert %Derivation{
@@ -173,7 +185,8 @@ defmodule DepsNix.DerivationTest do
                version: "0.15.1",
                sha256: "4f75b91451338bc0da5f52f3480fa6ef6e3a2aeecfc33686d6b3d0a0948f31aa"
              },
-             beam_deps: [:hpack]
+             beam_deps: [:hpack],
+             app_config_path: "config"
            }
   end
 
@@ -217,7 +230,8 @@ defmodule DepsNix.DerivationTest do
                version: "1.4.2",
                sha256: "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f"
              },
-             beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock]
+             beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock],
+             app_config_path: "config"
            }
   end
 
@@ -230,7 +244,8 @@ defmodule DepsNix.DerivationTest do
                src: %Path{
                  path: "../in/ur/repoz"
                },
-               beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock]
+               beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock],
+               app_config_path: "../../config"
              }
              |> to_string() == """
              my_project =
@@ -240,6 +255,7 @@ defmodule DepsNix.DerivationTest do
                buildMix {
                  inherit version;
                  name = "my_project";
+                 appConfigPath = ../../config;
 
                  src = ../in/ur/repoz;
 
@@ -265,7 +281,8 @@ defmodule DepsNix.DerivationTest do
                  version: "1.4.2",
                  sha256: "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f"
                },
-               beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock]
+               beam_deps: [:hpax, :plug, :telemetry, :thousand_island, :websock],
+               app_config_path: "foo"
              }
              |> to_string() == """
              bandit =
@@ -275,6 +292,7 @@ defmodule DepsNix.DerivationTest do
                buildMix {
                  inherit version;
                  name = "bandit";
+                 appConfigPath = ./foo;
 
                  src = fetchHex {
                    inherit version;
@@ -303,7 +321,8 @@ defmodule DepsNix.DerivationTest do
                  version: "1.4.2",
                  sha256: "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f"
                },
-               beam_deps: []
+               beam_deps: [],
+               app_config_path: "config"
              }
              |> to_string() == """
              bandit =
@@ -313,6 +332,7 @@ defmodule DepsNix.DerivationTest do
                buildMix {
                  inherit version;
                  name = "bandit";
+                 appConfigPath = ./config;
 
                  src = fetchHex {
                    inherit version;

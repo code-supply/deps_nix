@@ -5,6 +5,7 @@ defmodule DepsNix.Derivation do
   alias DepsNix.Util
 
   @type t :: %__MODULE__{
+          app_config_path: String.t(),
           builder: String.t(),
           name: atom(),
           version: String.t(),
@@ -15,17 +16,32 @@ defmodule DepsNix.Derivation do
           beam_deps: list(atom())
         }
 
-  @enforce_keys [:builder, :name, :version, :src, :beam_deps]
-  defstruct [:builder, :name, :version, :src, :beam_deps]
+  @enforce_keys [
+    :app_config_path,
+    :builder,
+    :name,
+    :version,
+    :src,
+    :beam_deps
+  ]
+  defstruct [
+    :app_config_path,
+    :builder,
+    :name,
+    :version,
+    :src,
+    :beam_deps
+  ]
 
-  def new(dep, version, src, builder) do
-    %__MODULE__{
-      name: dep.app,
-      version: version,
-      builder: builder,
-      src: src,
-      beam_deps: Enum.map(dep.deps, & &1.app)
-    }
+  def new(dep, opts) do
+    struct!(
+      __MODULE__,
+      [
+        name: dep.app,
+        beam_deps: Enum.map(dep.deps, & &1.app)
+      ]
+      |> Keyword.merge(opts)
+    )
   end
 
   @spec from(Mix.Dep.t(), DepsNix.Options.t()) :: t()
@@ -34,45 +50,61 @@ defmodule DepsNix.Derivation do
 
     prefetcher = options.github_prefetcher
 
-    if String.contains?(url, "github.com") do
-      [owner, repo | _] = URI.parse(url).path |> String.split("/", trim: true)
+    case parse_git_url(url) do
+      [owner: owner, repo: repo] ->
+        fetcher = %FetchFromGitHub{
+          owner: owner,
+          repo: repo,
+          rev: rev,
+          hash: if(prefetcher, do: prefetcher.(owner, repo, rev), else: "")
+        }
 
-      repo = String.replace_suffix(repo, ".git", "")
+        new(dep,
+          version: rev,
+          src: fetcher,
+          builder: "buildMix",
+          app_config_path: app_config_path(options)
+        )
 
-      fetcher = %FetchFromGitHub{
-        owner: owner,
-        repo: repo,
-        rev: rev,
-        hash: prefetcher.(owner, repo, rev)
-      }
+      url ->
+        fetcher = %FetchGit{url: url, rev: rev}
 
-      new(dep, rev, fetcher, "buildMix")
-    else
-      fetcher = %FetchGit{url: url, rev: rev}
-      new(dep, rev, fetcher, "buildMix")
+        new(dep,
+          version: rev,
+          src: fetcher,
+          builder: "buildMix",
+          app_config_path: app_config_path(options)
+        )
     end
   end
 
-  def from(%Mix.Dep{scm: Mix.SCM.Path} = dep, opts) do
+  def from(%Mix.Dep{scm: Mix.SCM.Path} = dep, options) do
     new(
       dep,
-      get_in(dep.opts, [:app_properties, :vsn]),
-      %DepsNix.Path{
+      version: get_in(dep.opts, [:app_properties, :vsn]),
+      src: %DepsNix.Path{
         path:
           Elixir.Path.relative_to(
             dep.opts[:dest],
-            Elixir.Path.join(opts.cwd, Elixir.Path.dirname(opts.output)),
+            Elixir.Path.join(options.cwd, Elixir.Path.dirname(options.output)),
             force: true
           )
       },
-      nix_builder([:mix])
+      builder: nix_builder([:mix]),
+      app_config_path: app_config_path(options)
     )
   end
 
-  def from(%Mix.Dep{} = dep, _opts) do
+  def from(%Mix.Dep{} = dep, options) do
     {:hex, name, version, _hash, beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
     fetcher = %FetchHex{pkg: name, version: version, sha256: sha256}
-    new(dep, version, fetcher, nix_builder(beam_builders))
+
+    new(dep,
+      version: version,
+      src: fetcher,
+      builder: nix_builder(beam_builders),
+      app_config_path: app_config_path(options)
+    )
   end
 
   defp nix_builder(builders) do
@@ -80,6 +112,26 @@ defmodule DepsNix.Derivation do
       Enum.member?(builders, :mix) -> "buildMix"
       Enum.member?(builders, :rebar3) -> "buildRebar3"
     end
+  end
+
+  @spec parse_git_url(String.t()) :: [owner: String.t(), repo: String.t()] | String.t()
+  defp parse_git_url(url) do
+    with path <- URI.parse(url).path,
+         true <- path && String.contains?(url, "github.com"),
+         [owner, repo | _] <- String.split(path, "/", trim: true),
+         repo <- String.replace_suffix(repo, ".git", "") do
+      [owner: owner, repo: repo]
+    else
+      _ -> url
+    end
+  end
+
+  defp app_config_path(opts) do
+    opts.output
+    |> String.split("/")
+    |> Enum.drop(1)
+    |> Enum.reduce("config", fn _path_part, acc -> ["../", acc] end)
+    |> IO.iodata_to_binary()
   end
 
   defimpl String.Chars do
@@ -92,6 +144,7 @@ defmodule DepsNix.Derivation do
         #{drv.builder} {
           inherit version;
           name = "#{drv.name}";
+          appConfigPath = #{format_path(drv.app_config_path)};
 
           src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
         };
@@ -119,6 +172,10 @@ defmodule DepsNix.Derivation do
       """
       |> Util.indent(from: 2)
       |> Util.indent(from: 2)
+    end
+
+    defp format_path(path) do
+      if String.starts_with?(path, "."), do: path, else: "./#{path}"
     end
   end
 end

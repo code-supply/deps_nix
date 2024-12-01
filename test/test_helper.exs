@@ -10,7 +10,8 @@ defmodule TestHelpers do
   def url(opts \\ []) do
     gen all scheme <- member_of(~w(http git)),
             fragment <- one_of([nil, string(:alphanumeric)]),
-            host <- overridable(opts, :host, string(:alphanumeric)),
+            host <-
+              overridable(opts, :host, one_of([string(:alphanumeric), constant("github.com")])),
             tld <- overridable(opts, :tld, string(:alphanumeric, max_length: 10)),
             path_parts <- list_of(string(:alphanumeric)),
             path <-

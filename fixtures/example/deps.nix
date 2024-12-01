@@ -126,6 +126,7 @@ let
         buildRebar3 {
           inherit version;
           name = "acceptor_pool";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -141,6 +142,7 @@ let
         buildRebar3 {
           inherit version;
           name = "aws_signature";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -156,6 +158,7 @@ let
         buildMix {
           inherit version;
           name = "bandit";
+          appConfigPath = ./config;
 
           src = pkgs.fetchFromGitHub {
             owner = "mtrudel";
@@ -180,6 +183,7 @@ let
         buildMix {
           inherit version;
           name = "castore";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -195,6 +199,7 @@ let
         buildRebar3 {
           inherit version;
           name = "chatterbox";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -214,6 +219,7 @@ let
         buildMix {
           inherit version;
           name = "cldr_utils";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -234,6 +240,7 @@ let
         buildRebar3 {
           inherit version;
           name = "ctx";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -249,6 +256,7 @@ let
         buildMix {
           inherit version;
           name = "db_connection";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -268,6 +276,7 @@ let
         buildMix {
           inherit version;
           name = "decimal";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -283,6 +292,7 @@ let
         buildMix {
           inherit version;
           name = "digital_token";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -303,6 +313,7 @@ let
         buildMix {
           inherit version;
           name = "eventstore";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -325,6 +336,7 @@ let
         buildMix {
           inherit version;
           name = "ex_cldr";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -346,6 +358,7 @@ let
         buildMix {
           inherit version;
           name = "ex_cldr_calendars";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -366,6 +379,7 @@ let
         buildMix {
           inherit version;
           name = "ex_cldr_currencies";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -386,6 +400,7 @@ let
         buildMix {
           inherit version;
           name = "ex_cldr_dates_times";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -407,6 +422,7 @@ let
         buildMix {
           inherit version;
           name = "ex_cldr_numbers";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -430,6 +446,7 @@ let
         buildMix {
           inherit version;
           name = "explorer";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -455,6 +472,7 @@ let
         buildMix {
           inherit version;
           name = "finch";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -478,6 +496,7 @@ let
         buildMix {
           inherit version;
           name = "fsm";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -493,6 +512,7 @@ let
         buildMix {
           inherit version;
           name = "fss";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -508,6 +528,7 @@ let
         buildMix {
           inherit version;
           name = "fun_with_flags";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -523,6 +544,7 @@ let
         buildMix {
           inherit version;
           name = "gen_stage";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -538,6 +560,7 @@ let
         buildRebar3 {
           inherit version;
           name = "gproc";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -553,6 +576,7 @@ let
         buildRebar3 {
           inherit version;
           name = "grpcbox";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -575,6 +599,7 @@ let
         buildRebar3 {
           inherit version;
           name = "hpack";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -590,6 +615,7 @@ let
         buildMix {
           inherit version;
           name = "hpax";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -605,6 +631,7 @@ let
         buildMix {
           inherit version;
           name = "jason";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -624,6 +651,7 @@ let
         buildMix {
           inherit version;
           name = "mime";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -639,6 +667,7 @@ let
         buildMix {
           inherit version;
           name = "mint";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -659,6 +688,7 @@ let
         buildMix {
           inherit version;
           name = "nimble_options";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -674,6 +704,7 @@ let
         buildMix {
           inherit version;
           name = "nimble_pool";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -689,6 +720,7 @@ let
         buildRebar3 {
           inherit version;
           name = "opentelemetry";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -708,6 +740,7 @@ let
         buildMix {
           inherit version;
           name = "opentelemetry_api";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -723,6 +756,7 @@ let
         buildRebar3 {
           inherit version;
           name = "opentelemetry_exporter";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -745,6 +779,7 @@ let
         buildMix {
           inherit version;
           name = "plug";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -766,6 +801,7 @@ let
         buildMix {
           inherit version;
           name = "plug_crypto";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -781,6 +817,7 @@ let
         buildRebar3 {
           inherit version;
           name = "png";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -796,6 +833,7 @@ let
         buildMix {
           inherit version;
           name = "postgrex";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -818,6 +856,7 @@ let
         buildMix {
           inherit version;
           name = "req";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -840,6 +879,7 @@ let
         buildMix {
           inherit version;
           name = "rustler";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -861,6 +901,7 @@ let
         buildMix {
           inherit version;
           name = "rustler_precompiled";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -881,6 +922,7 @@ let
         buildMix {
           inherit version;
           name = "ssl_verify_fun";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -896,6 +938,7 @@ let
         buildMix {
           inherit version;
           name = "table";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -911,6 +954,7 @@ let
         buildMix {
           inherit version;
           name = "table_rex";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -926,6 +970,7 @@ let
         buildRebar3 {
           inherit version;
           name = "telemetry";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -941,6 +986,7 @@ let
         buildMix {
           inherit version;
           name = "thousand_island";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -960,6 +1006,7 @@ let
         buildRebar3 {
           inherit version;
           name = "tls_certificate_check";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -979,6 +1026,7 @@ let
         buildMix {
           inherit version;
           name = "tokenizers";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -1000,6 +1048,7 @@ let
         buildMix {
           inherit version;
           name = "toml";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -1015,6 +1064,7 @@ let
         buildMix {
           inherit version;
           name = "websock";
+          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
