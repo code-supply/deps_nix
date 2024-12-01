@@ -42,8 +42,12 @@ defmodule Mix.Tasks.Deps.Nix do
 
   `deps_nix` supports git dependencies.
 
-  `builtins.fetchGit` is used, which doesn't require any prefetching and relies
-  on the git SHA as a unique identifier.
+  For open-source GitHub dependencies, `pkgs.fetchFromGitHub` is used. Hashes
+  are prefetched using [Mint](https://hexdocs.pm/mint) and hashed using `nix hash path`.
+
+  `builtins.fetchGit` is used for non-GitHub projects, which doesn't require
+  any prefetching and relies on the git SHA as a unique identifier. However, it
+  suffers from [several disadvantages](https://discourse.nixos.org/t/fetchgit-vs-fetchgit/23325).
   """
 
   @shortdoc "Produce nix derivations for mix dependencies"
