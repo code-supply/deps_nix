@@ -143,8 +143,7 @@ defmodule DepsNix.Derivation do
         in
         #{drv.builder} {
           inherit version;
-          name = "#{drv.name}";
-          appConfigPath = #{format_path(drv.app_config_path)};
+          name = "#{drv.name}";#{format_app_config_path(drv)}
 
           src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
         };
@@ -174,8 +173,25 @@ defmodule DepsNix.Derivation do
       |> Util.indent(from: 2)
     end
 
-    defp format_path(path) do
-      if String.starts_with?(path, "."), do: path, else: "./#{path}"
+    defp format_app_config_path(%DepsNix.Derivation{
+           builder: "buildMix",
+           app_config_path: path
+         }) do
+      "\nappConfigPath = #{prefix_path(path)};"
+      |> Util.indent(from: 1)
+      |> Util.indent(from: 1)
+    end
+
+    defp format_app_config_path(_drv) do
+      ""
+    end
+
+    defp prefix_path(<<".", _rest::binary>> = path) do
+      path
+    end
+
+    defp prefix_path(path) do
+      "./#{path}"
     end
   end
 end

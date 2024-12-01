@@ -236,6 +236,14 @@ defmodule DepsNix.DerivationTest do
   end
 
   describe "string representation" do
+    test "rebar3 builds don't get appConfigPaths" do
+      refute dep(builders: [:rebar3], scm: Mix.SCM.Hex)
+             |> pick()
+             |> Derivation.from(%DepsNix.Options{})
+             |> to_string()
+             |> String.contains?("appConfigPath")
+    end
+
     test "paths get special treatment" do
       assert %Derivation{
                builder: "buildMix",

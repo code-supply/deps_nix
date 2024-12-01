@@ -126,7 +126,6 @@ let
         buildRebar3 {
           inherit version;
           name = "acceptor_pool";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -142,7 +141,6 @@ let
         buildRebar3 {
           inherit version;
           name = "aws_signature";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -199,7 +197,6 @@ let
         buildRebar3 {
           inherit version;
           name = "chatterbox";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -240,7 +237,6 @@ let
         buildRebar3 {
           inherit version;
           name = "ctx";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -560,7 +556,6 @@ let
         buildRebar3 {
           inherit version;
           name = "gproc";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -576,7 +571,6 @@ let
         buildRebar3 {
           inherit version;
           name = "grpcbox";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -599,7 +593,6 @@ let
         buildRebar3 {
           inherit version;
           name = "hpack";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -720,7 +713,6 @@ let
         buildRebar3 {
           inherit version;
           name = "opentelemetry";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -756,7 +748,6 @@ let
         buildRebar3 {
           inherit version;
           name = "opentelemetry_exporter";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -817,7 +808,6 @@ let
         buildRebar3 {
           inherit version;
           name = "png";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -970,7 +960,6 @@ let
         buildRebar3 {
           inherit version;
           name = "telemetry";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
@@ -1006,7 +995,6 @@ let
         buildRebar3 {
           inherit version;
           name = "tls_certificate_check";
-          appConfigPath = ./config;
 
           src = fetchHex {
             inherit version;
