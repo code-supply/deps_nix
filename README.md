@@ -28,7 +28,7 @@ Using separate Nix derivations for each dependency:
 ```elixir
 def deps do
   [
-    {:deps_nix, "~> 0.0", only: :dev}
+    {:deps_nix, "~> 1.0", only: :dev}
   ]
 end
 ```
