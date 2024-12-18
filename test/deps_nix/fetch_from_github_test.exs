@@ -4,7 +4,7 @@ defmodule DepsNix.FetchFromGitHubTest do
   alias DepsNix.FetchFromGitHub
 
   describe "string representation" do
-    test "uses builtin fetcher to avoid prefetching" do
+    test "uses fetcher" do
       assert %FetchFromGitHub{
                owner: "sstoltze",
                repo: "tds",
