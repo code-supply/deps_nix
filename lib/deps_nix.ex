@@ -63,7 +63,8 @@ defmodule DepsNix do
          path <- "#{dir}/#{repo}-#{rev}",
          {:ok, _deletions} <- File.rm_rf(path),
          body <- github_archive(owner, repo, rev),
-         _body <- IO.iodata_to_binary(body) |> tap(fn body -> extract(body, dir) end),
+         :ok <- File.write("#{dir}/deps-nix-tarball", body),
+         {_, 0} <- System.cmd("tar", ["-xf", "#{dir}/deps-nix-tarball"], cd: dir),
          {output, 0} <- System.cmd("nix", ["hash", "path", path]) do
       String.trim_trailing(output)
     end
@@ -78,15 +79,6 @@ defmodule DepsNix do
           {:ok, resolved} -> Path.join("/", resolved)
           {:error, _} -> new_path
         end
-    end
-  end
-
-  defp extract(body, dir) do
-    try do
-      :erl_tar.extract({:binary, body}, [:compressed, cwd: dir])
-    rescue
-      _e ->
-        :error
     end
   end
 

@@ -13,6 +13,14 @@ defmodule DepsNixTest do
              ) == "sha256-zJOkGOSBBA0Y9HPRmwPmBpqaqsoRa0oR7VjMMyukvX4="
     end
 
+    test "works for repos with ../ relative symlinks" do
+      assert DepsNix.github_prefetcher(
+               "Strech",
+               "avrora",
+               "a2df4d8f177dacc7be24aa3e6bc76b52c3f114a9"
+             ) == "sha256-msktKtQGBhe2UrZr9uiKiRFCiXCkFa0+zbOy8KQIhc4="
+    end
+
     test "fails for nonsense repos" do
       assert_raise(DepsNix.InvalidGitHubReference, fn ->
         DepsNix.github_prefetcher(
