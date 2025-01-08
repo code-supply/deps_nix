@@ -176,7 +176,7 @@ let
 
       castore =
         let
-          version = "1.0.10";
+          version = "1.0.11";
         in
         buildMix {
           inherit version;
@@ -186,7 +186,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "castore";
-            sha256 = "1b0b7ea14d889d9ea21202c43a4fa015eb913021cb535e8ed91946f4b77a8848";
+            sha256 = "e03990b4db988df56262852f20de0f659871c35154691427a5047f4967a16a62";
           };
         };
 
@@ -267,7 +267,7 @@ let
 
       decimal =
         let
-          version = "2.2.0";
+          version = "2.3.0";
         in
         buildMix {
           inherit version;
@@ -277,7 +277,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "decimal";
-            sha256 = "af8daf87384b51b7e611fb1a1f2c4d4876b65ef968fa8bd3adf44cff401c7f21";
+            sha256 = "a4d66355cb29cb47c3cf30e71329e58361cfcb37c34235ef3bf1d7bf3773aeac";
           };
         };
 
@@ -304,7 +304,7 @@ let
 
       eventstore =
         let
-          version = "1.4.6";
+          version = "1.4.7";
         in
         buildMix {
           inherit version;
@@ -314,7 +314,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "eventstore";
-            sha256 = "3504d7d951899a47cc22d1ae12cad747d6f5547f80707bb1887cd1ec910bbc35";
+            sha256 = "9eedd728437848cbfeda3968b8d3092f15a66325f15fcd77941047e9ff39f916";
           };
 
           beamDeps = [
@@ -327,7 +327,7 @@ let
 
       ex_cldr =
         let
-          version = "2.40.1";
+          version = "2.40.2";
         in
         buildMix {
           inherit version;
@@ -337,7 +337,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "ex_cldr";
-            sha256 = "509810702e8e81991851d9426ffe6b34b48b7b9baa12922e7b3fb8f6368606f3";
+            sha256 = "cd9039ca9a7c61b99c053a16bd2201ebd7d1c87b49499a4c6d761ec14bca4442";
           };
 
           beamDeps = [
@@ -349,7 +349,7 @@ let
 
       ex_cldr_calendars =
         let
-          version = "1.26.2";
+          version = "1.26.4";
         in
         buildMix {
           inherit version;
@@ -359,7 +359,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "ex_cldr_calendars";
-            sha256 = "b689847f3fbbd145954a9205e19b1e4850a79c2a27cdae1c7912b9b262a8ef35";
+            sha256 = "6538ee5328ddf5457b5f11bfccb465405d0d7011ac0bb24d826af0be00335170";
           };
 
           beamDeps = [
@@ -841,7 +841,7 @@ let
 
       req =
         let
-          version = "0.5.7";
+          version = "0.5.8";
         in
         buildMix {
           inherit version;
@@ -851,7 +851,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "req";
-            sha256 = "c6035374615120a8923e8089d0c21a3496cf9eda2d287b806081b8f323ceee29";
+            sha256 = "d7fc5898a566477e174f26887821a3c5082b243885520ee4b45555f5d53f40ef";
           };
 
           beamDeps = [
@@ -970,7 +970,7 @@ let
 
       thousand_island =
         let
-          version = "1.3.6";
+          version = "1.3.9";
         in
         buildMix {
           inherit version;
@@ -980,7 +980,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "thousand_island";
-            sha256 = "0ed8798084c8c49a223840b20598b022e4eb8c9f390fb6701864c307fc9aa2cd";
+            sha256 = "25ab4c07badadf7f87adb4ab414e0ed374e5f19e72503aa85132caa25776e54f";
           };
 
           beamDeps = [
@@ -990,7 +990,7 @@ let
 
       tls_certificate_check =
         let
-          version = "1.24.0";
+          version = "1.25.0";
         in
         buildRebar3 {
           inherit version;
@@ -999,7 +999,7 @@ let
           src = fetchHex {
             inherit version;
             pkg = "tls_certificate_check";
-            sha256 = "90b25a58ee433d91c17f036d4d354bf8859a089bfda60e68a86f8eecae45ef1b";
+            sha256 = "167343ccf50538cf2faf61a3f1460e749b3edf2ecef55516af2b5834362abcb1";
           };
 
           beamDeps = [
