@@ -23,6 +23,11 @@ let
             };
           }
         ];
+        ex_keccak = [
+          {
+            name = "rustlerPrecompiled";
+          }
+        ];
         tokenizers = [
           {
             name = "rustlerPrecompiled";
@@ -34,6 +39,9 @@ let
         import Config
 
         config :explorer, Explorer.PolarsBackend.Native,
+          skip_compilation?: true
+
+        config :ex_keccak, ExKeccak,
           skip_compilation?: true
 
         config :tokenizers, Tokenizers.Native,
@@ -432,6 +440,27 @@ let
             ex_cldr
             ex_cldr_currencies
             jason
+          ];
+        };
+
+      ex_keccak =
+        let
+          version = "0.7.6";
+        in
+        buildMix {
+          inherit version;
+          name = "ex_keccak";
+          appConfigPath = ./config;
+
+          src = fetchHex {
+            inherit version;
+            pkg = "ex_keccak";
+            sha256 = "9d1568424eb7b995e480d1b7f0c1e914226ee625496600abb922bba6f5cdc5e4";
+          };
+
+          beamDeps = [
+            rustler
+            rustler_precompiled
           ];
         };
 

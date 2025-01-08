@@ -11,6 +11,11 @@ let
         };
       }
     ];
+    ex_keccak = [
+      {
+        name = "rustlerPrecompiled";
+      }
+    ];
     tokenizers = [
       {
         name = "rustlerPrecompiled";
@@ -22,6 +27,9 @@ let
     import Config
 
     config :explorer, Explorer.PolarsBackend.Native,
+      skip_compilation?: true
+
+    config :ex_keccak, ExKeccak,
       skip_compilation?: true
 
     config :tokenizers, Tokenizers.Native,
