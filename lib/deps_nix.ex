@@ -59,6 +59,8 @@ defmodule DepsNix do
   end
 
   def github_prefetcher(owner, repo, rev) do
+    Mix.shell().info("deps_nix: fetching hash for GitHub dependency #{owner}/#{repo}")
+
     with dir <- System.tmp_dir() |> realpath(),
          path <- "#{dir}/#{repo}-#{rev}",
          {:ok, _deletions} <- File.rm_rf(path),
