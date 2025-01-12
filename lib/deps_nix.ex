@@ -231,20 +231,10 @@ defmodule DepsNix do
                     ] ++ extendedPkgs.lib.lists.optional extendedPkgs.stdenv.isDarwin extendedPkgs.darwin.IOKit;
                     doCheck = false;
                   };
-              elixirConfig = pkgs.writeTextDir "config/config.exs" ''
-                import Config
-
-                config :ex_keccak, ExKeccak, skip_compilation?: true
-                config :explorer, Explorer.PolarsBackend.Native, skip_compilation?: true
-                config :ex_secp256k1, ExSecp256k1.Impl, skip_compilation?: true
-                config :tokenizers, Tokenizers.Native, skip_compilation?: true
-              '';
 
             in
             {
               nativeBuildInputs = [ extendedPkgs.cargo ];
-
-              appConfigPath = "${elixirConfig}/config";
 
               env.RUSTLER_PRECOMPILED_FORCE_BUILD_ALL = "true";
               env.RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH = "unused-but-required";

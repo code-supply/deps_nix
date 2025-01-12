@@ -71,9 +71,7 @@ altogether: it compiles the dependency from scratch to let your project
 leverage Nix caching. This will mean that you'll have to wait for an initial
 compilation in your CI system.
 
-You must disable Rustler's compilation in your release environment as well.
-This is done at compile time in the Nix derivation, but your runtime
-configuration must match this.
+You must disable Rustler's compilation for all rustler_precompiled dependencies.
 
 e.g. for explorer, in `config/prod.exs`:
 
