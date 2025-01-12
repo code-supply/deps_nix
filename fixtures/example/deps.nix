@@ -61,6 +61,31 @@ let
             ln -s "$lib" "priv/native/$(basename "$lib")"
           done
         '';
+
+        buildPhase = ''
+          suggestion() {
+            echo "***********************************************"
+            echo "                 deps_nix                      "
+            echo
+            echo " Rust dependency build failed.                 "
+            echo
+            echo " If you saw network errors, you might need     "
+            echo " to disable compilation on the appropriate     "
+            echo " RustlerPrecompiled module in your             "
+            echo " application config.                           "
+            echo
+            echo " We think you need this:                       "
+            echo
+            echo -n " "
+            grep -Rl 'use RustlerPrecompiled' lib \
+              | xargs grep 'defmodule' \
+              | sed 's/defmodule \(.*\) do/config :${old.packageName}, \1, skip_compilation?: true/'
+            echo "***********************************************"
+            exit 1
+          }
+          trap suggestion ERR
+          ${old.buildPhase}
+        '';
       };
   };
 
