@@ -319,7 +319,7 @@ defmodule DepsNix.DerivationTest do
              """
     end
 
-    test "empty sub-deps produce an empty list, formatted like nixpkgs-fmt" do
+    test "empty sub-deps produce an empty list, formatted like nixfmt" do
       assert %Derivation{
                builder: "buildMix",
                name: :bandit,
