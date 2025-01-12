@@ -194,6 +194,71 @@ defmodule DepsNix do
         buildMix = lib.makeOverridable beamPackages.buildMix;
         buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
 
+        workarounds = {
+          rustlerPrecompiled =
+            {
+              toolchain ? null,
+              ...
+            }:
+            old:
+            let
+              extendedPkgs = pkgs.extend fenixOverlay;
+              fenixOverlay = import "${
+                fetchTarball {
+                  url = "https://github.com/nix-community/fenix/archive/280efe0e9b7b824518091a5aff76065785f81649.tar.gz";
+                  sha256 = "sha256:07qi34kbz9hyxp0cjh2r37ix0jc849rd5c9cxw1ad3l4r92f4fcg";
+                }
+              }/overlay.nix";
+              nativeDir = "${old.src}/native/${with builtins; head (attrNames (readDir "${old.src}/native"))}";
+              fenix =
+                if toolchain == null then
+                  extendedPkgs.fenix.stable
+                else
+                  extendedPkgs.fenix.fromToolchainName toolchain;
+              native =
+                (extendedPkgs.makeRustPlatform {
+                  inherit (fenix) cargo rustc;
+                }).buildRustPackage
+                  {
+                    pname = "${old.packageName}-native";
+                    version = old.version;
+                    src = nativeDir;
+                    cargoLock = {
+                      lockFile = "${nativeDir}/Cargo.lock";
+                    };
+                    nativeBuildInputs = [
+                      extendedPkgs.cmake
+                    ] ++ extendedPkgs.lib.lists.optional extendedPkgs.stdenv.isDarwin extendedPkgs.darwin.IOKit;
+                    doCheck = false;
+                  };
+              elixirConfig = pkgs.writeTextDir "config/config.exs" ''
+                import Config
+
+                config :ex_keccak, ExKeccak, skip_compilation?: true
+                config :explorer, Explorer.PolarsBackend.Native, skip_compilation?: true
+                config :ex_secp256k1, ExSecp256k1.Impl, skip_compilation?: true
+                config :tokenizers, Tokenizers.Native, skip_compilation?: true
+              '';
+
+            in
+            {
+              nativeBuildInputs = [ extendedPkgs.cargo ];
+
+              appConfigPath = "${elixirConfig}/config";
+
+              env.RUSTLER_PRECOMPILED_FORCE_BUILD_ALL = "true";
+              env.RUSTLER_PRECOMPILED_GLOBAL_CACHE_PATH = "unused-but-required";
+
+              preConfigure = ''
+                mkdir -p priv/native
+                for lib in ${native}/lib/*
+                do
+                  ln -s "$lib" "priv/native/$(basename "$lib")"
+                done
+              '';
+            };
+        };
+
         defaultOverrides = (
       #{default_overrides()}
         );
