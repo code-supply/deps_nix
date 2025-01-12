@@ -28,6 +28,11 @@ let
             name = "rustlerPrecompiled";
           }
         ];
+        ex_secp256k1 = [
+          {
+            name = "rustlerPrecompiled";
+          }
+        ];
         tokenizers = [
           {
             name = "rustlerPrecompiled";
@@ -38,14 +43,10 @@ let
       elixirConfig = pkgs.writeTextDir "config/config.exs" ''
         import Config
 
-        config :explorer, Explorer.PolarsBackend.Native,
-          skip_compilation?: true
-
-        config :ex_keccak, ExKeccak,
-          skip_compilation?: true
-
-        config :tokenizers, Tokenizers.Native,
-          skip_compilation?: true
+        config :ex_keccak, ExKeccak, skip_compilation?: true
+        config :explorer, Explorer.PolarsBackend.Native, skip_compilation?: true
+        config :ex_secp256k1, ExSecp256k1.Impl, skip_compilation?: true
+        config :tokenizers, Tokenizers.Native, skip_compilation?: true
       '';
 
       buildNativeDir = src: "${src}/native/${with builtins; head (attrNames (readDir "${src}/native"))}";
@@ -456,6 +457,27 @@ let
             inherit version;
             pkg = "ex_keccak";
             sha256 = "9d1568424eb7b995e480d1b7f0c1e914226ee625496600abb922bba6f5cdc5e4";
+          };
+
+          beamDeps = [
+            rustler
+            rustler_precompiled
+          ];
+        };
+
+      ex_secp256k1 =
+        let
+          version = "0.7.3";
+        in
+        buildMix {
+          inherit version;
+          name = "ex_secp256k1";
+          appConfigPath = ./config;
+
+          src = fetchHex {
+            inherit version;
+            pkg = "ex_secp256k1";
+            sha256 = "ea63159442f4d8143166cd1507da03edc43216d6e7c6bac4b416bdce04f0daa8";
           };
 
           beamDeps = [

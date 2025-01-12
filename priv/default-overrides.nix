@@ -16,6 +16,11 @@ let
         name = "rustlerPrecompiled";
       }
     ];
+    ex_secp256k1 = [
+      {
+        name = "rustlerPrecompiled";
+      }
+    ];
     tokenizers = [
       {
         name = "rustlerPrecompiled";
@@ -26,14 +31,10 @@ let
   elixirConfig = pkgs.writeTextDir "config/config.exs" ''
     import Config
 
-    config :explorer, Explorer.PolarsBackend.Native,
-      skip_compilation?: true
-
-    config :ex_keccak, ExKeccak,
-      skip_compilation?: true
-
-    config :tokenizers, Tokenizers.Native,
-      skip_compilation?: true
+    config :ex_keccak, ExKeccak, skip_compilation?: true
+    config :explorer, Explorer.PolarsBackend.Native, skip_compilation?: true
+    config :ex_secp256k1, ExSecp256k1.Impl, skip_compilation?: true
+    config :tokenizers, Tokenizers.Native, skip_compilation?: true
   '';
 
   buildNativeDir = src: "${src}/native/${with builtins; head (attrNames (readDir "${src}/native"))}";
