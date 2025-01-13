@@ -140,19 +140,21 @@ defmodule DepsNix.Derivation do
       #{drv.name} =
         let
           version = "#{drv.version}";
-        in
-        #{drv.builder} {
-          inherit version;
-          name = "#{drv.name}";#{format_app_config_path(drv)}
+          drv = #{drv.builder} {
+            inherit version;
+            name = "#{drv.name}";#{format_app_config_path(drv)}
 
-          src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
-        };
+            src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
+          };
+        in
+        drv;
       """
     end
 
     defp src(src) do
       src
       |> Kernel.to_string()
+      |> Util.indent(from: 1)
       |> Util.indent(from: 1)
       |> Util.indent(from: 1)
     end
@@ -171,6 +173,7 @@ defmodule DepsNix.Derivation do
       """
       |> Util.indent(from: 2)
       |> Util.indent(from: 2)
+      |> Util.indent(from: 2)
     end
 
     defp format_app_config_path(%DepsNix.Derivation{
@@ -178,6 +181,7 @@ defmodule DepsNix.Derivation do
            app_config_path: path
          }) do
       "\nappConfigPath = #{prefix_path(path)};"
+      |> Util.indent(from: 1)
       |> Util.indent(from: 1)
       |> Util.indent(from: 1)
     end

@@ -259,23 +259,24 @@ defmodule DepsNix.DerivationTest do
              my_project =
                let
                  version = "6.6.6";
+                 drv = buildMix {
+                   inherit version;
+                   name = "my_project";
+                   appConfigPath = ../../config;
+
+                   src = ../in/ur/repoz;
+
+
+                   beamDeps = [
+                     hpax
+                     plug
+                     telemetry
+                     thousand_island
+                     websock
+                   ];
+                 };
                in
-               buildMix {
-                 inherit version;
-                 name = "my_project";
-                 appConfigPath = ../../config;
-
-                 src = ../in/ur/repoz;
-
-
-                 beamDeps = [
-                   hpax
-                   plug
-                   telemetry
-                   thousand_island
-                   websock
-                 ];
-               };
+               drv;
              """
     end
 
@@ -296,26 +297,27 @@ defmodule DepsNix.DerivationTest do
              bandit =
                let
                  version = "1.4.2";
-               in
-               buildMix {
-                 inherit version;
-                 name = "bandit";
-                 appConfigPath = ./foo;
-
-                 src = fetchHex {
+                 drv = buildMix {
                    inherit version;
-                   pkg = "bandit";
-                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-                 };
+                   name = "bandit";
+                   appConfigPath = ./foo;
 
-                 beamDeps = [
-                   hpax
-                   plug
-                   telemetry
-                   thousand_island
-                   websock
-                 ];
-               };
+                   src = fetchHex {
+                     inherit version;
+                     pkg = "bandit";
+                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                   };
+
+                   beamDeps = [
+                     hpax
+                     plug
+                     telemetry
+                     thousand_island
+                     websock
+                   ];
+                 };
+               in
+               drv;
              """
     end
 
@@ -336,18 +338,19 @@ defmodule DepsNix.DerivationTest do
              bandit =
                let
                  version = "1.4.2";
-               in
-               buildMix {
-                 inherit version;
-                 name = "bandit";
-                 appConfigPath = ./config;
-
-                 src = fetchHex {
+                 drv = buildMix {
                    inherit version;
-                   pkg = "bandit";
-                   sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                   name = "bandit";
+                   appConfigPath = ./config;
+
+                   src = fetchHex {
+                     inherit version;
+                     pkg = "bandit";
+                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
+                   };
                  };
-               };
+               in
+               drv;
              """
     end
   end
