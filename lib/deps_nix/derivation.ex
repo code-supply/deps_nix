@@ -147,7 +147,7 @@ defmodule DepsNix.Derivation do
             src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
           };
         in
-        drv;
+        drv#{override(drv)};
       """
     end
 
@@ -174,6 +174,14 @@ defmodule DepsNix.Derivation do
       |> Util.indent(from: 2)
       |> Util.indent(from: 2)
       |> Util.indent(from: 2)
+    end
+
+    defp override(drv) do
+      if :rustler_precompiled in drv.beam_deps do
+        ".override (workarounds.rustlerPrecompiled { } drv)"
+      else
+        ""
+      end
     end
 
     defp format_app_config_path(%DepsNix.Derivation{

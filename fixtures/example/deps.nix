@@ -103,21 +103,6 @@ let
             };
           }
         ];
-        ex_keccak = [
-          {
-            name = "rustlerPrecompiled";
-          }
-        ];
-        ex_secp256k1 = [
-          {
-            name = "rustlerPrecompiled";
-          }
-        ];
-        tokenizers = [
-          {
-            name = "rustlerPrecompiled";
-          }
-        ];
       };
 
       applyOverrides =
@@ -493,7 +478,7 @@ let
             ];
           };
         in
-        drv;
+        drv.override (workarounds.rustlerPrecompiled { } drv);
 
       ex_secp256k1 =
         let
@@ -515,7 +500,7 @@ let
             ];
           };
         in
-        drv;
+        drv.override (workarounds.rustlerPrecompiled { } drv);
 
       explorer =
         let
@@ -542,7 +527,7 @@ let
             ];
           };
         in
-        drv;
+        drv.override (workarounds.rustlerPrecompiled { } drv);
 
       finch =
         let
@@ -1141,7 +1126,7 @@ let
             ];
           };
         in
-        drv;
+        drv.override (workarounds.rustlerPrecompiled { } drv);
 
       toml =
         let

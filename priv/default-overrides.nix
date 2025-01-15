@@ -11,21 +11,6 @@ let
         };
       }
     ];
-    ex_keccak = [
-      {
-        name = "rustlerPrecompiled";
-      }
-    ];
-    ex_secp256k1 = [
-      {
-        name = "rustlerPrecompiled";
-      }
-    ];
-    tokenizers = [
-      {
-        name = "rustlerPrecompiled";
-      }
-    ];
   };
 
   applyOverrides =
