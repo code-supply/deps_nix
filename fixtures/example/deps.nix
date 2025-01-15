@@ -20,8 +20,8 @@ let
         extendedPkgs = pkgs.extend fenixOverlay;
         fenixOverlay = import "${
           fetchTarball {
-            url = "https://github.com/nix-community/fenix/archive/280efe0e9b7b824518091a5aff76065785f81649.tar.gz";
-            sha256 = "sha256:07qi34kbz9hyxp0cjh2r37ix0jc849rd5c9cxw1ad3l4r92f4fcg";
+            url = "https://github.com/nix-community/fenix/archive/056c9393c821a4df356df6ce7f14c722dc8717ec.tar.gz";
+            sha256 = "sha256:1cdfh6nj81gjmn689snigidyq7w98gd8hkl5rvhly6xj7vyppmnd";
           }
         }/overlay.nix";
         nativeDir = "${old.src}/native/${with builtins; head (attrNames (readDir "${old.src}/native"))}";
@@ -98,8 +98,8 @@ let
           {
             name = "rustlerPrecompiled";
             toolchain = {
-              name = "nightly-2024-07-26";
-              sha256 = "sha256-5icy5hSaQy6/fUim9L2vz2GeZNC3fX1N5T2MjnkTplc=";
+              name = "nightly-2024-11-01";
+              sha256 = "sha256-wq7bZ1/IlmmLkSa3GUJgK17dTWcKyf5A+ndS9yRwB88=";
             };
           }
         ];
@@ -144,7 +144,7 @@ let
 
       aws_signature =
         let
-          version = "0.3.2";
+          version = "0.3.3";
           drv = buildRebar3 {
             inherit version;
             name = "aws_signature";
@@ -152,7 +152,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "aws_signature";
-              sha256 = "b0daf61feb4250a8ab0adea60db3e336af732ff71dd3fb22e45ae3dcbd071e44";
+              sha256 = "87e8f42b8e49002aa8d0350a71d13d69ea91b9afb4ca9b526ae36db1d585c924";
             };
           };
         in
@@ -504,7 +504,7 @@ let
 
       explorer =
         let
-          version = "0.9.2";
+          version = "0.10.1";
           drv = buildMix {
             inherit version;
             name = "explorer";
@@ -513,12 +513,13 @@ let
             src = fetchHex {
               inherit version;
               pkg = "explorer";
-              sha256 = "63057e318d613c1819bd8bee2d8ed4f7061c3136edc6832ad18243d28e6344eb";
+              sha256 = "4e3efc45d4981a568405a181ebf206ba208622a5e94048c9d713b27a053c3197";
             };
 
             beamDeps = [
               aws_signature
               castore
+              decimal
               fss
               rustler
               rustler_precompiled

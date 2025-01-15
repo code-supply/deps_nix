@@ -29,7 +29,7 @@ defmodule Example.MixProject do
       {:ex_cldr_dates_times, "~> 2.17"},
       {:ex_cldr_numbers, "~> 2.33"},
       {:ex_keccak, "~> 0.7.6"},
-      {:explorer, "~> 0.9.0"},
+      {:explorer, "~> 0.10.1"},
       {:fun_with_flags, "~> 1.12.0"},
       {:heroicons,
        github: "tailwindlabs/heroicons",

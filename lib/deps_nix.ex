@@ -205,8 +205,8 @@ defmodule DepsNix do
               extendedPkgs = pkgs.extend fenixOverlay;
               fenixOverlay = import "${
                 fetchTarball {
-                  url = "https://github.com/nix-community/fenix/archive/280efe0e9b7b824518091a5aff76065785f81649.tar.gz";
-                  sha256 = "sha256:07qi34kbz9hyxp0cjh2r37ix0jc849rd5c9cxw1ad3l4r92f4fcg";
+                  url = "https://github.com/nix-community/fenix/archive/056c9393c821a4df356df6ce7f14c722dc8717ec.tar.gz";
+                  sha256 = "sha256:1cdfh6nj81gjmn689snigidyq7w98gd8hkl5rvhly6xj7vyppmnd";
                 }
               }/overlay.nix";
               nativeDir = "${old.src}/native/${with builtins; head (attrNames (readDir "${old.src}/native"))}";
@@ -283,8 +283,8 @@ defmodule DepsNix do
                 {
                   name = "rustlerPrecompiled";
                   toolchain = {
-                    name = "nightly-2024-07-26";
-                    sha256 = "sha256-5icy5hSaQy6/fUim9L2vz2GeZNC3fX1N5T2MjnkTplc=";
+                    name = "nightly-2024-11-01";
+                    sha256 = "sha256-wq7bZ1/IlmmLkSa3GUJgK17dTWcKyf5A+ndS9yRwB88=";
                   };
                 }
               ];
