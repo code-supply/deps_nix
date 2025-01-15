@@ -64,8 +64,7 @@ See `mix help deps.nix` for more options.
 ## Rustler-precompiled
 
 deps_nix will work with some dependencies that use
-[rustler-precompiled](https://github.com/philss/rustler_precompiled). See the
-[default overrides](priv/default-overrides.nix) for a list of them. For better
+[rustler-precompiled](https://github.com/philss/rustler_precompiled). For better
 compatibility with the Nix ecosystem, deps_nix eschews precompiled artifacts
 altogether: it compiles the dependency from scratch to let your project
 leverage Nix caching. This will mean that you'll have to wait for an initial
