@@ -22,6 +22,7 @@ defmodule Example.MixProject do
   defp deps do
     [
       {:bandit, github: "mtrudel/bandit", ref: "1.4.2"},
+      {:brod, "~> 3.16"},
       {:deps_nix, path: "../..", only: [:dev]},
       {:eventstore, "~> 1.4"},
       {:ex_secp256k1, "~> 0.7.3"},

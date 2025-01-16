@@ -10,6 +10,10 @@ let
   buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
 
   workarounds = {
+    portCompiler = _unusedArgs: old: {
+      buildPlugins = [ pkgs.beamPackages.pc ];
+    };
+
     rustlerPrecompiled =
       {
         toolchain ? null,
@@ -94,6 +98,11 @@ let
 
     let
       apps = {
+        crc32cer = [
+          {
+            name = "portCompiler";
+          }
+        ];
         explorer = [
           {
             name = "rustlerPrecompiled";
@@ -101,6 +110,11 @@ let
               name = "nightly-2024-11-01";
               sha256 = "sha256-wq7bZ1/IlmmLkSa3GUJgK17dTWcKyf5A+ndS9yRwB88=";
             };
+          }
+        ];
+        snappyer = [
+          {
+            name = "portCompiler";
           }
         ];
       };
@@ -184,6 +198,27 @@ let
         in
         drv;
 
+      brod =
+        let
+          version = "3.19.1";
+          drv = buildRebar3 {
+            inherit version;
+            name = "brod";
+
+            src = fetchHex {
+              inherit version;
+              pkg = "brod";
+              sha256 = "241899cff62e175cd60de4acd4b72f40edb3529b18853f8b22a8a35e4c76d71d";
+            };
+
+            beamDeps = [
+              kafka_protocol
+              snappyer
+            ];
+          };
+        in
+        drv;
+
       castore =
         let
           version = "1.0.11";
@@ -239,6 +274,22 @@ let
               castore
               decimal
             ];
+          };
+        in
+        drv;
+
+      crc32cer =
+        let
+          version = "0.1.8";
+          drv = buildRebar3 {
+            inherit version;
+            name = "crc32cer";
+
+            src = fetchHex {
+              inherit version;
+              pkg = "crc32cer";
+              sha256 = "251499085482920deb6c9b7aadabf9fb4c432f96add97ab42aee4501e5b6f591";
+            };
           };
         in
         drv;
@@ -716,6 +767,26 @@ let
         in
         drv;
 
+      kafka_protocol =
+        let
+          version = "4.1.5";
+          drv = buildRebar3 {
+            inherit version;
+            name = "kafka_protocol";
+
+            src = fetchHex {
+              inherit version;
+              pkg = "kafka_protocol";
+              sha256 = "c956c9357fef493b7072a35d0c3e2be02aa5186c804a412d29e62423bb15e5d9";
+            };
+
+            beamDeps = [
+              crc32cer
+            ];
+          };
+        in
+        drv;
+
       mime =
         let
           version = "2.0.6";
@@ -994,6 +1065,22 @@ let
               castore
               rustler
             ];
+          };
+        in
+        drv;
+
+      snappyer =
+        let
+          version = "1.2.9";
+          drv = buildRebar3 {
+            inherit version;
+            name = "snappyer";
+
+            src = fetchHex {
+              inherit version;
+              pkg = "snappyer";
+              sha256 = "18d00ca218ae613416e6eecafe1078db86342a66f86277bd45c95f05bf1c8b29";
+            };
           };
         in
         drv;

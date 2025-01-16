@@ -195,6 +195,10 @@ defmodule DepsNix do
         buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
 
         workarounds = {
+          portCompiler = _unusedArgs: old: {
+            buildPlugins = [ pkgs.beamPackages.pc ];
+          };
+
           rustlerPrecompiled =
             {
               toolchain ? null,
@@ -279,6 +283,11 @@ defmodule DepsNix do
 
           let
             apps = {
+              crc32cer = [
+                {
+                  name = "portCompiler";
+                }
+              ];
               explorer = [
                 {
                   name = "rustlerPrecompiled";
@@ -286,6 +295,11 @@ defmodule DepsNix do
                     name = "nightly-2024-11-01";
                     sha256 = "sha256-wq7bZ1/IlmmLkSa3GUJgK17dTWcKyf5A+ndS9yRwB88=";
                   };
+                }
+              ];
+              snappyer = [
+                {
+                  name = "portCompiler";
                 }
               ];
             };
