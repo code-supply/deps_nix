@@ -135,6 +135,12 @@ defmodule DepsNix.Derivation do
   end
 
   defimpl String.Chars do
+    def to_string(%DepsNix.Derivation{name: :heroicons} = drv) do
+      """
+      #{drv.name} = #{drv.src |> Kernel.to_string()}
+      """
+    end
+
     def to_string(drv) do
       """
       #{drv.name} =

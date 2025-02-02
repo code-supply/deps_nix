@@ -164,9 +164,10 @@ defmodule DepsNix do
   end
 
   defp unwanted(dep) do
-    Enum.all?([:app, :compile], fn opt ->
-      Keyword.fetch(dep.opts, opt) == {:ok, false}
-    end)
+    dep.app != :heroicons &&
+      Enum.all?([:app, :compile], fn opt ->
+        Keyword.fetch(dep.opts, opt) == {:ok, false}
+      end)
   end
 
   defp add_output(options, parsed_args) do

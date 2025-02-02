@@ -713,6 +713,13 @@ let
         in
         drv;
 
+      heroicons = pkgs.fetchFromGitHub {
+        owner = "tailwindlabs";
+        repo = "heroicons";
+        rev = "88ab3a0d790e6a47404cba02800a6b25d2afae50";
+        hash = "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg=";
+      };
+
       hpack =
         let
           version = "0.3.0";

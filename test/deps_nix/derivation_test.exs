@@ -277,6 +277,30 @@ defmodule DepsNix.DerivationTest do
              """
     end
 
+    test "is just a fetcher for heroicons" do
+      assert %Derivation{
+               builder: "buildMix",
+               name: :heroicons,
+               version: "6.6.6",
+               src: %FetchFromGitHub{
+                 owner: "tailwindlabs",
+                 repo: "heroicons",
+                 rev: "88ab3a0d790e6a47404cba02800a6b25d2afae50",
+                 hash: "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg="
+               },
+               beam_deps: [],
+               app_config_path: "foo"
+             }
+             |> to_string() == """
+             heroicons = pkgs.fetchFromGitHub {
+               owner = "tailwindlabs";
+               repo = "heroicons";
+               rev = "88ab3a0d790e6a47404cba02800a6b25d2afae50";
+               hash = "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg=";
+             };
+             """
+    end
+
     test "rebar3 builds don't get appConfigPaths" do
       refute dep(builders: [:rebar3], scm: Mix.SCM.Hex)
              |> pick()

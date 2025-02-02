@@ -90,6 +90,15 @@ defmodule DepsNixTest do
     assert output(%DepsNix.Options{}, &stub_converger/1) =~ "with self;\n    {\n \n    };"
   end
 
+  test "creates a special fetcher derivation for heroicons, which is included in new Phoenix apps" do
+    dep = dep(name: :heroicons, dep_opts: [app: false, compile: false]) |> pick()
+    converger = fn [env: :prod] -> [dep] end
+    nix = output(%DepsNix.Options{envs: %{"prod" => :all}}, converger)
+
+    assert Regex.scan(~r(heroicons), nix) |> length() >= 1,
+           "Couldn't find special-cased heroicons fetcher in #{nix}"
+  end
+
   property "doesn't create derivations marked both app: false and compile: false" do
     check all dep <- dep(name: :not_a_mix_dep, dep_opts: [app: false, compile: false]) do
       converger = fn [env: :prod] -> [dep] end
