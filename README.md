@@ -7,6 +7,10 @@ While mix2nix is a function of a `mix.lock`, this project instead uses Mix's
 internals to allow you to choose packages from certain environments. It also
 supports git and path dependencies.
 
+## Using to package Phoenix projects for release
+
+See [nix-phoenix](https://github.com/code-supply/nix-phoenix) for instructions and a flake template.
+
 ## Why?
 
 You want this if you plan to release your Elixir project using nixpkgs'
