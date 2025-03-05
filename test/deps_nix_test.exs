@@ -10,7 +10,7 @@ defmodule DepsNixTest do
                "code-supply",
                "deps_nix",
                "8a6c3537c958fe3fd1810d56bdee6c13fb35d089"
-             ) == "sha256-zJOkGOSBBA0Y9HPRmwPmBpqaqsoRa0oR7VjMMyukvX4="
+             ) == {"sha256-zJOkGOSBBA0Y9HPRmwPmBpqaqsoRa0oR7VjMMyukvX4=", "buildMix"}
     end
 
     test "works for repos with ../ relative symlinks" do
@@ -18,7 +18,7 @@ defmodule DepsNixTest do
                "Strech",
                "avrora",
                "a2df4d8f177dacc7be24aa3e6bc76b52c3f114a9"
-             ) == "sha256-msktKtQGBhe2UrZr9uiKiRFCiXCkFa0+zbOy8KQIhc4="
+             ) == {"sha256-msktKtQGBhe2UrZr9uiKiRFCiXCkFa0+zbOy8KQIhc4=", "buildMix"}
     end
 
     test "fails for nonsense repos" do
