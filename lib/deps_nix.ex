@@ -68,7 +68,7 @@ defmodule DepsNix do
          :ok <- File.write("#{dir}/deps-nix-tarball", body),
          {_, 0} <- System.cmd("tar", ["-xf", "#{dir}/deps-nix-tarball"], cd: dir),
          {output, 0} <- System.cmd("nix", ["hash", "path", path]) do
-      String.trim_trailing(output)
+      {String.trim_trailing(output), find_builder_from_path(path)}
     end
   end
 
@@ -121,6 +121,14 @@ defmodule DepsNix do
                 receive_archive(conn, request_ref, data)
             end
         end
+    end
+  end
+
+  defp find_builder_from_path(path) do
+    cond do
+      File.exists?(Path.join(path, "mix.exs")) -> "buildMix"
+      File.exists?(Path.join(path, "rebar.config")) -> "buildRebar3"
+      true -> :unknown
     end
   end
 
