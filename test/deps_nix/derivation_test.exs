@@ -74,7 +74,7 @@ defmodule DepsNix.DerivationTest do
                Derivation.from(dep, %DepsNix.Options{
                  github_prefetcher: fn
                    "code-supply", "mudbrick", ^rev ->
-                     generated_hash
+                     {generated_hash, "buildMix"}
                  end
                })
     end
