@@ -236,6 +236,27 @@ let
         in
         drv;
 
+      cc_precompiler =
+        let
+          version = "0.1.10";
+          drv = buildMix {
+            inherit version;
+            name = "cc_precompiler";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "cc_precompiler";
+              sha256 = "f6e046254e53cd6b41c6bacd70ae728011aa82b2742a80d6e2214855c6e06b22";
+            };
+
+            beamDeps = [
+              elixir_make
+            ];
+          };
+        in
+        drv;
+
       chatterbox =
         let
           version = "0.15.1";
@@ -366,6 +387,23 @@ let
               cldr_utils
               jason
             ];
+          };
+        in
+        drv;
+
+      elixir_make =
+        let
+          version = "0.9.0";
+          drv = buildMix {
+            inherit version;
+            name = "elixir_make";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "elixir_make";
+              sha256 = "db23d4fd8b757462ad02f8aa73431a426fe6671c80b200d9710caf3d1dd0ffdb";
+            };
           };
         in
         drv;
@@ -753,6 +791,32 @@ let
         in
         drv;
 
+      image =
+        let
+          version = "0.58.0";
+          drv = buildMix {
+            inherit version;
+            name = "image";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "image";
+              sha256 = "b5d472360caa7e8a113aeaa06559c705b593361c9d1391e1992b66ed2d7b6889";
+            };
+
+            beamDeps = [
+              jason
+              phoenix_html
+              plug
+              rustler
+              sweet_xml
+              vix
+            ];
+          };
+        in
+        drv;
+
       jason =
         let
           version = "1.4.4";
@@ -923,6 +987,23 @@ let
               opentelemetry_api
               tls_certificate_check
             ];
+          };
+        in
+        drv;
+
+      phoenix_html =
+        let
+          version = "4.2.1";
+          drv = buildMix {
+            inherit version;
+            name = "phoenix_html";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "phoenix_html";
+              sha256 = "cff108100ae2715dd959ae8f2a8cef8e20b593f8dfd031c9cba92702cf23e053";
+            };
           };
         in
         drv;
@@ -1109,6 +1190,23 @@ let
         in
         drv;
 
+      sweet_xml =
+        let
+          version = "0.7.5";
+          drv = buildMix {
+            inherit version;
+            name = "sweet_xml";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "sweet_xml";
+              sha256 = "193b28a9b12891cae351d81a0cead165ffe67df1b73fe5866d10629f4faefb12";
+            };
+          };
+        in
+        drv;
+
       table =
         let
           version = "0.1.2";
@@ -1236,6 +1334,36 @@ let
               pkg = "toml";
               sha256 = "0690246a2478c1defd100b0c9b89b4ea280a22be9a7b313a8a058a2408a2fa70";
             };
+          };
+        in
+        drv;
+
+      vix =
+        let
+          version = "0.33.0";
+          drv = buildMix {
+            inherit version;
+            name = "vix";
+            appConfigPath = ./config;
+
+            VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
+
+            nativeBuildInputs = with pkgs; [
+              pkg-config
+              vips
+            ];
+
+            src = fetchHex {
+              inherit version;
+              pkg = "vix";
+              sha256 = "9acde72b27bdfeadeb51f790f7a6cc0d06cf555718c05cf57e43c5cf93d8471b";
+            };
+
+            beamDeps = [
+              castore
+              cc_precompiler
+              elixir_make
+            ];
           };
         in
         drv;

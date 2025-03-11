@@ -135,6 +135,29 @@ defmodule DepsNix.Derivation do
   end
 
   defimpl String.Chars do
+    def to_string(%DepsNix.Derivation{name: :vix} = drv) do
+      """
+      vix =
+        let
+          version = "#{drv.version}";
+          drv = #{drv.builder} {
+            inherit version;
+            name = "#{drv.name}";#{format_app_config_path(drv)}
+
+            VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
+
+            nativeBuildInputs = with pkgs; [
+              pkg-config
+              vips
+            ];
+
+            src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
+          };
+        in
+        drv#{override(drv)};
+      """
+    end
+
     def to_string(%DepsNix.Derivation{name: :heroicons} = drv) do
       """
       #{drv.name} = #{drv.src |> Kernel.to_string()}

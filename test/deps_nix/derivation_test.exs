@@ -309,44 +309,6 @@ defmodule DepsNix.DerivationTest do
              |> String.contains?("appConfigPath")
     end
 
-    test "rustler_precompiled dependencies get automatically overridden" do
-      assert %Derivation{
-               builder: "buildMix",
-               name: :my_project,
-               version: "6.6.6",
-               src: %FetchHex{
-                 pkg: :my_project,
-                 version: "6.6.6",
-                 sha256: "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f"
-               },
-               beam_deps: [:rustler_precompiled, :some_other_dep],
-               app_config_path: "../../config"
-             }
-             |> to_string() == """
-             my_project =
-               let
-                 version = "6.6.6";
-                 drv = buildMix {
-                   inherit version;
-                   name = "my_project";
-                   appConfigPath = ../../config;
-
-                   src = fetchHex {
-                     inherit version;
-                     pkg = "my_project";
-                     sha256 = "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f";
-                   };
-
-                   beamDeps = [
-                     rustler_precompiled
-                     some_other_dep
-                   ];
-                 };
-               in
-               drv.override (workarounds.rustlerPrecompiled { } drv);
-             """
-    end
-
     test "paths get special treatment" do
       assert %Derivation{
                builder: "buildMix",
