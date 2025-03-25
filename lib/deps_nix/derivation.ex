@@ -48,21 +48,28 @@ defmodule DepsNix.Derivation do
   def from(%Mix.Dep{scm: Mix.SCM.Git} = dep, options) do
     {:git, url, rev, _} = dep.opts[:lock]
 
-    prefetcher = options.github_prefetcher
-
     case parse_git_url(url) do
       [owner: owner, repo: repo] ->
+        prefetcher = options.github_prefetcher
+
+        {hash, builder} =
+          if prefetcher do
+            prefetcher.(owner, repo, rev)
+          else
+            {"", "buildMix"}
+          end
+
         fetcher = %FetchFromGitHub{
           owner: owner,
           repo: repo,
           rev: rev,
-          hash: if(prefetcher, do: prefetcher.(owner, repo, rev), else: "")
+          hash: hash
         }
 
         new(dep,
           version: rev,
           src: fetcher,
-          builder: "buildMix",
+          builder: builder,
           app_config_path: app_config_path(options)
         )
 

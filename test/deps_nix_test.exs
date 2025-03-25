@@ -10,7 +10,7 @@ defmodule DepsNixTest do
                "code-supply",
                "deps_nix",
                "8a6c3537c958fe3fd1810d56bdee6c13fb35d089"
-             ) == "sha256-zJOkGOSBBA0Y9HPRmwPmBpqaqsoRa0oR7VjMMyukvX4="
+             ) == {"sha256-zJOkGOSBBA0Y9HPRmwPmBpqaqsoRa0oR7VjMMyukvX4=", "buildMix"}
     end
 
     test "works for repos with ../ relative symlinks" do
@@ -18,7 +18,23 @@ defmodule DepsNixTest do
                "Strech",
                "avrora",
                "a2df4d8f177dacc7be24aa3e6bc76b52c3f114a9"
-             ) == "sha256-msktKtQGBhe2UrZr9uiKiRFCiXCkFa0+zbOy8KQIhc4="
+             ) == {"sha256-msktKtQGBhe2UrZr9uiKiRFCiXCkFa0+zbOy8KQIhc4=", "buildMix"}
+    end
+
+    test "detects rebar3-only repositories" do
+      assert DepsNix.github_prefetcher(
+               "klarna",
+               "mnesia_eleveldb",
+               "af6d0556a78aec2918b3471f0c85121402a1f5b1"
+             ) == {"sha256-+ZZ5Uyoe/HK0wL0ev1vn9Tuiaps4X88izETtuRszKYE=", "buildRebar3"}
+    end
+
+    test "prefers buildMix over buildRebar3 for repos that have both" do
+      assert DepsNix.github_prefetcher(
+               "erlef",
+               "oidcc",
+               "fdf45b06d79813c7110171c5c6d334394c2f1190"
+             ) == {"sha256-QUwRH9GWMTrG2HsFqiPNNKm+K5+cwPigdtlx9OUNK58=", "buildMix"}
     end
 
     test "fails for nonsense repos" do
