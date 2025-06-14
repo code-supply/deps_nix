@@ -44,6 +44,7 @@ defmodule Example.MixProject do
       {:opentelemetry_exporter, "~> 1.7"},
       {:plug, "~> 1.13", override: true},
       {:png, "~> 0.2.1"},
+      {:redix, "~> 1.0"},
       {:rustler, ">= 0.0.0", optional: true},
       {:tokenizers, "~> 0.3.0"}
     ]

@@ -691,6 +691,10 @@ let
               pkg = "fun_with_flags";
               sha256 = "9ed303bee60687f7a07dde2c036d3e8905771001ebd77790543ba5655a5f9066";
             };
+
+            beamDeps = [
+              redix
+            ];
           };
         in
         drv;
@@ -1083,6 +1087,29 @@ let
               decimal
               jason
               table
+            ];
+          };
+        in
+        drv;
+
+      redix =
+        let
+          version = "1.5.2";
+          drv = buildMix {
+            inherit version;
+            name = "redix";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "redix";
+              sha256 = "78538d184231a5d6912f20567d76a49d1be7d3fca0e1aaaa20f4df8e1142dcb8";
+            };
+
+            beamDeps = [
+              castore
+              nimble_options
+              telemetry
             ];
           };
         in
