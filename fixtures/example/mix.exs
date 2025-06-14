@@ -46,7 +46,8 @@ defmodule Example.MixProject do
       {:png, "~> 0.2.1"},
       {:redix, "~> 1.0"},
       {:rustler, ">= 0.0.0", optional: true},
-      {:tokenizers, "~> 0.3.0"}
+      {:tokenizers, "~> 0.3.0"},
+      {:unicode_string, "~> 1.7"}
     ]
   end
 end

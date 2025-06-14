@@ -450,6 +450,7 @@ let
               cldr_utils
               decimal
               jason
+              nimble_parsec
             ];
           };
         in
@@ -918,6 +919,23 @@ let
         in
         drv;
 
+      nimble_parsec =
+        let
+          version = "1.4.2";
+          drv = buildMix {
+            inherit version;
+            name = "nimble_parsec";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "nimble_parsec";
+              sha256 = "4b21398942dda052b403bbe1da991ccd03a053668d147d53fb8c4e0efe09c973";
+            };
+          };
+        in
+        drv;
+
       nimble_pool =
         let
           version = "1.1.0";
@@ -1361,6 +1379,89 @@ let
               pkg = "toml";
               sha256 = "0690246a2478c1defd100b0c9b89b4ea280a22be9a7b313a8a058a2408a2fa70";
             };
+          };
+        in
+        drv;
+
+      trie =
+        let
+          version = "2.0.7";
+          drv = buildRebar3 {
+            inherit version;
+            name = "trie";
+
+            src = fetchHex {
+              inherit version;
+              pkg = "trie";
+              sha256 = "6b86092654bc6383d5c72dfbb32b466d3a70d3e95be37538bb5500ee888fa944";
+            };
+          };
+        in
+        drv;
+
+      unicode =
+        let
+          version = "1.20.0";
+          drv = buildMix {
+            inherit version;
+            name = "unicode";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "unicode";
+              sha256 = "fa581cf80b3b1b7f42e4d24a69109dfac465cec27a62c661306c81f4ab35894c";
+            };
+          };
+        in
+        drv;
+
+      unicode_set =
+        let
+          version = "1.5.0";
+          drv = buildMix {
+            inherit version;
+            name = "unicode_set";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "unicode_set";
+              sha256 = "6c7f200e52fb90434d6b783eaa4e0ea303cfc4844ea25b2fc1ba3eb8a6901b11";
+            };
+
+            beamDeps = [
+              nimble_parsec
+              unicode
+            ];
+          };
+        in
+        drv;
+
+      unicode_string =
+        let
+          version = "1.7.0";
+          drv = buildMix {
+            inherit version;
+            name = "unicode_string";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "unicode_string";
+              sha256 = "490f0550a1c9c70b869284975f81e09a7f9de0381e1b2d43e0779e60934b41f2";
+            };
+
+            beamDeps = [
+              ex_cldr
+              jason
+              sweet_xml
+              trie
+              unicode
+              unicode_set
+            ];
+
+            postUnpack = "ln -sfv ${unicode.src} ${unicode.name}";
           };
         in
         drv;

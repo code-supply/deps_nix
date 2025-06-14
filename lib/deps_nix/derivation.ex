@@ -180,11 +180,26 @@ defmodule DepsNix.Derivation do
             inherit version;
             name = "#{drv.name}";#{format_app_config_path(drv)}
 
-            src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
+            src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}#{post_unpack(drv)}
           };
         in
         drv#{override(drv)};
       """
+    end
+
+    defp post_unpack(%DepsNix.Derivation{name: :unicode_string}) do
+      """
+
+
+      postUnpack = "ln -sfv ${unicode.src} ${unicode.name}";\
+      """
+      |> Util.indent(from: 2)
+      |> Util.indent(from: 2)
+      |> Util.indent(from: 2)
+    end
+
+    defp post_unpack(_drv) do
+      ""
     end
 
     defp src(src) do

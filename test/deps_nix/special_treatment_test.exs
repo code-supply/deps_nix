@@ -5,6 +5,58 @@ defmodule DepsNix.SpecialTreatmentTest do
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
+  test "unicode_string has access to unicode's source at compile time" do
+    assert %Derivation{
+             builder: "buildMix",
+             name: :unicode_string,
+             version: "1.2.3",
+             src: %FetchHex{
+               pkg: :unicode_string,
+               version: "1.2.3",
+               sha256: "xxx"
+             },
+             beam_deps: [
+               :ex_cldr,
+               :jason,
+               :sweet_xml,
+               :trie,
+               :unicode,
+               :unicode_set
+             ],
+             app_config_path: "./config"
+           }
+           |> to_string() ==
+             """
+             unicode_string =
+               let
+                 version = "1.2.3";
+                 drv = buildMix {
+                   inherit version;
+                   name = "unicode_string";
+                   appConfigPath = ./config;
+
+                   src = fetchHex {
+                     inherit version;
+                     pkg = "unicode_string";
+                     sha256 = "xxx";
+                   };
+
+                   beamDeps = [
+                     ex_cldr
+                     jason
+                     sweet_xml
+                     trie
+                     unicode
+                     unicode_set
+                   ];
+
+                   postUnpack = "ln -sfv ${unicode.src} ${unicode.name}";
+                 };
+               in
+               drv;
+             """
+  end
+
   test "vix gets the vips dependency provided from nixpkgs" do
     assert %Derivation{
              builder: "buildMix",
