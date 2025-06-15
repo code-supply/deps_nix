@@ -1461,7 +1461,13 @@ let
               unicode_set
             ];
 
-            postUnpack = "ln -sfv ${unicode.src} ${unicode.name}";
+            postUnpack = ''
+              data_dir="$(elixir -e "IO.puts Unicode.data_dir()")"
+              unicode_dir="$(dirname "$data_dir")"
+              tmp_dir="$(dirname "$unicode_dir")"
+              mkdir -p "$tmp_dir"
+              ln -sfv ${unicode.src} "$tmp_dir/${unicode.name}"
+            '';
           };
         in
         drv;
