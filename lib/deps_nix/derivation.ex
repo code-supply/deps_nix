@@ -191,7 +191,13 @@ defmodule DepsNix.Derivation do
       """
 
 
-      postUnpack = "ln -sfv ${unicode.src} ${unicode.name}";\
+      postUnpack = ''
+        data_dir="$(elixir -e "IO.puts Unicode.data_dir()")"
+        unicode_dir="$(dirname "$data_dir")"
+        tmp_dir="$(dirname "$unicode_dir")"
+        mkdir -p "$tmp_dir"
+        ln -sfv ${unicode.src} "$tmp_dir/${unicode.name}"
+      '';\
       """
       |> Util.indent(from: 2)
       |> Util.indent(from: 2)
