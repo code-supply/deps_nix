@@ -47,9 +47,10 @@ defmodule DepsNix.Derivation do
   @spec from(Mix.Dep.t(), DepsNix.Options.t()) :: t()
   def from(%Mix.Dep{scm: Mix.SCM.Git} = dep, options) do
     {:git, url, rev, _} = dep.opts[:lock]
-
-    case parse_git_url(url) do
+    private = !!dep.opts[:private]
+    case parse_git_url(url, private) do
       [owner: owner, repo: repo] ->
+        IO.puts("Found #{owner}:#{repo} -> Github")
         prefetcher = options.github_prefetcher
 
         {hash, builder} =
@@ -74,6 +75,7 @@ defmodule DepsNix.Derivation do
         )
 
       url ->
+        IO.puts("Found #{url}")
         fetcher = %FetchGit{url: url, rev: rev}
 
         new(dep,
@@ -121,17 +123,22 @@ defmodule DepsNix.Derivation do
     end
   end
 
-  @spec parse_git_url(String.t()) :: [owner: String.t(), repo: String.t()] | String.t()
-  defp parse_git_url(url) do
+  @spec parse_git_url(String.t(), boolean) :: [owner: String.t(), repo: String.t()] | String.t()
+  defp parse_git_url(url, _private = false) do
     with path <- URI.parse(url).path,
          true <- path && String.contains?(url, "github.com"),
          [owner, repo | _] <- String.split(path, "/", trim: true),
          repo <- String.replace_suffix(repo, ".git", "") do
-      [owner: owner, repo: repo]
+      [owner: owner,  repo: repo]
     else
       _ -> url
     end
   end
+
+  ## Private github repos don't work with fetchGithub - that defaults to downloading the repo tarball via https
+  ## Instead, we need to use fetchgit, so that private keys can be used
+  defp parse_git_url(url, _private = true), do: url
+
 
   defp app_config_path(opts) do
     opts.output
