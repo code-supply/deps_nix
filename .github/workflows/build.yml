@@ -1,12 +1,28 @@
 name: Build
+
 on:
   pull_request:
   push:
   workflow_dispatch:
+
 jobs:
-  build:
-    name: Build
+
+  build_linux:
+    name: Build - Linux
     runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@v10
+      - name: Get dependencies
+        run: nix develop .#ci --command -- mix deps.get
+      - name: Run tests
+        run: nix develop .#ci --command -- mix test
+      - name: Check fixture derivations
+        run: nix flake check
+
+  build_mac:
+    name: Build - Mac
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@v10
