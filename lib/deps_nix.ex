@@ -209,6 +209,13 @@ defmodule DepsNix do
             buildPlugins = [ pkgs.beamPackages.pc ];
           };
 
+          elixirMake = _unusedArgs: old: {
+            nativeBuildInputs = [ pkgs.gnumake ];
+            preConfigure = ''
+              export ELIXIR_MAKE_CACHE_DIR="$TEMPDIR/elixir_make_cache"
+            '';
+          };
+
           rustlerPrecompiled =
             {
               toolchain ? null,

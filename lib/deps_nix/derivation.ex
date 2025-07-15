@@ -258,10 +258,15 @@ defmodule DepsNix.Derivation do
     end
 
     defp override(drv) do
-      if :rustler_precompiled in drv.beam_deps do
-        ".override (workarounds.rustlerPrecompiled { } drv)"
-      else
-        ""
+      cond do
+        :rustler_precompiled in drv.beam_deps ->
+          ".override (workarounds.rustlerPrecompiled { } drv)"
+
+        :elixir_make in drv.beam_deps ->
+          ".override (workarounds.elixirMake { } drv)"
+
+        true ->
+          ""
       end
     end
 
