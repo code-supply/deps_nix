@@ -24,6 +24,7 @@ defmodule Example.MixProject do
       {:bandit, github: "mtrudel/bandit", ref: "1.4.2"},
       {:brod, "~> 3.16"},
       {:deps_nix, path: "../..", only: [:dev]},
+      {:elixir_make, "~> 0.4", runtime: false},
       {:eventstore, "~> 1.4"},
       {:ex_secp256k1, "~> 0.7.3"},
       {:ex_cldr, "~> 2.38"},
