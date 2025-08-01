@@ -197,6 +197,7 @@ defmodule DepsNix do
         lib,
         beamPackages,
         overrides ? (x: y: { }),
+        overrideFenixOverlay ? null,
       }:
 
       let
@@ -216,12 +217,16 @@ defmodule DepsNix do
             old:
             let
               extendedPkgs = pkgs.extend fenixOverlay;
-              fenixOverlay = import "${
-                fetchTarball {
-                  url = "https://github.com/nix-community/fenix/archive/056c9393c821a4df356df6ce7f14c722dc8717ec.tar.gz";
-                  sha256 = "sha256:1cdfh6nj81gjmn689snigidyq7w98gd8hkl5rvhly6xj7vyppmnd";
-                }
-              }/overlay.nix";
+              fenixOverlay =
+                if overrideFenixOverlay == null then
+                  import "${
+                    fetchTarball {
+                      url = "https://github.com/nix-community/fenix/archive/056c9393c821a4df356df6ce7f14c722dc8717ec.tar.gz";
+                      sha256 = "sha256:1cdfh6nj81gjmn689snigidyq7w98gd8hkl5rvhly6xj7vyppmnd";
+                    }
+                  }/overlay.nix"
+                else
+                  overrideFenixOverlay;
               nativeDir = "${old.src}/native/${with builtins; head (attrNames (readDir "${old.src}/native"))}";
               fenix =
                 if toolchain == null then
