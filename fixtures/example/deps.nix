@@ -1418,7 +1418,8 @@ let
             ];
 
             postUnpack = ''
-              ln -sfv ${unicode.src}/data /tmp/unicode-data
+              test -e /tmp/unicode-data ||
+                ln -sfv ${unicode.src}/data /tmp/unicode-data
             '';
           };
         in
@@ -1470,7 +1471,8 @@ let
             ];
 
             postUnpack = ''
-              ln -sfv ${unicode.src}/data /tmp/unicode-data
+              test -e /tmp/unicode-data ||
+                ln -sfv ${unicode.src}/data /tmp/unicode-data
             '';
           };
         in
