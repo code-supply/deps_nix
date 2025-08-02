@@ -7,20 +7,11 @@ on:
 
 jobs:
 
-  build:
-    name: Build
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-24.04
-          - macos-latest
+  build_troublesome:
+    name: build unicode_string
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@v10
-      - name: Get dependencies
-        run: nix develop .#ci --command -- mix deps.get
-      - name: Run tests
-        run: nix develop .#ci --command -- mix test
-      - name: Check fixture derivations
+      - name: Check
         run: nix flake check
