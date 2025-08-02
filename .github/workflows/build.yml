@@ -14,4 +14,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: DeterminateSystems/nix-installer-action@v10
       - name: Check
-        run: nix build .#unicode_string
+        run: nix build --print-build-logs .#unicode_string
