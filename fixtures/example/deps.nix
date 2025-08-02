@@ -1412,6 +1412,14 @@ let
               pkg = "unicode";
               sha256 = "fa581cf80b3b1b7f42e4d24a69109dfac465cec27a62c661306c81f4ab35894c";
             };
+
+            patches = [
+              ./accessible-data-dir.patch
+            ];
+
+            postUnpack = ''
+              ln -sfv ${unicode.src}/data /tmp/unicode-data
+            '';
           };
         in
         drv;
@@ -1462,12 +1470,7 @@ let
             ];
 
             postUnpack = ''
-              data_dir="$(elixir -e "IO.puts Unicode.data_dir()")"
-              unicode_dir="$(dirname "$data_dir")"
-              tmp_dir="$(dirname "$unicode_dir")"
-              ls -la /nix/var/nix
-              mkdir -p "$tmp_dir"
-              ln -sfv ${unicode.src} "$tmp_dir/${unicode.name}"
+              ln -sfv ${unicode.src}/data /tmp/unicode-data
             '';
           };
         in
