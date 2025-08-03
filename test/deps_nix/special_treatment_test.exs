@@ -5,6 +5,63 @@ defmodule DepsNix.SpecialTreatmentTest do
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
+  test "unicode uses a custom directory for its data" do
+    assert %Derivation{
+             builder: "buildMix",
+             name: :unicode,
+             version: "1.2.3",
+             src: %FetchHex{
+               pkg: :unicode,
+               version: "1.2.3",
+               sha256: "xxx"
+             },
+             beam_deps: [],
+             app_config_path: "./config"
+           }
+           |> to_string() ==
+             """
+             unicode =
+               let
+                 version = "1.2.3";
+                 drv = buildMix {
+                   inherit version;
+                   name = "unicode";
+                   appConfigPath = ./config;
+
+                   src = fetchHex {
+                     inherit version;
+                     pkg = "unicode";
+                     sha256 = "xxx";
+                   };
+
+                   patches = [
+                     (pkgs.writeText "unicode-accessible-data-dir.patch" ''
+                       diff --git a/lib/unicode.ex b/lib/unicode.ex
+                       index 8224c3c..3c0bb3a 100644
+                       --- a/lib/unicode.ex
+                       +++ b/lib/unicode.ex
+                       @@ -46,7 +46,7 @@ defmodule Unicode do
+                            :hebrew | :buginese | :tifinagh
+
+                          @doc false
+                       -  @data_dir Path.join(__DIR__, "../data") |> Path.expand()
+                       +  @data_dir "/tmp/unicode-data"
+                          def data_dir do
+                            @data_dir
+                          end
+                     '')
+                   ];
+
+                   postUnpack = ''
+                     test -e /tmp/unicode-data ||
+                       ln -sfv ${unicode.src}/data /tmp/unicode-data
+                   '';
+                 };
+               in
+               drv;
+             """
+  end
+
   test "unicode_string has access to unicode's source at compile time" do
     assert %Derivation{
              builder: "buildMix",
@@ -51,11 +108,8 @@ defmodule DepsNix.SpecialTreatmentTest do
                    ];
 
                    postUnpack = ''
-                     data_dir="$(elixir -e "IO.puts Unicode.data_dir()")"
-                     unicode_dir="$(dirname "$data_dir")"
-                     tmp_dir="$(dirname "$unicode_dir")"
-                     mkdir -p "$tmp_dir"
-                     ln -sfv ${unicode.src} "$tmp_dir/${unicode.name}"
+                     test -e /tmp/unicode-data ||
+                       ln -sfv ${unicode.src}/data /tmp/unicode-data
                    '';
                  };
                in

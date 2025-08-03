@@ -180,23 +180,49 @@ defmodule DepsNix.Derivation do
             inherit version;
             name = "#{drv.name}";#{format_app_config_path(drv)}
 
-            src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}#{post_unpack(drv)}
+            src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}#{patches(drv)}#{post_unpack(drv)}
           };
         in
         drv#{override(drv)};
       """
     end
 
-    defp post_unpack(%DepsNix.Derivation{name: :unicode_string}) do
+    defp patches(%DepsNix.Derivation{name: :unicode}) do
+      """
+
+
+      patches = [
+        (pkgs.writeText "unicode-accessible-data-dir.patch" ''
+          diff --git a/lib/unicode.ex b/lib/unicode.ex
+          index 8224c3c..3c0bb3a 100644
+          --- a/lib/unicode.ex
+          +++ b/lib/unicode.ex
+          @@ -46,7 +46,7 @@ defmodule Unicode do
+               :hebrew | :buginese | :tifinagh
+          
+             @doc false
+          -  @data_dir Path.join(__DIR__, "../data") |> Path.expand()
+          +  @data_dir "/tmp/unicode-data"
+             def data_dir do
+               @data_dir
+             end
+        '')
+      ];\
+      """
+      |> Util.indent(from: 2)
+      |> Util.indent(from: 2)
+      |> Util.indent(from: 2)
+    end
+
+    defp patches(_drv), do: ""
+
+    defp post_unpack(%DepsNix.Derivation{name: name}) when name in [:unicode, :unicode_string] do
       """
 
 
       postUnpack = ''
-        data_dir="$(elixir -e "IO.puts Unicode.data_dir()")"
-        unicode_dir="$(dirname "$data_dir")"
-        tmp_dir="$(dirname "$unicode_dir")"
-        mkdir -p "$tmp_dir"
-        ln -sfv ${unicode.src} "$tmp_dir/${unicode.name}"
+        test -e /tmp/unicode-data ||
+          ln -sfv ${unicode.src}/data /tmp/unicode-data
       '';\
       """
       |> Util.indent(from: 2)
@@ -204,9 +230,7 @@ defmodule DepsNix.Derivation do
       |> Util.indent(from: 2)
     end
 
-    defp post_unpack(_drv) do
-      ""
-    end
+    defp post_unpack(_drv), do: ""
 
     defp src(src) do
       src

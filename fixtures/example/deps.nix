@@ -1412,6 +1412,29 @@ let
               pkg = "unicode";
               sha256 = "fa581cf80b3b1b7f42e4d24a69109dfac465cec27a62c661306c81f4ab35894c";
             };
+
+            patches = [
+              (pkgs.writeText "unicode-accessible-data-dir.patch" ''
+                diff --git a/lib/unicode.ex b/lib/unicode.ex
+                index 8224c3c..3c0bb3a 100644
+                --- a/lib/unicode.ex
+                +++ b/lib/unicode.ex
+                @@ -46,7 +46,7 @@ defmodule Unicode do
+                     :hebrew | :buginese | :tifinagh
+
+                   @doc false
+                -  @data_dir Path.join(__DIR__, "../data") |> Path.expand()
+                +  @data_dir "/tmp/unicode-data"
+                   def data_dir do
+                     @data_dir
+                   end
+              '')
+            ];
+
+            postUnpack = ''
+              test -e /tmp/unicode-data ||
+                ln -sfv ${unicode.src}/data /tmp/unicode-data
+            '';
           };
         in
         drv;
@@ -1462,11 +1485,8 @@ let
             ];
 
             postUnpack = ''
-              data_dir="$(elixir -e "IO.puts Unicode.data_dir()")"
-              unicode_dir="$(dirname "$data_dir")"
-              tmp_dir="$(dirname "$unicode_dir")"
-              mkdir -p "$tmp_dir"
-              ln -sfv ${unicode.src} "$tmp_dir/${unicode.name}"
+              test -e /tmp/unicode-data ||
+                ln -sfv ${unicode.src}/data /tmp/unicode-data
             '';
           };
         in
