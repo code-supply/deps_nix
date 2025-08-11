@@ -15,6 +15,13 @@ let
       buildPlugins = [ pkgs.beamPackages.pc ];
     };
 
+    elixirMake = _unusedArgs: old: {
+      nativeBuildInputs = [ pkgs.gnumake ];
+      preConfigure = ''
+        export ELIXIR_MAKE_CACHE_DIR="$TEMPDIR/elixir_make_cache"
+      '';
+    };
+
     rustlerPrecompiled =
       {
         toolchain ? null,
@@ -260,7 +267,7 @@ let
             ];
           };
         in
-        drv;
+        drv.override (workarounds.elixirMake { } drv);
 
       chatterbox =
         let
@@ -624,6 +631,30 @@ let
           };
         in
         drv.override (workarounds.rustlerPrecompiled { } drv);
+
+      exqlite =
+        let
+          version = "0.33.0";
+          drv = buildMix {
+            inherit version;
+            name = "exqlite";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "exqlite";
+              sha256 = "8a7c2792e567bbebb4dafe96f6397f1c527edd7039d74f508a603817fbad2844";
+            };
+
+            beamDeps = [
+              cc_precompiler
+              db_connection
+              elixir_make
+              table
+            ];
+          };
+        in
+        drv.override (workarounds.elixirMake { } drv);
 
       finch =
         let
@@ -1525,7 +1556,7 @@ let
             ];
           };
         in
-        drv;
+        drv.override (workarounds.elixirMake { } drv);
 
       websock =
         let
