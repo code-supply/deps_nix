@@ -134,8 +134,8 @@ defmodule DepsNix.Derivation do
   end
 
   defp app_config_path(opts) do
-    if opts.appConfigPath do
-      opts.appConfigPath
+    if opts.app_config_path do
+      opts.app_config_path
     else
       opts.output
       |> String.split("/")
