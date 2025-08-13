@@ -7,12 +7,14 @@ defmodule DepsNix do
             envs: map(),
             github_prefetcher: (String.t(), String.t(), String.t() -> String.t()),
             output: String.t(),
+            appConfigPath: String.t(),
             include_paths: boolean(),
             cwd: String.t()
           }
     defstruct envs: %{},
               github_prefetcher: nil,
               output: "deps.nix",
+              appConfigPath: nil,
               include_paths: false,
               cwd: nil
   end
