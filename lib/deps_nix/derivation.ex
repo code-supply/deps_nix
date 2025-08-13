@@ -134,11 +134,15 @@ defmodule DepsNix.Derivation do
   end
 
   defp app_config_path(opts) do
-    opts.output
-    |> String.split("/")
-    |> Enum.drop(1)
-    |> Enum.reduce("config", fn _path_part, acc -> ["../", acc] end)
-    |> IO.iodata_to_binary()
+    if opts.appConfigPath do
+      opts.appConfigPath
+    else
+      opts.output
+      |> String.split("/")
+      |> Enum.drop(1)
+      |> Enum.reduce("config", fn _path_part, acc -> ["../", acc] end)
+      |> IO.iodata_to_binary()
+    end
   end
 
   defimpl String.Chars do
