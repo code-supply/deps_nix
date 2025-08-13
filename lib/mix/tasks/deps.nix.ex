@@ -32,10 +32,11 @@ defmodule Mix.Tasks.Deps.Nix do
   This command creates derivations for everything in `:prod`, and only `ex_doc`
   and `credo` in `:dev`. It will include `:path` dependencies (this option is
   useful for repos with multiple Mix projects). It outputs the Nix expression
-  to `nix/deps.nix`.
+  to `nix/deps.nix`. It specifies `appConfigPath` to be `./my-app/config` for
+  all nix dependency derivations.
 
   ```
-  mix deps.nix --include-paths --env prod --env dev=ex_doc,credo --output nix/deps.nix
+  mix deps.nix --include-paths --env prod --env dev=ex_doc,credo --output nix/deps.nix --app-config-path ./my-app/config
   ```
 
   ## Git dependencies
