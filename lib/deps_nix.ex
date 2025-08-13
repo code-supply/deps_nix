@@ -161,7 +161,8 @@ defmodule DepsNix do
                 {env, String.split(packages, ",")}
             end
           end,
-        include_paths: Keyword.get(opts, :include_paths, false)
+        include_paths: Keyword.get(opts, :include_paths, false),
+        app_config_path: Keyword.get(opts, :app_config_path, nil)
     }
     |> add_output(opts)
   end
