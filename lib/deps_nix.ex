@@ -67,8 +67,10 @@ defmodule DepsNix do
          body <- github_archive(owner, repo, rev),
          :ok <- File.write("#{dir}/deps-nix-tarball", body),
          {_, 0} <- System.cmd("tar", ["-xf", "#{dir}/deps-nix-tarball"], cd: dir),
-         {output, 0} <- System.cmd("nix", ["hash", "path", path]) do
-      {String.trim_trailing(output), find_builder_from_path(path)}
+         nar = ExNar.serialize!(path),
+         nar_hash = :crypto.hash(:sha256, nar),
+         hash = "sha256-" <> Base.encode64(nar_hash) do
+      {hash, find_builder_from_path(path)}
     end
   end
 
