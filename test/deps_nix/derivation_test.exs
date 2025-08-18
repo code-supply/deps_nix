@@ -80,6 +80,17 @@ defmodule DepsNix.DerivationTest do
     end
   end
 
+  property "translates GitHub dependencies marked as private to use fetchGit" do
+    check all url <- url(host: "github", tld: "com", path: "/code-supply/mudbrick.git"),
+              rev <- hash(),
+              dep <-
+                dep(scm: Mix.SCM.Git, git_url: url, version: rev, dep_opts: [private: "true"]) do
+      assert %Derivation{
+               src: %FetchGit{url: ^url, rev: ^rev}
+             } = Derivation.from(dep, %DepsNix.Options{})
+    end
+  end
+
   property "prefers mix over every other builder" do
     check all other_builders <- list_of(one_of([:make, :rebar3])),
               dep <- dep(builders: [:mix] ++ other_builders) do
