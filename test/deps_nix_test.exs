@@ -92,6 +92,12 @@ defmodule DepsNixTest do
              } = DepsNix.parse_args(~w(--include-paths))
     end
 
+    test "can specify application config directory path" do
+      assert %DepsNix.Options{
+               app_config_path: "../my/app/config"
+             } = DepsNix.parse_args(~w(--app-config-path ../my/app/config))
+    end
+
     defp package_name do
       string(:alphanumeric, min_length: 1)
     end
@@ -224,6 +230,19 @@ defmodule DepsNixTest do
 
   test "output ends with a newline, for compatibility with other UNIX tools" do
     assert output(%DepsNix.Options{}) =~ ~r/\n$/
+  end
+
+  test "can specify appConfigPath" do
+    converger = fn _ -> [pick(dep())] end
+
+    assert output(
+             %DepsNix.Options{
+               envs: %{"prod" => :all},
+               app_config_path: "../my/app/config"
+             },
+             converger
+           ) =~
+             ~s(appConfigPath = ../my/app/config;)
   end
 
   defp output(opts, converger \\ &stub_converger/1) do
