@@ -21,7 +21,7 @@ jobs:
       - name: Get dependencies
         run: nix develop .#ci --command -- mix deps.get
       - name: Dialyze
-        run: nix develop .#ci --command -- mix dialyze
+        run: nix develop .#ci --command -- mix dialyzer
       - name: Run tests
         run: nix develop .#ci --command -- mix test
       - name: Check fixture derivations
