@@ -20,6 +20,8 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@v10
       - name: Get dependencies
         run: nix develop .#ci --command -- mix deps.get
+      - name: Dialyze
+        run: nix develop .#ci --command -- mix dialyze
       - name: Run tests
         run: nix develop .#ci --command -- mix test
       - name: Check fixture derivations
