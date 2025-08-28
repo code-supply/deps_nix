@@ -7,12 +7,14 @@ defmodule DepsNix do
             envs: map(),
             github_prefetcher: (String.t(), String.t(), String.t() -> String.t()),
             output: String.t(),
+            app_config_path: String.t() | nil,
             include_paths: boolean(),
             cwd: String.t()
           }
     defstruct envs: %{},
               github_prefetcher: nil,
               output: "deps.nix",
+              app_config_path: nil,
               include_paths: false,
               cwd: nil
   end
@@ -53,7 +55,7 @@ defmodule DepsNix do
   def parse_args(args) do
     args
     |> OptionParser.parse(
-      strict: [env: [:string, :keep], output: :string, include_paths: :boolean]
+      strict: [env: [:string, :keep], output: :string, app_config_path: :string, include_paths: :boolean]
     )
     |> to_opts()
   end
@@ -159,7 +161,8 @@ defmodule DepsNix do
                 {env, String.split(packages, ",")}
             end
           end,
-        include_paths: Keyword.get(opts, :include_paths, false)
+        include_paths: Keyword.get(opts, :include_paths, false),
+        app_config_path: Keyword.get(opts, :app_config_path, nil)
     }
     |> add_output(opts)
   end
