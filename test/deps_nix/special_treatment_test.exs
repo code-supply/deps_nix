@@ -163,7 +163,7 @@ defmodule DepsNix.SpecialTreatmentTest do
                  ];
                };
              in
-             drv;
+             drv.override (workarounds.elixirMake { } drv);
            """
   end
 
