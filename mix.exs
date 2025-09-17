@@ -12,7 +12,7 @@ defmodule DepsNix.MixProject do
       elixir: "~> 1.16",
       package: package(),
       start_permanent: Mix.env() == :prod,
-      version: "2.4.0",
+      version: "2.5.0",
 
       # Docs
       source_url: @scm_url,
@@ -35,9 +35,9 @@ defmodule DepsNix.MixProject do
     [
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:ex_nar, "~> 0.3.0"},
       {:mint, "~> 1.0"},
-      {:stream_data, "~> 1.1", only: [:dev, :test]},
-      {:ex_nar, "~> 0.3.0"}
+      {:stream_data, "~> 1.1", only: [:dev, :test]}
     ]
   end
 
