@@ -21,7 +21,7 @@ mkShell {
     in
     [
       elixir
-      elixir_ls
+      elixir-ls
       gh
       nixfmt-rfc-style
       release

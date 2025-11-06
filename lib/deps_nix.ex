@@ -55,7 +55,12 @@ defmodule DepsNix do
   def parse_args(args) do
     args
     |> OptionParser.parse(
-      strict: [env: [:string, :keep], output: :string, app_config_path: :string, include_paths: :boolean]
+      strict: [
+        env: [:string, :keep],
+        output: :string,
+        app_config_path: :string,
+        include_paths: :boolean
+      ]
     )
     |> to_opts()
   end
