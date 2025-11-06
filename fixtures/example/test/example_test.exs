@@ -2,7 +2,7 @@ defmodule ExampleTest do
   use ExUnit.Case
   doctest Example
 
-  test "greets the world" do
-    assert Example.hello() == :world
+  test "runs simple Explorer example" do
+    assert Explorer.Series.from_list(["apple", "mango", "banana", "orange"])
   end
 end

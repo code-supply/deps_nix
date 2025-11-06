@@ -16,7 +16,13 @@
         ] (system: generate { pkgs = import nixpkgs { inherit system; }; });
     in
     {
-      packages = forAllSystems ({ pkgs, ... }: (pkgs.callPackages ./fixtures/example/deps.nix { }));
+      packages = forAllSystems (
+        { pkgs, ... }:
+        (pkgs.callPackages ./fixtures/example/deps.nix { })
+        // {
+          example = pkgs.callPackage ./fixtures/example/package.nix { };
+        }
+      );
 
       devShells = forAllSystems (
         { pkgs, ... }:
