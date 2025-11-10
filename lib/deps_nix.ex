@@ -158,7 +158,7 @@ defmodule DepsNix do
   defp to_opts({opts, _, _}) do
     default = to_opts({[], [], []})
 
-    %Options{
+    %{
       default
       | envs:
           for {:env, env} <- opts, into: default.envs do
@@ -193,13 +193,13 @@ defmodule DepsNix do
       end)
   end
 
-  defp add_output(options, parsed_args) do
+  defp add_output(%Options{} = options, parsed_args) do
     case Keyword.get(parsed_args, :output) do
       nil ->
         options
 
       output ->
-        %Options{options | output: output}
+        %{options | output: output}
     end
   end
 
