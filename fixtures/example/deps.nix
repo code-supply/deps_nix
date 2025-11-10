@@ -226,7 +226,7 @@ let
 
       castore =
         let
-          version = "1.0.11";
+          version = "1.0.16";
           drv = buildMix {
             inherit version;
             name = "castore";
@@ -235,7 +235,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "castore";
-              sha256 = "e03990b4db988df56262852f20de0f659871c35154691427a5047f4967a16a62";
+              sha256 = "33689203a0eaaf02fcd0e86eadfbcf1bd636100455350592e7e2628564022aaf";
             };
           };
         in
@@ -243,7 +243,7 @@ let
 
       cc_precompiler =
         let
-          version = "0.1.10";
+          version = "0.1.11";
           drv = buildMix {
             inherit version;
             name = "cc_precompiler";
@@ -252,7 +252,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "cc_precompiler";
-              sha256 = "f6e046254e53cd6b41c6bacd70ae728011aa82b2742a80d6e2214855c6e06b22";
+              sha256 = "3427232caf0835f94680e5bcf082408a70b48ad68a5f5c0b02a3bea9f3a075b9";
             };
 
             beamDeps = [
@@ -1499,7 +1499,7 @@ let
 
       vix =
         let
-          version = "0.33.0";
+          version = "0.35.0";
           drv = buildMix {
             inherit version;
             name = "vix";
@@ -1515,11 +1515,10 @@ let
             src = fetchHex {
               inherit version;
               pkg = "vix";
-              sha256 = "9acde72b27bdfeadeb51f790f7a6cc0d06cf555718c05cf57e43c5cf93d8471b";
+              sha256 = "a3e80067a89d0631b6cf2b93594e03c1b303a2c7cddbbdd28040750d521984e5";
             };
 
             beamDeps = [
-              castore
               cc_precompiler
               elixir_make
             ];
