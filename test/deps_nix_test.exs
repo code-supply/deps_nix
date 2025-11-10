@@ -74,6 +74,52 @@ defmodule DepsNixTest do
       end
     end
 
+    property "dependencies with same name don't get duped" do
+      check all dep_1 <- dep(name: :dupe),
+                dep_2 <- dep(name: :dupe) do
+        converger = fn
+          [env: :prod] ->
+            [dep_1]
+
+          [env: :dev] ->
+            [dep_2]
+        end
+
+        nix =
+          output(
+            %DepsNix.Options{envs: %{"prod" => :all, "dev" => :all}},
+            converger
+          )
+
+        assert Regex.scan(~r/dupe =/, nix) |> length() == 1
+      end
+    end
+
+    test "prefer low env when deduplicating" do
+      dep_test =
+        dep(name: :foo, sub_deps: [dep(name: :alpha) |> pick(), dep(name: :beta) |> pick()])
+        |> pick()
+
+      dep_dev = dep(name: :foo, sub_deps: [dep(name: :gamma) |> pick()]) |> pick()
+      dep_prod = dep(name: :foo, sub_deps: []) |> pick()
+
+      converger = fn
+        [env: :prod] -> [dep_prod]
+        [env: :dev] -> [dep_dev]
+        [env: :test] -> [dep_test]
+      end
+
+      nix =
+        output(
+          %DepsNix.Options{envs: %{"prod" => :all, "dev" => :all, "test" => :all}},
+          converger
+        )
+
+      assert nix =~ "alpha"
+      assert nix =~ "beta"
+      refute nix =~ "gamma"
+    end
+
     test "can request inclusion of path dependencies" do
       assert %DepsNix.Options{
                envs: %{

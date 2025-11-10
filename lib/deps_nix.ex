@@ -30,6 +30,11 @@ defmodule DepsNix do
   def run(opts, converger) do
     opts
     |> convert_opts()
+    |> Enum.sort_by(fn
+      {[env: :test], _packages} -> 0
+      {[env: :dev], _packages} -> 1
+      {[env: :prod], _packages} -> 2
+    end)
     |> Enum.flat_map(fn {converger_opts, permitted_names} ->
       all_packages_for_env = converger.(converger_opts)
 
@@ -44,7 +49,7 @@ defmodule DepsNix do
     end)
     |> Enum.reject(&unwanted/1)
     |> Enum.sort_by(& &1.app)
-    |> Enum.uniq()
+    |> Enum.uniq_by(& &1.app)
     |> Enum.map(&DepsNix.Derivation.from(&1, opts))
     |> Enum.join("\n")
     |> indent_deps()
