@@ -8,7 +8,7 @@ mkShell {
       release = writeShellApplication {
         name = "release";
         runtimeInputs = [
-          elixir
+          elixir_1_19
           gh
         ];
         text = ''
@@ -20,7 +20,7 @@ mkShell {
       };
     in
     [
-      elixir
+      elixir_1_19
       elixir-ls
       gh
       nixfmt-rfc-style
