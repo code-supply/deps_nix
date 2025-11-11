@@ -208,7 +208,7 @@ defmodule DepsNix.Derivation do
           +++ b/lib/unicode.ex
           @@ -46,7 +46,7 @@ defmodule Unicode do
                :hebrew | :buginese | :tifinagh
-          
+
              @doc false
           -  @data_dir Path.join(__DIR__, "../data") |> Path.expand()
           +  @data_dir "/tmp/unicode-data"
