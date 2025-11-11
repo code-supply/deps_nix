@@ -163,7 +163,48 @@ defmodule DepsNix.SpecialTreatmentTest do
                  ];
                };
              in
-             drv;
+             drv.override (workarounds.elixirMake { } drv);
+           """
+  end
+
+  test "lazy_html applies a workaround so it can build with elixir_make" do
+    assert %Derivation{
+             builder: "buildMix",
+             name: :lazy_html,
+             version: "0.1.8",
+             src: %FetchHex{
+               pkg: :my_project,
+               version: "0.1.8",
+               sha256: "0d8167d930b704feb94b41414ca7f5779dff9bca7fcf619fcef18de138f08736"
+             },
+             beam_deps: [
+               :cc_precompiler,
+               :elixir_make
+             ],
+             app_config_path: "./config"
+           }
+           |> to_string() == """
+           lazy_html =
+             let
+               version = "0.1.8";
+               drv = buildMix {
+                 inherit version;
+                 name = "lazy_html";
+                 appConfigPath = ./config;
+
+                 src = fetchHex {
+                   inherit version;
+                   pkg = "my_project";
+                   sha256 = "0d8167d930b704feb94b41414ca7f5779dff9bca7fcf619fcef18de138f08736";
+                 };
+
+                 beamDeps = [
+                   cc_precompiler
+                   elixir_make
+                 ];
+               };
+             in
+             drv.override (workarounds.elixirMake { } drv);
            """
   end
 
