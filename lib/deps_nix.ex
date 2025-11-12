@@ -307,7 +307,6 @@ defmodule DepsNix do
             };
 
           elixirMake = _unusedArgs: old: {
-            nativeBuildInputs = [ pkgs.gnumake ];
             preConfigure = ''
               export ELIXIR_MAKE_CACHE_DIR="$TEMPDIR/elixir_make_cache"
             '';
