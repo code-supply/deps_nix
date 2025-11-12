@@ -128,7 +128,6 @@ defmodule DepsNix.SpecialTreatmentTest do
                sha256: "9acde72b27bdfeadeb51f790f7a6cc0d06cf555718c05cf57e43c5cf93d8471b"
              },
              beam_deps: [
-               :castore,
                :cc_precompiler,
                :elixir_make
              ],
@@ -157,7 +156,6 @@ defmodule DepsNix.SpecialTreatmentTest do
                  };
 
                  beamDeps = [
-                   castore
                    cc_precompiler
                    elixir_make
                  ];
@@ -179,7 +177,8 @@ defmodule DepsNix.SpecialTreatmentTest do
              },
              beam_deps: [
                :cc_precompiler,
-               :elixir_make
+               :elixir_make,
+               :fine
              ],
              app_config_path: "./config"
            }
@@ -201,6 +200,7 @@ defmodule DepsNix.SpecialTreatmentTest do
                  beamDeps = [
                    cc_precompiler
                    elixir_make
+                   fine
                  ];
                };
              in
