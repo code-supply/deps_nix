@@ -165,7 +165,7 @@ defmodule DepsNix.SpecialTreatmentTest do
            """
   end
 
-  test "lazy_html applies a workaround so it can build with elixir_make" do
+  test "lazy_html applies a workaround so it can build against lexbor with elixir_make" do
     assert %Derivation{
              builder: "buildMix",
              name: :lazy_html,
@@ -191,6 +191,11 @@ defmodule DepsNix.SpecialTreatmentTest do
                  name = "lazy_html";
                  appConfigPath = ./config;
 
+                 nativeBuildInputs = with pkgs; [
+                   cmake
+                   lexbor
+                 ];
+
                  src = fetchHex {
                    inherit version;
                    pkg = "my_project";
@@ -204,7 +209,7 @@ defmodule DepsNix.SpecialTreatmentTest do
                  ];
                };
              in
-             drv.override (workarounds.elixirMake { } drv);
+             drv.override (workarounds.lazyHtml { } drv);
            """
   end
 
