@@ -128,7 +128,6 @@ defmodule DepsNix.SpecialTreatmentTest do
                sha256: "9acde72b27bdfeadeb51f790f7a6cc0d06cf555718c05cf57e43c5cf93d8471b"
              },
              beam_deps: [
-               :castore,
                :cc_precompiler,
                :elixir_make
              ],
@@ -157,13 +156,60 @@ defmodule DepsNix.SpecialTreatmentTest do
                  };
 
                  beamDeps = [
-                   castore
                    cc_precompiler
                    elixir_make
                  ];
                };
              in
-             drv;
+             drv.override (workarounds.elixirMake { } drv);
+           """
+  end
+
+  test "lazy_html applies a workaround so it can build against lexbor with elixir_make" do
+    assert %Derivation{
+             builder: "buildMix",
+             name: :lazy_html,
+             version: "0.1.8",
+             src: %FetchHex{
+               pkg: :my_project,
+               version: "0.1.8",
+               sha256: "0d8167d930b704feb94b41414ca7f5779dff9bca7fcf619fcef18de138f08736"
+             },
+             beam_deps: [
+               :cc_precompiler,
+               :elixir_make,
+               :fine
+             ],
+             app_config_path: "./config"
+           }
+           |> to_string() == """
+           lazy_html =
+             let
+               version = "0.1.8";
+               drv = buildMix {
+                 inherit version;
+                 name = "lazy_html";
+                 appConfigPath = ./config;
+
+                 nativeBuildInputs = with pkgs; [
+                   cmake
+                   lexbor
+                 ];
+
+                 src = fetchHex {
+                   inherit version;
+                   pkg = "my_project";
+                   sha256 = "0d8167d930b704feb94b41414ca7f5779dff9bca7fcf619fcef18de138f08736";
+                 };
+
+                 beamDeps = [
+                   cc_precompiler
+                   elixir_make
+                   fine
+                 ];
+               };
+             in
+             drv.override (workarounds.lazyHtml { } drv);
            """
   end
 

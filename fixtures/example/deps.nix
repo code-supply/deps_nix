@@ -96,6 +96,26 @@ let
           ${old.buildPhase}
         '';
       };
+
+    elixirMake = _unusedArgs: old: {
+      preConfigure = ''
+        export ELIXIR_MAKE_CACHE_DIR="$TEMPDIR/elixir_make_cache"
+      '';
+    };
+
+    lazyHtml = _unusedArgs: old: {
+      preConfigure = ''
+        export ELIXIR_MAKE_CACHE_DIR="$TEMPDIR/elixir_make_cache"
+      '';
+
+      postPatch = ''
+        substituteInPlace mix.exs           --replace-fail "Fine.include_dir()" '"${packages.fine}/src/c_include"'           --replace-fail '@lexbor_git_sha "244b84956a6dc7eec293781d051354f351274c46"' '@lexbor_git_sha ""'
+      '';
+
+      preBuild = ''
+        install -Dm644           -t _build/c/third_party/lexbor/$LEXBOR_GIT_SHA/build           ${pkgs.lexbor}/lib/liblexbor_static.a
+      '';
+    };
   };
 
   defaultOverrides = (
@@ -260,7 +280,7 @@ let
             ];
           };
         in
-        drv;
+        drv.override (workarounds.elixirMake { } drv);
 
       chatterbox =
         let
@@ -650,6 +670,23 @@ let
         in
         drv;
 
+      fine =
+        let
+          version = "0.1.4";
+          drv = buildMix {
+            inherit version;
+            name = "fine";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "fine";
+              sha256 = "be3324cc454a42d80951cf6023b9954e9ff27c6daa255483b3e8d608670303f5";
+            };
+          };
+        in
+        drv;
+
       fsm =
         let
           version = "0.3.1";
@@ -867,6 +904,34 @@ let
           };
         in
         drv;
+
+      lazy_html =
+        let
+          version = "0.1.8";
+          drv = buildMix {
+            inherit version;
+            name = "lazy_html";
+            appConfigPath = ./config;
+
+            nativeBuildInputs = with pkgs; [
+              cmake
+              lexbor
+            ];
+
+            src = fetchHex {
+              inherit version;
+              pkg = "lazy_html";
+              sha256 = "0d8167d930b704feb94b41414ca7f5779dff9bca7fcf619fcef18de138f08736";
+            };
+
+            beamDeps = [
+              cc_precompiler
+              elixir_make
+              fine
+            ];
+          };
+        in
+        drv.override (workarounds.lazyHtml { } drv);
 
       mime =
         let
@@ -1524,7 +1589,7 @@ let
             ];
           };
         in
-        drv;
+        drv.override (workarounds.elixirMake { } drv);
 
       websock =
         let

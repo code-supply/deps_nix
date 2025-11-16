@@ -41,6 +41,7 @@ defmodule Example.MixProject do
        depth: 1},
       {:image, "~> 0.37"},
       {:jason, "~> 1.4.1"},
+      {:lazy_html, "~> 0.1"},
       {:opentelemetry_exporter, "~> 1.7"},
       {:plug, "~> 1.13", override: true},
       {:png, "~> 0.2.1"},

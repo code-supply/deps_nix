@@ -174,6 +174,27 @@ defmodule DepsNix.Derivation do
       """
     end
 
+    def to_string(%DepsNix.Derivation{name: :lazy_html} = drv) do
+      """
+      lazy_html =
+        let
+          version = "#{drv.version}";
+          drv = #{drv.builder} {
+            inherit version;
+            name = "#{drv.name}";#{format_app_config_path(drv)}
+
+            nativeBuildInputs = with pkgs; [
+              cmake
+              lexbor
+            ];
+
+            src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
+          };
+        in
+        drv#{override(drv)};
+      """
+    end
+
     def to_string(%DepsNix.Derivation{name: :heroicons} = drv) do
       """
       #{drv.name} = #{drv.src |> Kernel.to_string()}
@@ -208,7 +229,7 @@ defmodule DepsNix.Derivation do
           +++ b/lib/unicode.ex
           @@ -46,7 +46,7 @@ defmodule Unicode do
                :hebrew | :buginese | :tifinagh
-          
+
              @doc false
           -  @data_dir Path.join(__DIR__, "../data") |> Path.expand()
           +  @data_dir "/tmp/unicode-data"
@@ -266,11 +287,20 @@ defmodule DepsNix.Derivation do
       |> Util.indent(from: 2)
     end
 
+    defp override(%{name: :lazy_html} = _drv) do
+      ".override (workarounds.lazyHtml { } drv)"
+    end
+
     defp override(drv) do
-      if :rustler_precompiled in drv.beam_deps do
-        ".override (workarounds.rustlerPrecompiled { } drv)"
-      else
-        ""
+      cond do
+        :rustler_precompiled in drv.beam_deps ->
+          ".override (workarounds.rustlerPrecompiled { } drv)"
+
+        :elixir_make in drv.beam_deps ->
+          ".override (workarounds.elixirMake { } drv)"
+
+        true ->
+          ""
       end
     end
 
