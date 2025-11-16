@@ -199,7 +199,7 @@ let
 
       bandit =
         let
-          version = "4f15f029e7aa17f8e7f98d55b0e94c684dee0971";
+          version = "1.4.2";
           drv = buildMix {
             inherit version;
             name = "bandit";

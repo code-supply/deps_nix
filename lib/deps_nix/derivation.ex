@@ -68,7 +68,7 @@ defmodule DepsNix.Derivation do
         }
 
         new(dep,
-          version: rev,
+          version: dep.opts[:app_properties][:vsn],
           src: fetcher,
           builder: builder,
           app_config_path: app_config_path(options)
@@ -78,7 +78,7 @@ defmodule DepsNix.Derivation do
         fetcher = %FetchGit{url: url, rev: rev}
 
         new(dep,
-          version: rev,
+          version: dep.opts[:app_properties][:vsn],
           src: fetcher,
           builder: "buildMix",
           app_config_path: app_config_path(options)

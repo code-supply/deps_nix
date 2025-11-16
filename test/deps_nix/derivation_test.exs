@@ -51,8 +51,19 @@ defmodule DepsNix.DerivationTest do
   property "translates dependencies specified with git" do
     check all url <- string(:alphanumeric),
               rev <- hash(),
-              dep <- dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
+              dep <-
+                dep(
+                  scm: Mix.SCM.Git,
+                  git_url: url,
+                  version: rev,
+                  dep_opts: [
+                    app_properties: [
+                      vsn: ~c"1.2.3"
+                    ]
+                  ]
+                ) do
       assert %Derivation{
+               version: ~c"1.2.3",
                src: %FetchGit{url: ^url, rev: ^rev}
              } = Derivation.from(dep, %DepsNix.Options{})
     end
@@ -62,8 +73,19 @@ defmodule DepsNix.DerivationTest do
     check all url <- url(host: "github", tld: "com", path: "/code-supply/mudbrick.git"),
               rev <- hash(),
               generated_hash <- hash(),
-              dep <- dep(scm: Mix.SCM.Git, git_url: url, version: rev) do
+              dep <-
+                dep(
+                  scm: Mix.SCM.Git,
+                  git_url: url,
+                  version: rev,
+                  dep_opts: [
+                    app_properties: [
+                      vsn: ~c"9.8.7"
+                    ]
+                  ]
+                ) do
       assert %Derivation{
+               version: ~c"9.8.7",
                src: %FetchFromGitHub{
                  owner: "code-supply",
                  repo: "mudbrick",
