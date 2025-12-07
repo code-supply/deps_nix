@@ -1,7 +1,7 @@
 defmodule Mix.Tasks.Deps.NixTest do
   use ExUnit.Case, async: true
 
-  @tag timeout: 240_000
+  @tag timeout: :timer.minutes(8)
   test "produces a formatted Nix function for the fixture app's dependencies" do
     {run_output, run_status} =
       System.shell("mix do deps.get, deps.nix --env prod 2>&1",
