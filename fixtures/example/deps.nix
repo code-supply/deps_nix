@@ -67,8 +67,9 @@ let
           mkdir -p priv/native
           for lib in ${native}/lib/*
           do
-            dest=$(basename "$lib")
-            if [ "''${dest##*.}" = "dylib" ]; then
+            dest="$(basename "$lib")"
+            if [[ "''${dest##*.}" = "dylib" ]]
+            then
               dest="''${dest%.dylib}.so"
             fi
             ln -s "$lib" "priv/native/$dest"
