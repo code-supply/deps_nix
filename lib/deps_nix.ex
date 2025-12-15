@@ -208,11 +208,17 @@ defmodule DepsNix do
       output,
       """
       {
-        pkgs,
         lib,
         beamPackages,
+        cmake,
+        extend,
+        lexbor,
+        fetchFromGitHub,
         overrides ? (x: y: { }),
         overrideFenixOverlay ? null,
+        pkg-config,
+        vips,
+        writeText,
       }:
 
       let
@@ -221,7 +227,7 @@ defmodule DepsNix do
 
         workarounds = {
           portCompiler = _unusedArgs: old: {
-            buildPlugins = [ pkgs.beamPackages.pc ];
+            buildPlugins = [ beamPackages.pc ];
           };
 
           rustlerPrecompiled =
@@ -231,7 +237,7 @@ defmodule DepsNix do
             }:
             old:
             let
-              extendedPkgs = pkgs.extend fenixOverlay;
+              extendedPkgs = extend fenixOverlay;
               fenixOverlay =
                 if overrideFenixOverlay == null then
                   import "${
@@ -331,7 +337,7 @@ defmodule DepsNix do
             preBuild = ''
               install -Dm644 \
                 -t _build/c/third_party/lexbor/$LEXBOR_GIT_SHA/build \
-                ${pkgs.lexbor}/lib/liblexbor_static.a
+                ${lexbor}/lib/liblexbor_static.a
             '';
           };
         };

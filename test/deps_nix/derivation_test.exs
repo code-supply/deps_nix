@@ -325,7 +325,7 @@ defmodule DepsNix.DerivationTest do
                app_config_path: "foo"
              }
              |> to_string() == """
-             heroicons = pkgs.fetchFromGitHub {
+             heroicons = fetchFromGitHub {
                owner = "tailwindlabs";
                repo = "heroicons";
                rev = "88ab3a0d790e6a47404cba02800a6b25d2afae50";
