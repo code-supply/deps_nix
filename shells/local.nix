@@ -20,6 +20,7 @@ mkShell {
       };
     in
     [
+      beamPackages.hex
       elixir_1_19
       elixir-ls
       gh

@@ -35,7 +35,7 @@ defmodule DepsNix.SpecialTreatmentTest do
                    };
 
                    patches = [
-                     (pkgs.writeText "unicode-accessible-data-dir.patch" ''
+                     (writeText "unicode-accessible-data-dir.patch" ''
                        diff --git a/lib/unicode.ex b/lib/unicode.ex
                        index 8224c3c..3c0bb3a 100644
                        --- a/lib/unicode.ex
@@ -144,7 +144,7 @@ defmodule DepsNix.SpecialTreatmentTest do
 
                  VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
 
-                 nativeBuildInputs = with pkgs; [
+                 nativeBuildInputs = [
                    pkg-config
                    vips
                  ];
@@ -191,7 +191,7 @@ defmodule DepsNix.SpecialTreatmentTest do
                  name = "lazy_html";
                  appConfigPath = ./config;
 
-                 nativeBuildInputs = with pkgs; [
+                 nativeBuildInputs = [
                    cmake
                    lexbor
                  ];

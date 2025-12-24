@@ -162,7 +162,7 @@ defmodule DepsNix.Derivation do
 
             VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
 
-            nativeBuildInputs = with pkgs; [
+            nativeBuildInputs = [
               pkg-config
               vips
             ];
@@ -183,7 +183,7 @@ defmodule DepsNix.Derivation do
             inherit version;
             name = "#{drv.name}";#{format_app_config_path(drv)}
 
-            nativeBuildInputs = with pkgs; [
+            nativeBuildInputs = [
               cmake
               lexbor
             ];
@@ -222,7 +222,7 @@ defmodule DepsNix.Derivation do
 
 
       patches = [
-        (pkgs.writeText "unicode-accessible-data-dir.patch" ''
+        (writeText "unicode-accessible-data-dir.patch" ''
           diff --git a/lib/unicode.ex b/lib/unicode.ex
           index 8224c3c..3c0bb3a 100644
           --- a/lib/unicode.ex

@@ -5,25 +5,14 @@
 let
   src = ./.;
 
-  erlang = pkgs.beam.interpreters.erlang_28;
-  beamUpstream = pkgs.beam.packagesWith erlang;
-  elixir = beamUpstream.elixir_1_19;
-
-  beamPackages = beamUpstream // rec {
-    inherit erlang elixir;
-    hex = beamUpstream.hex.override { inherit elixir; };
-    buildMix = beamUpstream.buildMix.override { inherit elixir erlang hex; };
-  };
+  beamPackages = pkgs.beamMinimal28Packages.extend (_: prev: { elixir = prev.elixir_1_19; });
 
   mixNixDeps = pkgs.callPackages ./deps.nix {
     beamPackages = beamPackages;
   };
 in
 beamPackages.buildMix {
-  inherit
-    src
-    elixir
-    ;
+  inherit src;
 
   name = "example";
   version = "0.1.0";
