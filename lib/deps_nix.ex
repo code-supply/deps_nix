@@ -236,8 +236,8 @@ defmodule DepsNix do
                 if overrideFenixOverlay == null then
                   import "${
                     fetchTarball {
-                      url = "https://github.com/nix-community/fenix/archive/056c9393c821a4df356df6ce7f14c722dc8717ec.tar.gz";
-                      sha256 = "sha256:1cdfh6nj81gjmn689snigidyq7w98gd8hkl5rvhly6xj7vyppmnd";
+                      url = "https://github.com/nix-community/fenix/archive/6399553b7a300c77e7f07342904eb696a5b6bf9d.tar.gz";
+                      sha256 = "sha256-C6tT7K1Lx6VsYw1BY5S3OavtapUvEnDQtmQB5DSgbCc=";
                     }
                   }/overlay.nix"
                 else
@@ -350,8 +350,8 @@ defmodule DepsNix do
                 {
                   name = "rustlerPrecompiled";
                   toolchain = {
-                    name = "nightly-2024-11-01";
-                    sha256 = "sha256-wq7bZ1/IlmmLkSa3GUJgK17dTWcKyf5A+ndS9yRwB88=";
+                    name = "nightly-2025-06-23";
+                    sha256 = "sha256-UAoZcxg3iWtS+2n8TFNfANFt/GmkuOMDf7QAE0fRxeA=";
                   };
                 }
               ];
