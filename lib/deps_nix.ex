@@ -216,6 +216,7 @@ defmodule DepsNix do
         fetchFromGitHub,
         overrides ? (x: y: { }),
         overrideFenixOverlay ? null,
+        rustlerPrecompiledOverrides ? { },
         pkg-config,
         vips,
         writeText,
@@ -255,9 +256,10 @@ defmodule DepsNix do
                 else
                   extendedPkgs.fenix.fromToolchainName toolchain;
               native =
-                (extendedPkgs.makeRustPlatform {
-                  inherit (fenix) cargo rustc;
-                }).buildRustPackage
+                (
+                  (extendedPkgs.makeRustPlatform {
+                    inherit (fenix) cargo rustc;
+                  }).buildRustPackage
                   {
                     pname = "${old.packageName}-native";
                     version = old.version;
@@ -269,7 +271,9 @@ defmodule DepsNix do
                       extendedPkgs.cmake
                     ];
                     doCheck = false;
-                  };
+                  }
+                ).overrideAttrs
+                  rustlerPrecompiledOverrides.${old.packageName} or { };
 
             in
             {
