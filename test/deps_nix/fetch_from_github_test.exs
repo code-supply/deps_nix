@@ -13,7 +13,7 @@ defmodule DepsNix.FetchFromGitHubTest do
              }
              |> to_string() ==
                """
-               pkgs.fetchFromGitHub {
+               fetchFromGitHub {
                  owner = "sstoltze";
                  repo = "tds";
                  rev = "somegithash";

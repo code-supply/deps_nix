@@ -22,7 +22,7 @@ defmodule DepsNix.FetchFromGitHub do
   defimpl String.Chars do
     def to_string(%DepsNix.FetchFromGitHub{} = g) do
       """
-      pkgs.fetchFromGitHub {
+      fetchFromGitHub {
         owner = "#{g.owner}";
         repo = "#{g.repo}";
         rev = "#{g.rev}";

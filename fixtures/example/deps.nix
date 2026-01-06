@@ -1,9 +1,15 @@
 {
-  pkgs,
   lib,
   beamPackages,
+  cmake,
+  extend,
+  lexbor,
+  fetchFromGitHub,
   overrides ? (x: y: { }),
   overrideFenixOverlay ? null,
+  pkg-config,
+  vips,
+  writeText,
 }:
 
 let
@@ -12,7 +18,7 @@ let
 
   workarounds = {
     portCompiler = _unusedArgs: old: {
-      buildPlugins = [ pkgs.beamPackages.pc ];
+      buildPlugins = [ beamPackages.pc ];
     };
 
     rustlerPrecompiled =
@@ -22,7 +28,7 @@ let
       }:
       old:
       let
-        extendedPkgs = pkgs.extend fenixOverlay;
+        extendedPkgs = extend fenixOverlay;
         fenixOverlay =
           if overrideFenixOverlay == null then
             import "${
@@ -118,7 +124,7 @@ let
       '';
 
       preBuild = ''
-        install -Dm644           -t _build/c/third_party/lexbor/$LEXBOR_GIT_SHA/build           ${pkgs.lexbor}/lib/liblexbor_static.a
+        install -Dm644           -t _build/c/third_party/lexbor/$LEXBOR_GIT_SHA/build           ${lexbor}/lib/liblexbor_static.a
       '';
     };
   };
@@ -210,7 +216,7 @@ let
             name = "bandit";
             appConfigPath = ./config;
 
-            src = pkgs.fetchFromGitHub {
+            src = fetchFromGitHub {
               owner = "mtrudel";
               repo = "bandit";
               rev = "4f15f029e7aa17f8e7f98d55b0e94c684dee0971";
@@ -803,7 +809,7 @@ let
         in
         drv;
 
-      heroicons = pkgs.fetchFromGitHub {
+      heroicons = fetchFromGitHub {
         owner = "tailwindlabs";
         repo = "heroicons";
         rev = "88ab3a0d790e6a47404cba02800a6b25d2afae50";
@@ -918,7 +924,7 @@ let
             name = "lazy_html";
             appConfigPath = ./config;
 
-            nativeBuildInputs = with pkgs; [
+            nativeBuildInputs = [
               cmake
               lexbor
             ];
@@ -1489,7 +1495,7 @@ let
             };
 
             patches = [
-              (pkgs.writeText "unicode-accessible-data-dir.patch" ''
+              (writeText "unicode-accessible-data-dir.patch" ''
                 diff --git a/lib/unicode.ex b/lib/unicode.ex
                 index 8224c3c..3c0bb3a 100644
                 --- a/lib/unicode.ex
@@ -1577,7 +1583,7 @@ let
 
             VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
 
-            nativeBuildInputs = with pkgs; [
+            nativeBuildInputs = [
               pkg-config
               vips
             ];
