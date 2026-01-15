@@ -107,10 +107,20 @@ defmodule DepsNix.Derivation do
     {:hex, name, version, _hash, beam_builders, _sub_deps, _, sha256} = dep.opts[:lock]
     fetcher = %FetchHex{pkg: name, version: version, sha256: sha256}
 
+    builder =
+      case nix_builder(beam_builders) do
+        nil ->
+          IO.puts("Unknown builders #{inspect(beam_builders)} for dep: #{name}")
+          System.halt(1)
+
+        builder ->
+          builder
+      end
+
     new(dep,
       version: version,
       src: fetcher,
-      builder: nix_builder(beam_builders),
+      builder: builder,
       app_config_path: app_config_path(options)
     )
   end
@@ -119,6 +129,8 @@ defmodule DepsNix.Derivation do
     cond do
       Enum.member?(builders, :mix) -> "buildMix"
       Enum.member?(builders, :rebar3) -> "buildRebar3"
+      Enum.member?(builders, :make) -> "buildErlangMk"
+      true -> nil
     end
   end
 
