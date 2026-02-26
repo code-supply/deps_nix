@@ -131,6 +131,12 @@ defmodule DepsNix.DerivationTest do
     end
   end
 
+  property "selects buildErlangMk for :make builder" do
+    check all dep <- dep(scm: Mix.SCM.Hex, builders: [:make]) do
+      assert %Derivation{builder: "buildErlangMk"} = Derivation.from(dep, %DepsNix.Options{})
+    end
+  end
+
   test "doesn't include optional dependencies in beamDeps" do
     eventstore =
       %Mix.Dep{
