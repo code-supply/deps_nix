@@ -24,7 +24,7 @@ mkShell {
       elixir_1_19
       elixir-ls
       gh
-      nixfmt-rfc-style
+      nixfmt
       release
     ];
 }

@@ -288,16 +288,16 @@ defmodule DepsNix.Derivation do
     end
 
     defp override(%{name: :lazy_html} = _drv) do
-      ".override (workarounds.lazyHtml { } drv)"
+      ".overrideAttrs (workarounds.lazyHtml { } drv)"
     end
 
     defp override(drv) do
       cond do
         :rustler_precompiled in drv.beam_deps ->
-          ".override (workarounds.rustlerPrecompiled { } drv)"
+          ".overrideAttrs (workarounds.rustlerPrecompiled { } drv)"
 
         :elixir_make in drv.beam_deps ->
-          ".override (workarounds.elixirMake { } drv)"
+          ".overrideAttrs (workarounds.elixirMake { } drv)"
 
         true ->
           ""

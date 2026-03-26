@@ -222,8 +222,8 @@ defmodule DepsNix do
       }:
 
       let
-        buildMix = lib.makeOverridable beamPackages.buildMix;
-        buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
+        buildMix = beamPackages.buildMix;
+        buildRebar3 = beamPackages.buildRebar3;
 
         workarounds = {
           portCompiler = _unusedArgs: old: {
@@ -259,7 +259,7 @@ defmodule DepsNix do
                   inherit (fenix) cargo rustc;
                 }).buildRustPackage
                   {
-                    pname = "${old.packageName}-native";
+                    pname = "${if old ? beamModuleName then old.beamModuleName else old.name}-native";
                     version = old.version;
                     src = nativeDir;
                     cargoLock = {
@@ -289,31 +289,6 @@ defmodule DepsNix do
                   fi
                   ln -s "$lib" "priv/native/$dest"
                 done
-              '';
-
-              buildPhase = ''
-                suggestion() {
-                  echo "***********************************************"
-                  echo "                 deps_nix                      "
-                  echo
-                  echo " Rust dependency build failed.                 "
-                  echo
-                  echo " If you saw network errors, you might need     "
-                  echo " to disable compilation on the appropriate     "
-                  echo " RustlerPrecompiled module in your             "
-                  echo " application config.                           "
-                  echo
-                  echo " We think you need this:                       "
-                  echo
-                  echo -n " "
-                  grep -Rl 'use RustlerPrecompiled' lib \\
-                    | xargs grep 'defmodule' \\
-                    | sed 's/defmodule \\(.*\\) do/config :${old.packageName}, \\1, skip_compilation?: true/'
-                  echo "***********************************************"
-                  exit 1
-                }
-                trap suggestion ERR
-                ${old.buildPhase}
               '';
             };
 
@@ -376,7 +351,7 @@ defmodule DepsNix do
                 ) { } apps.${appName};
 
               in
-              if builtins.hasAttr appName apps then drv.override allOverridesForApp else drv;
+              if builtins.hasAttr appName apps then drv.overrideAttrs allOverridesForApp else drv;
 
           in
           builtins.mapAttrs applyOverrides prev

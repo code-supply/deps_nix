@@ -13,8 +13,8 @@
 }:
 
 let
-  buildMix = lib.makeOverridable beamPackages.buildMix;
-  buildRebar3 = lib.makeOverridable beamPackages.buildRebar3;
+  buildMix = beamPackages.buildMix;
+  buildRebar3 = beamPackages.buildRebar3;
 
   workarounds = {
     portCompiler = _unusedArgs: old: {
@@ -50,7 +50,7 @@ let
             inherit (fenix) cargo rustc;
           }).buildRustPackage
             {
-              pname = "${old.packageName}-native";
+              pname = "${if old ? beamModuleName then old.beamModuleName else old.name}-native";
               version = old.version;
               src = nativeDir;
               cargoLock = {
@@ -80,31 +80,6 @@ let
             fi
             ln -s "$lib" "priv/native/$dest"
           done
-        '';
-
-        buildPhase = ''
-          suggestion() {
-            echo "***********************************************"
-            echo "                 deps_nix                      "
-            echo
-            echo " Rust dependency build failed.                 "
-            echo
-            echo " If you saw network errors, you might need     "
-            echo " to disable compilation on the appropriate     "
-            echo " RustlerPrecompiled module in your             "
-            echo " application config.                           "
-            echo
-            echo " We think you need this:                       "
-            echo
-            echo -n " "
-            grep -Rl 'use RustlerPrecompiled' lib \
-              | xargs grep 'defmodule' \
-              | sed 's/defmodule \(.*\) do/config :${old.packageName}, \1, skip_compilation?: true/'
-            echo "***********************************************"
-            exit 1
-          }
-          trap suggestion ERR
-          ${old.buildPhase}
         '';
       };
 
@@ -144,7 +119,7 @@ let
             name = "rustlerPrecompiled";
             toolchain = {
               name = "nightly-2025-06-23";
-              sha256 =  "sha256-UAoZcxg3iWtS+2n8TFNfANFt/GmkuOMDf7QAE0fRxeA=";
+              sha256 = "sha256-UAoZcxg3iWtS+2n8TFNfANFt/GmkuOMDf7QAE0fRxeA=";
             };
           }
         ];
@@ -163,7 +138,7 @@ let
           ) { } apps.${appName};
 
         in
-        if builtins.hasAttr appName apps then drv.override allOverridesForApp else drv;
+        if builtins.hasAttr appName apps then drv.overrideAttrs allOverridesForApp else drv;
 
     in
     builtins.mapAttrs applyOverrides prev
@@ -291,7 +266,7 @@ let
             ];
           };
         in
-        drv.override (workarounds.elixirMake { } drv);
+        drv.overrideAttrs (workarounds.elixirMake { } drv);
 
       chatterbox =
         let
@@ -604,7 +579,7 @@ let
             ];
           };
         in
-        drv.override (workarounds.rustlerPrecompiled { } drv);
+        drv.overrideAttrs (workarounds.rustlerPrecompiled { } drv);
 
       ex_secp256k1 =
         let
@@ -626,7 +601,7 @@ let
             ];
           };
         in
-        drv.override (workarounds.rustlerPrecompiled { } drv);
+        drv.overrideAttrs (workarounds.rustlerPrecompiled { } drv);
 
       explorer =
         let
@@ -653,7 +628,7 @@ let
             ];
           };
         in
-        drv.override (workarounds.rustlerPrecompiled { } drv);
+        drv.overrideAttrs (workarounds.rustlerPrecompiled { } drv);
 
       fine =
         let
@@ -916,7 +891,7 @@ let
             ];
           };
         in
-        drv.override (workarounds.lazyHtml { } drv);
+        drv.overrideAttrs (workarounds.lazyHtml { } drv);
 
       mime =
         let
@@ -1355,7 +1330,7 @@ let
             ];
           };
         in
-        drv.override (workarounds.rustlerPrecompiled { } drv);
+        drv.overrideAttrs (workarounds.rustlerPrecompiled { } drv);
 
       toml =
         let
@@ -1510,7 +1485,7 @@ let
             ];
           };
         in
-        drv.override (workarounds.elixirMake { } drv);
+        drv.overrideAttrs (workarounds.elixirMake { } drv);
 
       websock =
         let
