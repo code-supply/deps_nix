@@ -192,7 +192,6 @@ defmodule DepsNix.SpecialTreatmentTest do
                  appConfigPath = ./config;
 
                  nativeBuildInputs = [
-                   cmake
                    lexbor
                  ];
 

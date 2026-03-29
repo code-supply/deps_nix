@@ -144,7 +144,7 @@ let
             name = "rustlerPrecompiled";
             toolchain = {
               name = "nightly-2025-06-23";
-              sha256 =  "sha256-UAoZcxg3iWtS+2n8TFNfANFt/GmkuOMDf7QAE0fRxeA=";
+              sha256 = "sha256-UAoZcxg3iWtS+2n8TFNfANFt/GmkuOMDf7QAE0fRxeA=";
             };
           }
         ];
@@ -899,7 +899,6 @@ let
             appConfigPath = ./config;
 
             nativeBuildInputs = [
-              cmake
               lexbor
             ];
 

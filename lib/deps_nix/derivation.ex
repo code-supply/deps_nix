@@ -184,7 +184,6 @@ defmodule DepsNix.Derivation do
             name = "#{drv.name}";#{format_app_config_path(drv)}
 
             nativeBuildInputs = [
-              cmake
               lexbor
             ];
 
