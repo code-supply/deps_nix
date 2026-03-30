@@ -1,11 +1,12 @@
-{ pkgs }:
+{
+  beamPackages,
+  pkgs,
+}:
 
-with pkgs;
-
-mkShell {
+pkgs.mkShell {
   packages = [
     beamPackages.hex
-    elixir_1_19
-    nixfmt-rfc-style
+    beamPackages.elixir
+    pkgs.nixfmt-rfc-style
   ];
 }

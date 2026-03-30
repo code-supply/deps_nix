@@ -1,15 +1,14 @@
-{ pkgs }:
+{ beamPackages, pkgs }:
 
-with pkgs;
-
-mkShell {
+pkgs.mkShell {
   packages =
     let
-      release = writeShellApplication {
+      release = pkgs.writeShellApplication {
         name = "release";
         runtimeInputs = [
-          elixir_1_19
-          gh
+          beamPackages.elixir
+          beamPackages.hex
+          pkgs.gh
         ];
         text = ''
           tag=$1
@@ -21,10 +20,10 @@ mkShell {
     in
     [
       beamPackages.hex
-      elixir_1_19
-      elixir-ls
-      gh
-      nixfmt-rfc-style
+      beamPackages.elixir
+      beamPackages.elixir-ls
+      pkgs.gh
+      pkgs.nixfmt
       release
     ];
 }

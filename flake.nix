@@ -26,9 +26,12 @@
 
       devShells = forAllSystems (
         { pkgs, ... }:
+        let
+          beamPackages = pkgs.beam28Packages.extend (_: prev: { elixir = prev.elixir_1_19; });
+        in
         {
-          default = pkgs.callPackage ./shells/local.nix { };
-          ci = pkgs.callPackage ./shells/ci.nix { };
+          default = pkgs.callPackage ./shells/local.nix { inherit beamPackages; };
+          ci = pkgs.callPackage ./shells/ci.nix { inherit beamPackages; };
         }
       );
 
