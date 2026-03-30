@@ -1,6 +1,7 @@
 {
   lib,
   beamPackages,
+  cmake,
   extend,
   lexbor,
   fetchFromGitHub,
@@ -1484,7 +1485,7 @@ let
 
       vix =
         let
-          version = "0.35.0";
+          version = "0.38.0";
           drv = buildMix {
             inherit version;
             name = "vix";
@@ -1500,7 +1501,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "vix";
-              sha256 = "a3e80067a89d0631b6cf2b93594e03c1b303a2c7cddbbdd28040750d521984e5";
+              sha256 = "dca58f654922fa678d5df8e028317483d9c0f8acb2e2714076a8468695687aa7";
             };
 
             beamDeps = [
