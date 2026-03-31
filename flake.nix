@@ -38,7 +38,9 @@
       checks = forAllSystems (
         { pkgs, ... }:
         {
-          default = pkgs.linkFarmFromDrvs "fixtures" (builtins.attrValues self.packages.${pkgs.system});
+          default = pkgs.linkFarmFromDrvs "fixtures" (
+            builtins.attrValues self.packages.${pkgs.stdenv.hostPlatform.system}
+          );
         }
       );
     };
