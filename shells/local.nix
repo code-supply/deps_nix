@@ -19,9 +19,9 @@ pkgs.mkShell {
       };
     in
     [
-      beamPackages.hex
       beamPackages.elixir
       beamPackages.elixir-ls
+      beamPackages.hex
       pkgs.gh
       pkgs.nixfmt
       release
