@@ -217,6 +217,7 @@ defmodule DepsNix do
         oniguruma,
         overrides ? (x: y: { }),
         overrideFenixOverlay ? null,
+        rustlerPrecompiledOverrides ? { },
         pkg-config,
         vips,
         writeText,
@@ -259,9 +260,10 @@ defmodule DepsNix do
                 else
                   extendedPkgs.fenix.fromToolchainName toolchain;
               native =
-                (extendedPkgs.makeRustPlatform {
-                  inherit (fenix) cargo rustc;
-                }).buildRustPackage
+                (
+                  (extendedPkgs.makeRustPlatform {
+                    inherit (fenix) cargo rustc;
+                  }).buildRustPackage
                   {
                     inherit env buildInputs;
                     pname = "${old.beamModuleName}-native";
@@ -272,7 +274,9 @@ defmodule DepsNix do
                     };
                     nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
                     doCheck = false;
-                  };
+                  }
+                ).overrideAttrs
+                  rustlerPrecompiledOverrides.${old.packageName} or { };
 
             in
             {
