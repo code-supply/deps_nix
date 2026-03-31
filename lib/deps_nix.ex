@@ -276,7 +276,7 @@ defmodule DepsNix do
                     doCheck = false;
                   }
                 ).overrideAttrs
-                  rustlerPrecompiledOverrides.${old.packageName} or { };
+                  rustlerPrecompiledOverrides.${old.beamModuleName} or { };
 
             in
             {
