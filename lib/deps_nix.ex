@@ -214,6 +214,7 @@ defmodule DepsNix do
         extend,
         lexbor,
         fetchFromGitHub,
+        oniguruma,
         overrides ? (x: y: { }),
         overrideFenixOverlay ? null,
         pkg-config,
@@ -233,6 +234,9 @@ defmodule DepsNix do
           rustlerPrecompiled =
             {
               toolchain ? null,
+              buildInputs ? [ ],
+              nativeBuildInputs ? [ ],
+              env ? { },
               ...
             }:
             old:
@@ -259,15 +263,14 @@ defmodule DepsNix do
                   inherit (fenix) cargo rustc;
                 }).buildRustPackage
                   {
+                    inherit env buildInputs;
                     pname = "${old.beamModuleName}-native";
                     version = old.version;
                     src = nativeDir;
                     cargoLock = {
                       lockFile = "${nativeDir}/Cargo.lock";
                     };
-                    nativeBuildInputs = [
-                      extendedPkgs.cmake
-                    ];
+                    nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
                     doCheck = false;
                   };
 

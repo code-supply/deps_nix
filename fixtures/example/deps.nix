@@ -5,6 +5,7 @@
   extend,
   lexbor,
   fetchFromGitHub,
+  oniguruma,
   overrides ? (x: y: { }),
   overrideFenixOverlay ? null,
   pkg-config,
@@ -24,6 +25,9 @@ let
     rustlerPrecompiled =
       {
         toolchain ? null,
+        buildInputs ? [ ],
+        nativeBuildInputs ? [ ],
+        env ? { },
         ...
       }:
       old:
@@ -50,15 +54,14 @@ let
             inherit (fenix) cargo rustc;
           }).buildRustPackage
             {
+              inherit env buildInputs;
               pname = "${old.beamModuleName}-native";
               version = old.version;
               src = nativeDir;
               cargoLock = {
                 lockFile = "${nativeDir}/Cargo.lock";
               };
-              nativeBuildInputs = [
-                extendedPkgs.cmake
-              ];
+              nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
               doCheck = false;
             };
 
@@ -258,7 +261,7 @@ let
 
       castore =
         let
-          version = "1.0.17";
+          version = "1.0.18";
           drv = buildMix {
             inherit version;
             name = "castore";
@@ -267,7 +270,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "castore";
-              sha256 = "12d24b9d80b910dd3953e165636d68f147a31db945d2dcb9365e441f8b5351e5";
+              sha256 = "f393e4fe6317829b158fb74d86eb681f737d2fe326aa61ccf6293c4104957e34";
             };
           };
         in
@@ -1173,7 +1176,7 @@ let
 
       rustler_precompiled =
         let
-          version = "0.8.4";
+          version = "0.9.0";
           drv = buildMix {
             inherit version;
             name = "rustler_precompiled";
@@ -1182,11 +1185,10 @@ let
             src = fetchHex {
               inherit version;
               pkg = "rustler_precompiled";
-              sha256 = "3b33d99b540b15f142ba47944f7a163a25069f6d608783c321029bc1ffb09514";
+              sha256 = "471d97315bd3bf7b64623418b3693eedd8e47de3d1cb79a0ac8f9da7d770d94c";
             };
 
             beamDeps = [
-              castore
               rustler
             ];
           };
@@ -1355,7 +1357,13 @@ let
             ];
           };
         in
-        drv.override (workarounds.rustlerPrecompiled { } drv);
+        drv.override (
+          workarounds.rustlerPrecompiled {
+            buildInputs = [ oniguruma ];
+            nativeBuildInputs = [ pkg-config ];
+            env.RUSTONIG_SYSTEM_LIBONIG = "1";
+          } drv
+        );
 
       toml =
         let

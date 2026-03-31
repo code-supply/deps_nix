@@ -290,6 +290,18 @@ defmodule DepsNix.Derivation do
       ".override (workarounds.lazyHtml { } drv)"
     end
 
+    defp override(%{name: :tokenizers} = _drv) do
+      """
+      .override (
+          workarounds.rustlerPrecompiled {
+            buildInputs = [ oniguruma ];
+            nativeBuildInputs = [ pkg-config ];
+            env.RUSTONIG_SYSTEM_LIBONIG = "1";
+          } drv
+        )\
+      """
+    end
+
     defp override(drv) do
       cond do
         :rustler_precompiled in drv.beam_deps ->

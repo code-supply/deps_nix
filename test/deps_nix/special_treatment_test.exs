@@ -5,6 +5,31 @@ defmodule DepsNix.SpecialTreatmentTest do
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
+  test "tokenizers uses nixpkgs-provided oniguruma (it's a dead project)" do
+    assert %Derivation{
+             builder: "buildMix",
+             name: :tokenizers,
+             version: "1.2.3",
+             src: %FetchHex{
+               pkg: :tokenizers,
+               version: "1.2.3",
+               sha256: "xxx"
+             },
+             beam_deps: [:rustler_precompiled],
+             app_config_path: "something"
+           }
+           |> to_string() =~
+             """
+             drv.override (
+                 workarounds.rustlerPrecompiled {
+                   buildInputs = [ oniguruma ];
+                   nativeBuildInputs = [ pkg-config ];
+                   env.RUSTONIG_SYSTEM_LIBONIG = "1";
+                 } drv
+               );
+             """
+  end
+
   test "unicode uses a custom directory for its data" do
     assert %Derivation{
              builder: "buildMix",
