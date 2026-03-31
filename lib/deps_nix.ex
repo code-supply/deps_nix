@@ -259,7 +259,7 @@ defmodule DepsNix do
                   inherit (fenix) cargo rustc;
                 }).buildRustPackage
                   {
-                    pname = "${old.packageName}-native";
+                    pname = "${old.beamModuleName}-native";
                     version = old.version;
                     src = nativeDir;
                     cargoLock = {
@@ -291,7 +291,7 @@ defmodule DepsNix do
                 done
               '';
 
-              buildPhase = ''
+              preBuild = ''
                 suggestion() {
                   echo "***********************************************"
                   echo "                 deps_nix                      "
@@ -308,12 +308,11 @@ defmodule DepsNix do
                   echo -n " "
                   grep -Rl 'use RustlerPrecompiled' lib \\
                     | xargs grep 'defmodule' \\
-                    | sed 's/defmodule \\(.*\\) do/config :${old.packageName}, \\1, skip_compilation?: true/'
+                    | sed 's/defmodule \\(.*\\) do/config :${old.beamModuleName}, \\1, skip_compilation?: true/'
                   echo "***********************************************"
                   exit 1
                 }
                 trap suggestion ERR
-                ${old.buildPhase}
               '';
             };
 

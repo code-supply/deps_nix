@@ -50,7 +50,7 @@ let
             inherit (fenix) cargo rustc;
           }).buildRustPackage
             {
-              pname = "${old.packageName}-native";
+              pname = "${old.beamModuleName}-native";
               version = old.version;
               src = nativeDir;
               cargoLock = {
@@ -82,7 +82,7 @@ let
           done
         '';
 
-        buildPhase = ''
+        preBuild = ''
           suggestion() {
             echo "***********************************************"
             echo "                 deps_nix                      "
@@ -99,12 +99,11 @@ let
             echo -n " "
             grep -Rl 'use RustlerPrecompiled' lib \
               | xargs grep 'defmodule' \
-              | sed 's/defmodule \(.*\) do/config :${old.packageName}, \1, skip_compilation?: true/'
+              | sed 's/defmodule \(.*\) do/config :${old.beamModuleName}, \1, skip_compilation?: true/'
             echo "***********************************************"
             exit 1
           }
           trap suggestion ERR
-          ${old.buildPhase}
         '';
       };
 
@@ -1486,13 +1485,13 @@ let
 
       vix =
         let
-          version = "0.35.0";
+          version = "0.38.0";
           drv = buildMix {
             inherit version;
             name = "vix";
             appConfigPath = ./config;
 
-            VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
+            env.VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
 
             nativeBuildInputs = [
               pkg-config
@@ -1502,7 +1501,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "vix";
-              sha256 = "a3e80067a89d0631b6cf2b93594e03c1b303a2c7cddbbdd28040750d521984e5";
+              sha256 = "dca58f654922fa678d5df8e028317483d9c0f8acb2e2714076a8468695687aa7";
             };
 
             beamDeps = [

@@ -160,7 +160,7 @@ defmodule DepsNix.Derivation do
             inherit version;
             name = "#{drv.name}";#{format_app_config_path(drv)}
 
-            VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
+            env.VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
 
             nativeBuildInputs = [
               pkg-config

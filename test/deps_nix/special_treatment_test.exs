@@ -142,7 +142,7 @@ defmodule DepsNix.SpecialTreatmentTest do
                  name = "vix";
                  appConfigPath = ./config;
 
-                 VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
+                 env.VIX_COMPILATION_MODE = "PLATFORM_PROVIDED_LIBVIPS";
 
                  nativeBuildInputs = [
                    pkg-config
