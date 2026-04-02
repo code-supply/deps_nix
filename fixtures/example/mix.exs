@@ -21,10 +21,11 @@ defmodule Example.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:bandit, github: "mtrudel/bandit", ref: "1.4.2"},
+      {:bandit, github: "mtrudel/bandit", ref: "1.4.2", override: true},
       {:brod, "~> 3.16"},
       {:deps_nix, path: "../..", only: [:dev]},
       {:eventstore, "~> 1.4"},
+      {:ex_heroicons, "~> 3.1"},
       {:ex_secp256k1, "~> 0.7.3"},
       {:ex_cldr, "~> 2.38"},
       {:ex_cldr_dates_times, "~> 2.17"},

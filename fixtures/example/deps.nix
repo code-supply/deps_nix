@@ -591,6 +591,32 @@ let
         in
         drv;
 
+      ex_heroicons =
+        let
+          version = "3.1.0";
+          drv = buildMix {
+            inherit version;
+            name = "ex_heroicons";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "ex_heroicons";
+              sha256 = "e37d0270b429d292a652efc477fe4c80a245d5ac9f8e3d879c6c653dab30835c";
+            };
+
+            beamDeps = [
+              phoenix_live_view
+            ];
+          };
+        in
+        drv.override {
+          preBuild = ''
+            mkdir deps
+            ln -sfv ${heroicons} deps/heroicons
+          '';
+        };
+
       ex_keccak =
         let
           version = "0.7.8";
@@ -728,6 +754,7 @@ let
             };
 
             beamDeps = [
+              phoenix_pubsub
               redix
             ];
           };
@@ -1035,6 +1062,34 @@ let
         in
         drv;
 
+      phoenix =
+        let
+          version = "1.8.5";
+          drv = buildMix {
+            inherit version;
+            name = "phoenix";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "phoenix";
+              sha256 = "83b2bb125127e02e9f475c8e3e92736325b5b01b0b9b05407bcb4083b7a32485";
+            };
+
+            beamDeps = [
+              bandit
+              jason
+              phoenix_pubsub
+              phoenix_template
+              plug
+              plug_crypto
+              telemetry
+              websock_adapter
+            ];
+          };
+        in
+        drv;
+
       phoenix_html =
         let
           version = "4.3.0";
@@ -1048,6 +1103,71 @@ let
               pkg = "phoenix_html";
               sha256 = "3eaa290a78bab0f075f791a46a981bbe769d94bc776869f4f3063a14f30497ad";
             };
+          };
+        in
+        drv;
+
+      phoenix_live_view =
+        let
+          version = "1.1.28";
+          drv = buildMix {
+            inherit version;
+            name = "phoenix_live_view";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "phoenix_live_view";
+              sha256 = "24faad535b65089642c3a7d84088109dc58f49c1f1c5a978659855d643466353";
+            };
+
+            beamDeps = [
+              jason
+              lazy_html
+              phoenix
+              phoenix_html
+              phoenix_template
+              plug
+              telemetry
+            ];
+          };
+        in
+        drv;
+
+      phoenix_pubsub =
+        let
+          version = "2.2.0";
+          drv = buildMix {
+            inherit version;
+            name = "phoenix_pubsub";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "phoenix_pubsub";
+              sha256 = "adc313a5bf7136039f63cfd9668fde73bba0765e0614cba80c06ac9460ff3e96";
+            };
+          };
+        in
+        drv;
+
+      phoenix_template =
+        let
+          version = "1.0.4";
+          drv = buildMix {
+            inherit version;
+            name = "phoenix_template";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "phoenix_template";
+              sha256 = "2c0c81f0e5c6753faf5cca2f229c9709919aba34fab866d3bc05060c9c444206";
+            };
+
+            beamDeps = [
+              phoenix_html
+            ];
           };
         in
         drv;
@@ -1535,6 +1655,29 @@ let
               pkg = "websock";
               sha256 = "6105453d7fac22c712ad66fab1d45abdf049868f253cf719b625151460b8b453";
             };
+          };
+        in
+        drv;
+
+      websock_adapter =
+        let
+          version = "0.5.9";
+          drv = buildMix {
+            inherit version;
+            name = "websock_adapter";
+            appConfigPath = ./config;
+
+            src = fetchHex {
+              inherit version;
+              pkg = "websock_adapter";
+              sha256 = "5534d5c9adad3c18a0f58a9371220d75a803bf0b9a3d87e6fe072faaeed76a08";
+            };
+
+            beamDeps = [
+              bandit
+              plug
+              websock
+            ];
           };
         in
         drv;

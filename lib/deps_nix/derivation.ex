@@ -286,6 +286,17 @@ defmodule DepsNix.Derivation do
       |> Util.indent(from: 2)
     end
 
+    defp override(%{name: :ex_heroicons} = _drv) do
+      """
+      .override {
+          preBuild = ''
+            mkdir deps
+            ln -sfv ${heroicons} deps/heroicons
+          '';
+        }\
+      """
+    end
+
     defp override(%{name: :lazy_html} = _drv) do
       ".override (workarounds.lazyHtml { } drv)"
     end

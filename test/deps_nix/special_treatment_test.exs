@@ -5,6 +5,30 @@ defmodule DepsNix.SpecialTreatmentTest do
   alias DepsNix.Derivation
   alias DepsNix.FetchHex
 
+  test "ex_heroicons symlinks the required heroicons into place" do
+    assert %Derivation{
+             builder: "buildMix",
+             name: :ex_heroicons,
+             version: "1.2.3",
+             src: %FetchHex{
+               pkg: :ex_heroicons,
+               version: "1.2.3",
+               sha256: "xxx"
+             },
+             beam_deps: [],
+             app_config_path: "something"
+           }
+           |> to_string() =~
+             """
+             drv.override {
+                 preBuild = ''
+                   mkdir deps
+                   ln -sfv ${heroicons} deps/heroicons
+                 '';
+               };
+             """
+  end
+
   test "tokenizers uses nixpkgs-provided oniguruma (it's a dead project)" do
     assert %Derivation{
              builder: "buildMix",
