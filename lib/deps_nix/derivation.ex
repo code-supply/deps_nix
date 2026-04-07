@@ -196,7 +196,14 @@ defmodule DepsNix.Derivation do
 
     def to_string(%DepsNix.Derivation{name: :heroicons} = drv) do
       """
-      #{drv.name} = #{drv.src |> Kernel.to_string()}
+      #{drv.name} = stdenv.mkDerivation {
+        name = "heroicons";
+        src = #{drv.src |> Kernel.to_string() |> Util.indent(from: 1)}
+        buildPhase = ''
+          mkdir $out
+          ln -sv $src $out/src
+        '';
+      };
       """
     end
 

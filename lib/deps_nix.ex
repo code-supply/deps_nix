@@ -218,6 +218,7 @@ defmodule DepsNix do
         overrides ? (x: y: { }),
         overrideFenixOverlay ? null,
         rustlerPrecompiledOverrides ? { },
+        stdenv,
         pkg-config,
         vips,
         writeText,

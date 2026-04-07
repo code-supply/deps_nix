@@ -3,7 +3,40 @@ defmodule DepsNix.SpecialTreatmentTest do
   use ExUnitProperties
 
   alias DepsNix.Derivation
+  alias DepsNix.FetchFromGitHub
   alias DepsNix.FetchHex
+
+  test "heroicons needs a nested GitHub fetch" do
+    # the src dir is expected by mixRelease, which symlinks deps into place
+    assert %Derivation{
+             builder: "buildMix",
+             name: :heroicons,
+             version: "6.6.6",
+             src: %FetchFromGitHub{
+               owner: "tailwindlabs",
+               repo: "heroicons",
+               rev: "88ab3a0d790e6a47404cba02800a6b25d2afae50",
+               hash: "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg="
+             },
+             beam_deps: [],
+             app_config_path: "foo"
+           }
+           |> to_string() == """
+           heroicons = stdenv.mkDerivation {
+             name = "heroicons";
+             src = fetchFromGitHub {
+               owner = "tailwindlabs";
+               repo = "heroicons";
+               rev = "88ab3a0d790e6a47404cba02800a6b25d2afae50";
+               hash = "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg=";
+             };
+             buildPhase = ''
+               mkdir $out
+               ln -sv $src $out/src
+             '';
+           };
+           """
+  end
 
   test "ex_heroicons symlinks the required heroicons into place" do
     assert %Derivation{
