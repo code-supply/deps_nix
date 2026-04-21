@@ -5,7 +5,7 @@ defmodule DepsNix.Derivation do
   alias DepsNix.Util
 
   @type t :: %__MODULE__{
-          app_config_path: String.t(),
+          app_config_path: String.t() | nil,
           builder: String.t(),
           name: atom(),
           version: String.t(),
@@ -17,7 +17,6 @@ defmodule DepsNix.Derivation do
         }
 
   @enforce_keys [
-    :app_config_path,
     :builder,
     :name,
     :version,
@@ -25,12 +24,12 @@ defmodule DepsNix.Derivation do
     :beam_deps
   ]
   defstruct [
-    :app_config_path,
     :builder,
     :name,
     :version,
     :src,
-    :beam_deps
+    :beam_deps,
+    app_config_path: nil
   ]
 
   def new(dep, opts) do
@@ -71,7 +70,7 @@ defmodule DepsNix.Derivation do
           version: dep.opts[:app_properties][:vsn],
           src: fetcher,
           builder: builder,
-          app_config_path: app_config_path(options)
+          app_config_path: app_config_path_for(dep, options)
         )
 
       url ->
@@ -81,7 +80,7 @@ defmodule DepsNix.Derivation do
           version: dep.opts[:app_properties][:vsn],
           src: fetcher,
           builder: "buildMix",
-          app_config_path: app_config_path(options)
+          app_config_path: app_config_path_for(dep, options)
         )
     end
   end
@@ -99,7 +98,7 @@ defmodule DepsNix.Derivation do
           )
       },
       builder: nix_builder([:mix]),
-      app_config_path: app_config_path(options)
+      app_config_path: app_config_path_for(dep, options)
     )
   end
 
@@ -111,9 +110,21 @@ defmodule DepsNix.Derivation do
       version: version,
       src: fetcher,
       builder: nix_builder(beam_builders),
-      app_config_path: app_config_path(options)
+      app_config_path: app_config_path_for(dep, options)
     )
   end
+
+  defp app_config_path_for(%Mix.Dep{app: name}, %DepsNix.Options{config_deps: selection} = opts) do
+    if includes?(selection, name) do
+      app_config_path(opts)
+    else
+      nil
+    end
+  end
+
+  defp includes?(:all, _name), do: true
+  defp includes?(:none, _name), do: false
+  defp includes?(%MapSet{} = set, name), do: MapSet.member?(set, name)
 
   defp nix_builder(builders) do
     cond do
@@ -331,6 +342,10 @@ defmodule DepsNix.Derivation do
         true ->
           ""
       end
+    end
+
+    defp format_app_config_path(%DepsNix.Derivation{app_config_path: nil}) do
+      ""
     end
 
     defp format_app_config_path(%DepsNix.Derivation{

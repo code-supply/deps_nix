@@ -27,16 +27,51 @@ defmodule Mix.Tasks.Deps.Nix do
   }
   ```
 
+  ## Controlling `appConfigPath`
+
+  By default every `buildMix` derivation receives an `appConfigPath` pointing
+  at your application's `config/` directory. This causes the Nix store hash
+  of every dependency to change whenever any file under `config/` changes,
+  invalidating the cache even for dependencies that don't actually read
+  compile-time configuration.
+
+  Two flags let you narrow this:
+
+  - `--config-deps phoenix,swoosh` — only the listed dependencies receive
+    `appConfigPath`; every other derivation omits the line entirely. The flag
+    is repeatable and values may be comma-separated:
+
+    ```
+    mix deps.nix --config-deps phoenix,swoosh
+    mix deps.nix --config-deps phoenix --config-deps swoosh
+    ```
+
+    If any name does not match a resolved dependency, the task fails and
+    writes no output.
+
+  - `--no-config-deps` — no derivation receives `appConfigPath`:
+
+    ```
+    mix deps.nix --no-config-deps
+    ```
+
+  The two flags are mutually exclusive. The existing `--app-config-path` flag
+  still sets the path value wherever `appConfigPath` is emitted:
+
+  ```
+  mix deps.nix --config-deps phoenix --app-config-path ./apps/web/config
+  ```
+
   ## Example with all options
 
   This command creates derivations for everything in `:prod`, and only `ex_doc`
   and `credo` in `:dev`. It will include `:path` dependencies (this option is
   useful for repos with multiple Mix projects). It outputs the Nix expression
-  to `nix/deps.nix`. It specifies `appConfigPath` to be `./my-app/config` for
-  all nix dependency derivations.
+  to `nix/deps.nix`. It emits `appConfigPath = ./my-app/config;` only on the
+  `phoenix` derivation.
 
   ```
-  mix deps.nix --include-paths --env prod --env dev=ex_doc,credo --output nix/deps.nix --app-config-path ./my-app/config
+  mix deps.nix --include-paths --env prod --env dev=ex_doc,credo --output nix/deps.nix --config-deps phoenix --app-config-path ./my-app/config
   ```
 
   ## Git dependencies

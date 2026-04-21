@@ -144,6 +144,44 @@ defmodule DepsNixTest do
              } = DepsNix.parse_args(~w(--app-config-path ../my/app/config))
     end
 
+    test "config_deps defaults to :all when neither flag is given" do
+      assert %DepsNix.Options{config_deps: :all} = DepsNix.parse_args(~w())
+    end
+
+    test "--config-deps with a single comma-separated value becomes a MapSet of atoms" do
+      assert %DepsNix.Options{config_deps: selection} =
+               DepsNix.parse_args(~w(--config-deps phoenix,swoosh))
+
+      assert selection == MapSet.new([:phoenix, :swoosh])
+    end
+
+    test "--config-deps may be repeated and the values are unioned" do
+      assert %DepsNix.Options{config_deps: selection} =
+               DepsNix.parse_args(~w(--config-deps phoenix --config-deps swoosh,ecto))
+
+      assert selection == MapSet.new([:phoenix, :swoosh, :ecto])
+    end
+
+    test "--config-deps collapses duplicate names" do
+      assert %DepsNix.Options{config_deps: selection} =
+               DepsNix.parse_args(~w(--config-deps phoenix,phoenix --config-deps phoenix))
+
+      assert selection == MapSet.new([:phoenix])
+    end
+
+    test "--no-config-deps yields :none" do
+      assert %DepsNix.Options{config_deps: :none} =
+               DepsNix.parse_args(~w(--no-config-deps))
+    end
+
+    test "passing both --config-deps and --no-config-deps raises Mix.Error" do
+      assert_raise Mix.Error,
+                   ~r/--config-deps and --no-config-deps are mutually exclusive/,
+                   fn ->
+                     DepsNix.parse_args(~w(--config-deps phoenix --no-config-deps))
+                   end
+    end
+
     defp package_name do
       string(:alphanumeric, min_length: 1)
     end
@@ -291,10 +329,165 @@ defmodule DepsNixTest do
              ~s(appConfigPath = ../my/app/config;)
   end
 
+  describe "config_deps validation" do
+    test "raises Mix.Error when --config-deps names an unknown dep" do
+      foo = dep(name: :foo, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      converger = fn [env: :prod] -> [foo] end
+
+      assert_raise Mix.Error, ~r/typo_dep/, fn ->
+        DepsNix.run(
+          %DepsNix.Options{
+            envs: %{"prod" => :all},
+            config_deps: MapSet.new([:typo_dep])
+          },
+          converger
+        )
+      end
+    end
+
+    test "lists every unknown name in the error message" do
+      foo = dep(name: :foo, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      converger = fn [env: :prod] -> [foo] end
+
+      err =
+        assert_raise Mix.Error, fn ->
+          DepsNix.run(
+            %DepsNix.Options{
+              envs: %{"prod" => :all},
+              config_deps: MapSet.new([:nope_one, :nope_two])
+            },
+            converger
+          )
+        end
+
+      assert err.message =~ "nope_one"
+      assert err.message =~ "nope_two"
+    end
+
+    test "a rebar3 dep named in --config-deps passes validation and renders without appConfigPath" do
+      rdep = dep(name: :cowlib, builders: [:rebar3], scm: Mix.SCM.Hex) |> pick()
+      converger = fn [env: :prod] -> [rdep] end
+
+      nix =
+        output(
+          %DepsNix.Options{
+            envs: %{"prod" => :all},
+            config_deps: MapSet.new([:cowlib])
+          },
+          converger
+        )
+
+      refute nix =~ "appConfigPath"
+      assert nix =~ ~r/cowlib =/
+    end
+
+    test "a dep filtered out by --env is not 'known' for validation" do
+      prod_dep = dep(name: :prod_only, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      dev_dep = dep(name: :dev_only, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+
+      converger = fn
+        [env: :prod] -> [prod_dep]
+        [env: :dev] -> [dev_dep]
+      end
+
+      assert_raise Mix.Error, ~r/dev_only/, fn ->
+        DepsNix.run(
+          %DepsNix.Options{
+            envs: %{"prod" => :all},
+            config_deps: MapSet.new([:dev_only])
+          },
+          converger
+        )
+      end
+
+      nix =
+        output(
+          %DepsNix.Options{
+            envs: %{"prod" => :all},
+            config_deps: MapSet.new([:prod_only])
+          },
+          converger
+        )
+
+      assert nix =~ ~r/prod_only =/
+    end
+  end
+
+  describe "config_deps selection" do
+    test ":all (default) emits appConfigPath for every buildMix dep" do
+      foo = dep(name: :foo, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      bar = dep(name: :bar, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      converger = fn [env: :prod] -> [foo, bar] end
+
+      nix = output(%DepsNix.Options{envs: %{"prod" => :all}}, converger)
+
+      assert Regex.scan(~r/appConfigPath/, nix) |> length() == 2
+    end
+
+    test ":none emits no appConfigPath lines" do
+      foo = dep(name: :foo, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      bar = dep(name: :bar, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      converger = fn [env: :prod] -> [foo, bar] end
+
+      nix =
+        output(
+          %DepsNix.Options{envs: %{"prod" => :all}, config_deps: :none},
+          converger
+        )
+
+      refute nix =~ "appConfigPath"
+    end
+
+    test "MapSet selection emits appConfigPath only for the listed deps" do
+      foo = dep(name: :foo, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      bar = dep(name: :bar, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      converger = fn [env: :prod] -> [foo, bar] end
+
+      nix =
+        output(
+          %DepsNix.Options{
+            envs: %{"prod" => :all},
+            config_deps: MapSet.new([:foo])
+          },
+          converger
+        )
+
+      assert Regex.scan(~r/appConfigPath/, nix) |> length() == 1
+      assert derivation_block(nix, "foo") =~ "appConfigPath"
+      refute derivation_block(nix, "bar") =~ "appConfigPath"
+    end
+
+    test "MapSet selection combines with --app-config-path to set the path value" do
+      foo = dep(name: :foo, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      bar = dep(name: :bar, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      converger = fn [env: :prod] -> [foo, bar] end
+
+      nix =
+        output(
+          %DepsNix.Options{
+            envs: %{"prod" => :all},
+            config_deps: MapSet.new([:foo]),
+            app_config_path: "../x/config"
+          },
+          converger
+        )
+
+      assert nix =~ ~s(appConfigPath = ../x/config;)
+      assert Regex.scan(~r/appConfigPath/, nix) |> length() == 1
+    end
+  end
+
   defp output(opts, converger \\ &stub_converger/1) do
     {_path, output} = DepsNix.run(opts, converger)
     output
   end
 
   defp stub_converger(_), do: []
+
+  defp derivation_block(nix, name) do
+    case Regex.run(~r/ #{name} =\s+let.*?in\s+drv[^;]*;/s, nix) do
+      [match] -> match
+      _ -> flunk("No derivation block found for #{name} in output:\n#{nix}")
+    end
+  end
 end
