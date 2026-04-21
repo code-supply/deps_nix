@@ -318,6 +318,44 @@ defmodule DepsNix.DerivationTest do
              |> String.contains?("appConfigPath")
     end
 
+    test "buildMix derivation with app_config_path: nil omits the appConfigPath line" do
+      refute %Derivation{
+               builder: "buildMix",
+               name: :bandit,
+               version: "1.4.2",
+               src: %FetchHex{
+                 pkg: :bandit,
+                 version: "1.4.2",
+                 sha256: "3db8bacea631bd926cc62ccad58edfee4252d1b4c5cccbbad9825df2722b884f"
+               },
+               beam_deps: [],
+               app_config_path: nil
+             }
+             |> to_string()
+             |> String.contains?("appConfigPath")
+    end
+
+    test "config_deps: :none excludes appConfigPath even from buildMix deps" do
+      rendered =
+        dep(builders: [:mix], scm: Mix.SCM.Hex)
+        |> pick()
+        |> Derivation.from(%DepsNix.Options{config_deps: :none})
+        |> to_string()
+
+      refute String.contains?(rendered, "appConfigPath")
+    end
+
+    test "config_deps: MapSet includes only named deps" do
+      named = dep(name: :phoenix, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+      other = dep(name: :jason, builders: [:mix], scm: Mix.SCM.Hex) |> pick()
+
+      opts = %DepsNix.Options{config_deps: MapSet.new([:phoenix])}
+
+      assert named |> Derivation.from(opts) |> to_string() |> String.contains?("appConfigPath")
+
+      refute other |> Derivation.from(opts) |> to_string() |> String.contains?("appConfigPath")
+    end
+
     test "paths get special treatment" do
       assert %Derivation{
                builder: "buildMix",

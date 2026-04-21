@@ -3,11 +3,14 @@ defmodule DepsNix do
   alias DepsNix.Util
 
   defmodule Options do
+    @type config_deps_selection :: :all | :none | MapSet.t(atom())
+
     @type t :: %Options{
             envs: map(),
             github_prefetcher: (String.t(), String.t(), String.t() -> String.t()),
             output: String.t(),
             app_config_path: String.t() | nil,
+            config_deps: config_deps_selection(),
             include_paths: boolean(),
             cwd: String.t()
           }
@@ -15,6 +18,7 @@ defmodule DepsNix do
               github_prefetcher: nil,
               output: "deps.nix",
               app_config_path: nil,
+              config_deps: :all,
               include_paths: false,
               cwd: nil
   end
@@ -28,33 +32,64 @@ defmodule DepsNix do
   @spec run(Options.t(), converger()) ::
           {path :: String.t(), output :: String.t()}
   def run(opts, converger) do
-    opts
-    |> convert_opts()
-    |> Enum.sort_by(fn
-      {[env: :test], _packages} -> 0
-      {[env: :dev], _packages} -> 1
-      {[env: :prod], _packages} -> 2
-    end)
-    |> Enum.flat_map(fn {converger_opts, permitted_names} ->
-      all_packages_for_env = converger.(converger_opts)
-
-      Packages.filter(all_packages_for_env, permitted_names)
-      |> then(fn packages ->
-        if opts.include_paths do
-          packages
-        else
-          Packages.reject_paths(packages)
-        end
+    resolved_deps =
+      opts
+      |> convert_opts()
+      |> Enum.sort_by(fn
+        {[env: :test], _packages} -> 0
+        {[env: :dev], _packages} -> 1
+        {[env: :prod], _packages} -> 2
       end)
-    end)
-    |> Enum.reject(&unwanted/1)
-    |> Enum.sort_by(& &1.app)
-    |> Enum.uniq_by(& &1.app)
+      |> Enum.flat_map(fn {converger_opts, permitted_names} ->
+        all_packages_for_env = converger.(converger_opts)
+
+        Packages.filter(all_packages_for_env, permitted_names)
+        |> then(fn packages ->
+          if opts.include_paths do
+            packages
+          else
+            Packages.reject_paths(packages)
+          end
+        end)
+      end)
+      |> Enum.reject(&unwanted/1)
+      |> Enum.sort_by(& &1.app)
+      |> Enum.uniq_by(& &1.app)
+
+    validate_config_deps!(opts.config_deps, resolved_deps)
+
+    resolved_deps
     |> Enum.map(&DepsNix.Derivation.from(&1, opts))
     |> Enum.join("\n")
     |> indent_deps()
     |> wrap(opts.output)
   end
+
+  defp validate_config_deps!(:all, _deps), do: :ok
+  defp validate_config_deps!(:none, _deps), do: :ok
+
+  defp validate_config_deps!(%MapSet{} = requested, deps) do
+    resolved_names = MapSet.new(deps, & &1.app)
+    unknown = MapSet.difference(requested, resolved_names)
+
+    if MapSet.size(unknown) > 0 do
+      names =
+        unknown
+        |> Enum.map(&to_string/1)
+        |> Enum.sort()
+        |> Enum.join(", ")
+
+      raise Mix.Error,
+        message:
+          "--config-deps named unknown #{pluralize_deps(MapSet.size(unknown))}: #{names}. " <>
+            "The name must match a dependency that appears in the generated output."
+    end
+
+    :ok
+  end
+
+  defp pluralize_deps(1), do: "dependency"
+  defp pluralize_deps(_), do: "dependencies"
 
   @spec parse_args(list()) :: Options.t()
   def parse_args(args) do
@@ -64,6 +99,8 @@ defmodule DepsNix do
         env: [:string, :keep],
         output: :string,
         app_config_path: :string,
+        config_deps: [:string, :keep],
+        no_config_deps: :boolean,
         include_paths: :boolean
       ]
     )
@@ -174,9 +211,38 @@ defmodule DepsNix do
             end
           end,
         include_paths: Keyword.get(opts, :include_paths, false),
-        app_config_path: Keyword.get(opts, :app_config_path, nil)
+        app_config_path: Keyword.get(opts, :app_config_path, nil),
+        config_deps: parse_config_deps(opts)
     }
     |> add_output(opts)
+  end
+
+  defp parse_config_deps(opts) do
+    raw_names =
+      for {:config_deps, value} <- opts,
+          name <- String.split(value, ",", trim: true),
+          trimmed = String.trim(name),
+          trimmed != "",
+          do: String.to_atom(trimmed)
+
+    names = MapSet.new(raw_names)
+    no_config_deps = Keyword.get(opts, :no_config_deps, false)
+
+    case {MapSet.size(names), no_config_deps} do
+      {0, false} ->
+        :all
+
+      {0, true} ->
+        :none
+
+      {_, false} ->
+        names
+
+      {_, true} ->
+        raise Mix.Error,
+          message:
+            "--config-deps and --no-config-deps are mutually exclusive; pass only one of them"
+    end
   end
 
   defp convert_opts(%Options{envs: envs}) do
