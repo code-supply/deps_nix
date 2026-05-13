@@ -56,7 +56,7 @@ defmodule DepsNix.SpecialTreatmentTest do
              drv.override {
                  preBuild = ''
                    mkdir deps
-                   ln -sfv ${heroicons} deps/heroicons
+                   ln -sfv ${heroicons}/src deps/heroicons
                  '';
                };
              """

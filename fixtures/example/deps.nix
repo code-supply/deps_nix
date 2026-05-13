@@ -614,7 +614,7 @@ let
         drv.override {
           preBuild = ''
             mkdir deps
-            ln -sfv ${heroicons} deps/heroicons
+            ln -sfv ${heroicons}/src deps/heroicons
           '';
         };
 
@@ -823,8 +823,8 @@ let
         src = fetchFromGitHub {
           owner = "tailwindlabs";
           repo = "heroicons";
-          rev = "88ab3a0d790e6a47404cba02800a6b25d2afae50";
-          hash = "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg=";
+          rev = "ad0ad1f6d51bd64dcd67e363d2b2833a8de25154";
+          hash = "sha256-ouzch4TOSUE1r2g8S+jW1HaElQahwGfPuuozKMSW8o8=";
         };
         buildPhase = ''
           mkdir $out

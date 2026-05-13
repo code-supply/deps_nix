@@ -35,7 +35,7 @@ defmodule Example.MixProject do
       {:fun_with_flags, "~> 1.12.0"},
       {:heroicons,
        github: "tailwindlabs/heroicons",
-       tag: "v2.1.1",
+       tag: "v2.1.5",
        sparse: "optimized",
        app: false,
        compile: false,
