@@ -39,6 +39,22 @@ defmodule Mix.Tasks.Deps.Nix do
   mix deps.nix --include-paths --env prod --env dev=ex_doc,credo --output nix/deps.nix --app-config-path ./my-app/config
   ```
 
+  ## Application config
+
+  By default, every `buildMix` derivation is given an `appConfigPath` pointing
+  at your application's `config` directory, so that dependencies see your
+  compile-time configuration. This means a change to any config file
+  invalidates every dependency and forces a recompile.
+
+  Pass `--no-app-config` to omit `appConfigPath` entirely. Dependencies then
+  build with an empty config and are no longer rebuilt when your config
+  changes. Individual dependencies that need compile-time config can be given
+  one back through the `overrides` argument of the generated file:
+
+  ```
+  some_dep = prev.some_dep.override { appConfigPath = ./config; };
+  ```
+
   ## Git dependencies
 
   `deps_nix` supports git dependencies.
