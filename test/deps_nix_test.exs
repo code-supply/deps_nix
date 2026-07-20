@@ -144,6 +144,14 @@ defmodule DepsNixTest do
              } = DepsNix.parse_args(~w(--app-config-path ../my/app/config))
     end
 
+    test "application config is passed by default" do
+      assert %DepsNix.Options{app_config: true} = DepsNix.parse_args(~w())
+    end
+
+    test "can disable passing of application config" do
+      assert %DepsNix.Options{app_config: false} = DepsNix.parse_args(~w(--no-app-config))
+    end
+
     defp package_name do
       string(:alphanumeric, min_length: 1)
     end
@@ -289,6 +297,18 @@ defmodule DepsNixTest do
              converger
            ) =~
              ~s(appConfigPath = ../my/app/config;)
+  end
+
+  test "can omit appConfigPath entirely" do
+    converger = fn _ -> [pick(dep())] end
+
+    refute output(
+             %DepsNix.Options{
+               envs: %{"prod" => :all},
+               app_config: false
+             },
+             converger
+           ) =~ "appConfigPath"
   end
 
   defp output(opts, converger \\ &stub_converger/1) do

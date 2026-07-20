@@ -138,6 +138,8 @@ defmodule DepsNix.Derivation do
   ## Instead, we need to use fetchgit, so that private keys can be used
   defp parse_git_url(url, _private = true), do: url
 
+  defp app_config_path(%DepsNix.Options{app_config: false}), do: nil
+
   defp app_config_path(opts) do
     if opts.app_config_path do
       opts.app_config_path
@@ -331,6 +333,10 @@ defmodule DepsNix.Derivation do
         true ->
           ""
       end
+    end
+
+    defp format_app_config_path(%DepsNix.Derivation{app_config_path: nil}) do
+      ""
     end
 
     defp format_app_config_path(%DepsNix.Derivation{
