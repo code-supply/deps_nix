@@ -203,7 +203,7 @@ let
 
       aws_signature =
         let
-          version = "0.4.2";
+          version = "0.4.3";
           drv = buildRebar3 {
             inherit version;
             name = "aws_signature";
@@ -211,7 +211,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "aws_signature";
-              sha256 = "1df4a2d1dff200c7bdfa8f9f935efc71a51273adfc6dd39a9f2cc937e01baa01";
+              sha256 = "7b4dc6fd48e583b61cef75b330c344e71c451ba70903d1506af1e38caf68bb0c";
             };
           };
         in
@@ -378,7 +378,7 @@ let
 
       db_connection =
         let
-          version = "2.9.0";
+          version = "2.10.2";
           drv = buildMix {
             inherit version;
             name = "db_connection";
@@ -387,7 +387,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "db_connection";
-              sha256 = "17d502eacaf61829db98facf6f20808ed33da6ccf495354a41e64fe42f9c509c";
+              sha256 = "510b14482330f1af6490a2fa0efd8d4f1435d1529b165647df22ac0f2df0fa93";
             };
 
             beamDeps = [
@@ -399,7 +399,7 @@ let
 
       decimal =
         let
-          version = "2.4.1";
+          version = "3.1.1";
           drv = buildMix {
             inherit version;
             name = "decimal";
@@ -408,7 +408,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "decimal";
-              sha256 = "7e618897933a8455f19a727d7c5e50a2c071a544b700e5e724298ecb4340187f";
+              sha256 = "c5f25f2ced74a0587d03e6023f595db8e924c9d3922c8c8ffd9edfc4498cf1f6";
             };
           };
         in
@@ -659,7 +659,7 @@ let
 
       explorer =
         let
-          version = "0.11.1";
+          version = "0.12.0";
           drv = buildMix {
             inherit version;
             name = "explorer";
@@ -668,13 +668,12 @@ let
             src = fetchHex {
               inherit version;
               pkg = "explorer";
-              sha256 = "acc679ea15790d03d9a406bb45284bd4e30531d01a650d9194393cbadcdefccd";
+              sha256 = "3ebc3f84f6f9f829c31f107bc3c2cb484705163d9cb7c62ed2e0405913360595";
             };
 
             beamDeps = [
               aws_signature
               decimal
-              fss
               rustler
               rustler_precompiled
               table
@@ -713,23 +712,6 @@ let
               inherit version;
               pkg = "fsm";
               sha256 = "fbf0d53f89e9082b326b0b5828b94b4c549ff9d1452bbfd00b4d1ac082208e96";
-            };
-          };
-        in
-        drv;
-
-      fss =
-        let
-          version = "0.1.1";
-          drv = buildMix {
-            inherit version;
-            name = "fss";
-            appConfigPath = ./config;
-
-            src = fetchHex {
-              inherit version;
-              pkg = "fss";
-              sha256 = "78ad5955c7919c3764065b21144913df7515d52e228c09427a004afe9c1a16b0";
             };
           };
         in
@@ -1233,7 +1215,7 @@ let
 
       postgrex =
         let
-          version = "0.22.0";
+          version = "0.22.3";
           drv = buildMix {
             inherit version;
             name = "postgrex";
@@ -1242,7 +1224,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "postgrex";
-              sha256 = "a68c4261e299597909e03e6f8ff5a13876f5caadaddd0d23af0d0a61afcc5d84";
+              sha256 = "f018c13752b2b46e8d35d7e2d84c3276557cbfd880769109021a1d0ee36c1cfe";
             };
 
             beamDeps = [
@@ -1280,7 +1262,7 @@ let
 
       rustler =
         let
-          version = "0.36.2";
+          version = "0.38.0";
           drv = buildMix {
             inherit version;
             name = "rustler";
@@ -1289,12 +1271,11 @@ let
             src = fetchHex {
               inherit version;
               pkg = "rustler";
-              sha256 = "93832a6dbc1166739a19cd0c25e110e4cf891f16795deb9361dfcae95f6c88fe";
+              sha256 = "704c03c1bf66be12b031c5a389347b91c81c5cb819a24b068b0de36fe4a5652a";
             };
 
             beamDeps = [
               jason
-              toml
             ];
           };
         in
@@ -1407,7 +1388,7 @@ let
 
       telemetry =
         let
-          version = "1.4.1";
+          version = "1.4.2";
           drv = buildRebar3 {
             inherit version;
             name = "telemetry";
@@ -1415,7 +1396,7 @@ let
             src = fetchHex {
               inherit version;
               pkg = "telemetry";
-              sha256 = "2172e05a27531d3d31dd9782841065c50dd5c3c7699d95266b2edd54c2dafa1c";
+              sha256 = "928f6495066506077862c0d1646609eed891a4326bee3126ba54b60af61febb1";
             };
           };
         in
@@ -1490,23 +1471,6 @@ let
             env.RUSTONIG_SYSTEM_LIBONIG = "1";
           } drv
         );
-
-      toml =
-        let
-          version = "0.7.0";
-          drv = buildMix {
-            inherit version;
-            name = "toml";
-            appConfigPath = ./config;
-
-            src = fetchHex {
-              inherit version;
-              pkg = "toml";
-              sha256 = "0690246a2478c1defd100b0c9b89b4ea280a22be9a7b313a8a058a2408a2fa70";
-            };
-          };
-        in
-        drv;
 
       trie =
         let
