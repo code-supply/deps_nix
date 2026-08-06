@@ -286,6 +286,17 @@ defmodule DepsNixTest do
     assert output(%DepsNix.Options{}) =~ ~r/\n$/
   end
 
+  test "rustlerPrecompiled workaround strips the 'lib' prefix cargo gives cdylib artifacts" do
+    # cargo always names a cdylib output "lib<crate>.so" (or .dylib on macOS),
+    # but Erlang's NIF loader (and Rustler's own compiler) expect exactly
+    # "<crate>.so" in priv/native - see rustler's Compiler.output_file/3,
+    # which drops the "lib" prefix. Without stripping it here too, the
+    # symlinked artifact never gets found and the NIF fails to load at
+    # runtime (e.g. "cannot open shared object file: No such file or
+    # directory" for explorer.so).
+    assert output(%DepsNix.Options{}) =~ ~s(dest="''${dest#lib}")
+  end
+
   test "can specify appConfigPath" do
     converger = fn _ -> [pick(dep())] end
 

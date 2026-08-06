@@ -299,6 +299,7 @@ defmodule DepsNix do
                   then
                     dest="''${dest%.dylib}.so"
                   fi
+                  dest="''${dest#lib}"
                   ln -s "$lib" "priv/native/$dest"
                 done
               '';
