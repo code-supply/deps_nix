@@ -58,7 +58,12 @@ defmodule DepsNix do
     |> wrap(opts.output)
   end
 
-  @spec parse_args(list()) :: Options.t()
+  @version Mix.Project.config()[:version]
+
+  @spec version() :: String.t()
+  def version, do: @version
+
+  @spec parse_args(list()) :: Options.t() | :help | :version
   def parse_args(args) do
     args
     |> OptionParser.parse(
@@ -67,7 +72,9 @@ defmodule DepsNix do
         output: :string,
         app_config: :boolean,
         app_config_path: :string,
-        include_paths: :boolean
+        include_paths: :boolean,
+        help: :boolean,
+        version: :boolean
       ]
     )
     |> to_opts()
@@ -149,7 +156,7 @@ defmodule DepsNix do
     end
   end
 
-  @spec to_opts({list(), any(), any()}) :: Options.t()
+  @spec to_opts({list(), any(), any()}) :: Options.t() | :help | :version
   defp to_opts({[], _, _}) do
     %Options{
       cwd: File.cwd!(),
@@ -159,6 +166,14 @@ defmodule DepsNix do
   end
 
   defp to_opts({opts, _, _}) do
+    cond do
+      Keyword.get(opts, :help) -> :help
+      Keyword.get(opts, :version) -> :version
+      true -> build_opts(opts)
+    end
+  end
+
+  defp build_opts(opts) do
     default = to_opts({[], [], []})
 
     %{

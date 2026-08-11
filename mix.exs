@@ -9,6 +9,7 @@ defmodule DepsNix.MixProject do
       deps: deps(),
       description: "Mix task that converts Mix dependencies to Nix derivations",
       dialyzer: [plt_add_apps: [:mix]],
+      escript: [main_module: DepsNix.CLI],
       elixir: "~> 1.16",
       package: package(),
       start_permanent: Mix.env() == :prod,
@@ -26,7 +27,7 @@ defmodule DepsNix.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: []
+      extra_applications: [:mix]
     ]
   end
 
