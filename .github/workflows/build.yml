@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 jobs:
-
   build:
     name: Build
     runs-on: ${{ matrix.os }}
@@ -27,3 +26,7 @@ jobs:
         run: nix develop .#ci --command -- mix test
       - name: Check fixture derivations
         run: nix flake check
+      - name: Check deps.nix is up to date
+        run: |
+          nix run .# -- --no-app-config
+          git diff --exit-code -- deps.nix
