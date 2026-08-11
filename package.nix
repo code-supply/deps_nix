@@ -4,9 +4,12 @@
   gnutar,
   lib,
 }:
+let
+  version = lib.trim (builtins.readFile ./VERSION);
+in
 beamPackages.mixRelease (finalAttrs: {
   pname = "deps_nix";
-  version = "3.1.0";
+  inherit version;
 
   src = lib.fileset.toSource {
     root = ./.;
@@ -14,6 +17,7 @@ beamPackages.mixRelease (finalAttrs: {
       ./lib
       ./mix.exs
       ./mix.lock
+      ./VERSION
     ];
   };
 

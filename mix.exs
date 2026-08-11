@@ -4,6 +4,8 @@ defmodule DepsNix.MixProject do
   @scm_url "https://github.com/code-supply/deps_nix"
 
   def project do
+    version = "VERSION" |> Path.expand(__DIR__) |> File.read!() |> String.trim()
+
     [
       app: :deps_nix,
       deps: deps(),
@@ -13,7 +15,7 @@ defmodule DepsNix.MixProject do
       elixir: "~> 1.16",
       package: package(),
       start_permanent: Mix.env() == :prod,
-      version: "3.1.1",
+      version: version,
 
       # Docs
       source_url: @scm_url,
