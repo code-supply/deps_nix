@@ -377,6 +377,20 @@ let
         in
         drv;
 
+      daisyui = stdenv.mkDerivation {
+        name = "daisyui";
+        src = fetchFromGitHub {
+          owner = "saadeghi";
+          repo = "daisyui";
+          rev = "22ecff57f2c391b80a75617325748cf4d13fdf47";
+          hash = "sha256-I2LI9VYVxQcvoMDgDWmvNyQToS1rFm12V167YxqDs24=";
+        };
+        buildPhase = ''
+          mkdir $out
+          ln -sv $src $out/src
+        '';
+      };
+
       db_connection =
         let
           version = "2.10.2";

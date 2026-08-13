@@ -28,6 +28,16 @@ defmodule DepsNix.Packages do
     Enum.filter(packages, &("#{&1.app}" in permitted_names))
   end
 
+  @doc """
+  Deps declared with `app: false, compile: false` are plain source checkouts
+  (e.g. asset repos like heroicons or daisyui) rather than BEAM packages.
+  """
+  def fetch_only?(%Mix.Dep{} = dep) do
+    Enum.all?([:app, :compile], fn opt ->
+      Keyword.fetch(dep.opts, opt) == {:ok, false}
+    end)
+  end
+
   def reject_paths(deps) do
     deps
     |> Enum.reject(fn dep ->

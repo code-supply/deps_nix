@@ -6,7 +6,7 @@ defmodule DepsNix.SpecialTreatmentTest do
   alias DepsNix.FetchFromGitHub
   alias DepsNix.FetchHex
 
-  test "heroicons needs a nested GitHub fetch" do
+  test "fetch-only deps like heroicons or daisyui get a nested GitHub fetch" do
     # the src dir is expected by mixRelease, which symlinks deps into place
     assert %Derivation{
              builder: "buildMix",
@@ -19,7 +19,8 @@ defmodule DepsNix.SpecialTreatmentTest do
                hash: "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg="
              },
              beam_deps: [],
-             app_config_path: "foo"
+             app_config_path: "foo",
+             fetch_only: true
            }
            |> to_string() == """
            heroicons = stdenv.mkDerivation {
@@ -28,6 +29,36 @@ defmodule DepsNix.SpecialTreatmentTest do
                owner = "tailwindlabs";
                repo = "heroicons";
                rev = "88ab3a0d790e6a47404cba02800a6b25d2afae50";
+               hash = "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg=";
+             };
+             buildPhase = ''
+               mkdir $out
+               ln -sv $src $out/src
+             '';
+           };
+           """
+
+    assert %Derivation{
+             builder: "buildMix",
+             name: :daisyui,
+             version: nil,
+             src: %FetchFromGitHub{
+               owner: "saadeghi",
+               repo: "daisyui",
+               rev: "4dbf88f9dd80e0917b7d366b0f4e28ec33ba6b52",
+               hash: "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg="
+             },
+             beam_deps: [],
+             app_config_path: "foo",
+             fetch_only: true
+           }
+           |> to_string() == """
+           daisyui = stdenv.mkDerivation {
+             name = "daisyui";
+             src = fetchFromGitHub {
+               owner = "saadeghi";
+               repo = "daisyui";
+               rev = "4dbf88f9dd80e0917b7d366b0f4e28ec33ba6b52";
                hash = "sha256-4yRqfY8r2Ar9Fr45ikD/8jK+H3g4veEHfXa9BorLxXg=";
              };
              buildPhase = ''
