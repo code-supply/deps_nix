@@ -27,7 +27,7 @@
       devShells = forAllSystems (
         { pkgs, ... }:
         let
-          beamPackages = pkgs.beam29Packages.extend (_: prev: { elixir = prev.elixir_1_20; });
+          beamPackages = pkgs.beam29Packages.overrideScope (_: prev: { elixir = prev.elixir_1_20; });
         in
         {
           default = pkgs.callPackage ./shells/local.nix { inherit beamPackages; };
