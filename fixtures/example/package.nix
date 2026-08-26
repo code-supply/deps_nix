@@ -5,7 +5,7 @@
 let
   src = ./.;
 
-  beamPackages = pkgs.beamMinimal28Packages.extend (_: prev: { elixir = prev.elixir_1_19; });
+  beamPackages = pkgs.beamMinimal28Packages.overrideScope (_: prev: { elixir = prev.elixir_1_19; });
 
   mixNixDeps = pkgs.callPackages ./deps.nix {
     beamPackages = beamPackages;
