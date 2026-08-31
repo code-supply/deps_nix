@@ -294,6 +294,53 @@ defmodule DepsNix.SpecialTreatmentTest do
            """
   end
 
+  test "exqlite builds against sqlite from nixpkgs" do
+    assert %Derivation{
+             builder: "buildMix",
+             name: :exqlite,
+             version: "0.33.0",
+             src: %FetchHex{
+               pkg: :exqlite,
+               version: "0.33.0",
+               sha256: "9acde72b27bdfeadeb51f790f7a6cc0d06cf555718c05cf57e43c5cf93d8471b"
+             },
+             beam_deps: [
+               :cc_precompiler,
+               :elixir_make
+             ],
+             app_config_path: "./config"
+           }
+           |> to_string() == """
+           exqlite =
+             let
+               version = "0.33.0";
+               drv = buildMix {
+                 inherit version;
+                 name = "exqlite";
+                 appConfigPath = ./config;
+
+                 env.EXQLITE_USE_SYSTEM = "1";
+
+                 buildInputs = [
+                   sqlite
+                 ];
+
+                 src = fetchHex {
+                   inherit version;
+                   pkg = "exqlite";
+                   sha256 = "9acde72b27bdfeadeb51f790f7a6cc0d06cf555718c05cf57e43c5cf93d8471b";
+                 };
+
+                 beamDeps = [
+                   cc_precompiler
+                   elixir_make
+                 ];
+               };
+             in
+             drv.override (workarounds.elixirMake { } drv);
+           """
+  end
+
   test "rustler_precompiled dependencies get automatically overridden" do
     assert %Derivation{
              builder: "buildMix",

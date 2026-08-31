@@ -224,6 +224,7 @@ defmodule DepsNix do
         rustlerPrecompiledOverrides ? { },
         stdenv,
         pkg-config,
+        sqlite,
         vips,
         writeText,
       }:
