@@ -11,6 +11,7 @@
   rustlerPrecompiledOverrides ? { },
   stdenv,
   pkg-config,
+  sqlite,
   vips,
   writeText,
 }:
@@ -683,6 +684,36 @@ let
           };
         in
         drv.override (workarounds.rustlerPrecompiled { } drv);
+
+      exqlite =
+        let
+          version = "0.40.0";
+          drv = buildMix {
+            inherit version;
+            name = "exqlite";
+            appConfigPath = ./config;
+
+            env.EXQLITE_USE_SYSTEM = "1";
+
+            buildInputs = [
+              sqlite
+            ];
+
+            src = fetchHex {
+              inherit version;
+              pkg = "exqlite";
+              sha256 = "f83350f2d29a38be1fd38f39081dd36f41fc51bbacf0f4c2927d01308ae331d0";
+            };
+
+            beamDeps = [
+              cc_precompiler
+              db_connection
+              elixir_make
+              table
+            ];
+          };
+        in
+        drv.override (workarounds.elixirMake { } drv);
 
       fine =
         let

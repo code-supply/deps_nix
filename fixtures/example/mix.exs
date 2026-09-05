@@ -32,6 +32,7 @@ defmodule Example.MixProject do
       {:ex_cldr_numbers, "~> 2.33"},
       {:ex_keccak, "~> 0.7.6"},
       {:explorer, "~> 0.12.0"},
+      {:exqlite, "~> 0.40"},
       {:fun_with_flags, "~> 1.12.0"},
       {:heroicons,
        github: "tailwindlabs/heroicons",

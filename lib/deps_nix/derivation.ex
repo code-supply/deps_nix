@@ -176,6 +176,28 @@ defmodule DepsNix.Derivation do
       """
     end
 
+    def to_string(%DepsNix.Derivation{name: :exqlite} = drv) do
+      """
+      exqlite =
+        let
+          version = "#{drv.version}";
+          drv = #{drv.builder} {
+            inherit version;
+            name = "#{drv.name}";#{format_app_config_path(drv)}
+
+            env.EXQLITE_USE_SYSTEM = "1";
+
+            buildInputs = [
+              sqlite
+            ];
+
+            src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}
+          };
+        in
+        drv#{override(drv)};
+      """
+    end
+
     def to_string(%DepsNix.Derivation{name: :lazy_html} = drv) do
       """
       lazy_html =
