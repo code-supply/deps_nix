@@ -190,11 +190,10 @@ defmodule DepsNix do
     end
   end
 
+  # Fetch-only deps become plain source derivations, but that only works for
+  # git checkouts; anything else with `app: false, compile: false` is dropped.
   defp unwanted(dep) do
-    dep.app != :heroicons &&
-      Enum.all?([:app, :compile], fn opt ->
-        Keyword.fetch(dep.opts, opt) == {:ok, false}
-      end)
+    dep.scm != Mix.SCM.Git && Packages.fetch_only?(dep)
   end
 
   defp add_output(%Options{} = options, parsed_args) do

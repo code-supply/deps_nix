@@ -23,6 +23,13 @@ defmodule Example.MixProject do
     [
       {:bandit, github: "mtrudel/bandit", ref: "1.4.2", override: true},
       {:brod, "~> 3.16"},
+      {:daisyui,
+       github: "saadeghi/daisyui",
+       tag: "v5.5.20",
+       sparse: "packages/bundle",
+       app: false,
+       compile: false,
+       depth: 1},
       {:deps_nix, path: "../..", only: [:dev]},
       {:eventstore, "~> 1.4"},
       {:ex_heroicons, "~> 3.1"},
