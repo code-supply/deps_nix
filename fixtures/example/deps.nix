@@ -949,7 +949,7 @@ let
             name = "lazy_html";
             appConfigPath = ./config;
 
-            nativeBuildInputs = [
+            buildInputs = [
               lexbor
             ];
 
@@ -1624,6 +1624,9 @@ let
 
             nativeBuildInputs = [
               pkg-config
+            ];
+
+            buildInputs = [
               vips
             ];
 

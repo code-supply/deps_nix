@@ -166,6 +166,9 @@ defmodule DepsNix.Derivation do
 
             nativeBuildInputs = [
               pkg-config
+            ];
+
+            buildInputs = [
               vips
             ];
 
@@ -207,7 +210,7 @@ defmodule DepsNix.Derivation do
             inherit version;
             name = "#{drv.name}";#{format_app_config_path(drv)}
 
-            nativeBuildInputs = [
+            buildInputs = [
               lexbor
             ];
 

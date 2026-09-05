@@ -228,6 +228,9 @@ defmodule DepsNix.SpecialTreatmentTest do
 
                  nativeBuildInputs = [
                    pkg-config
+                 ];
+
+                 buildInputs = [
                    vips
                  ];
 
@@ -273,7 +276,7 @@ defmodule DepsNix.SpecialTreatmentTest do
                  name = "lazy_html";
                  appConfigPath = ./config;
 
-                 nativeBuildInputs = [
+                 buildInputs = [
                    lexbor
                  ];
 
