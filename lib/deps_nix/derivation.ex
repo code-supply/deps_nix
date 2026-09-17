@@ -13,7 +13,8 @@ defmodule DepsNix.Derivation do
             DepsNix.FetchFromGitHub.t()
             | DepsNix.FetchGit.t()
             | DepsNix.FetchHex.t(),
-          beam_deps: list(atom())
+          beam_deps: list(atom()),
+          subdir: String.t() | nil
         }
 
   @enforce_keys [
@@ -30,7 +31,8 @@ defmodule DepsNix.Derivation do
     :name,
     :version,
     :src,
-    :beam_deps
+    :beam_deps,
+    :subdir
   ]
 
   def new(dep, opts) do
@@ -48,6 +50,7 @@ defmodule DepsNix.Derivation do
   def from(%Mix.Dep{scm: Mix.SCM.Git} = dep, options) do
     {:git, url, rev, _} = dep.opts[:lock]
     private = !!dep.opts[:private]
+    subdir = dep.opts[:subdir]
 
     case parse_git_url(url, private) do
       [owner: owner, repo: repo] ->
@@ -55,7 +58,7 @@ defmodule DepsNix.Derivation do
 
         {hash, builder} =
           if prefetcher do
-            prefetcher.(owner, repo, rev)
+            prefetcher.(owner, repo, rev, subdir)
           else
             {"", "buildMix"}
           end
@@ -71,6 +74,7 @@ defmodule DepsNix.Derivation do
           version: dep.opts[:app_properties][:vsn],
           src: fetcher,
           builder: builder,
+          subdir: subdir,
           app_config_path: app_config_path(options)
         )
 
@@ -81,6 +85,7 @@ defmodule DepsNix.Derivation do
           version: dep.opts[:app_properties][:vsn],
           src: fetcher,
           builder: "buildMix",
+          subdir: subdir,
           app_config_path: app_config_path(options)
         )
     end
@@ -241,13 +246,22 @@ defmodule DepsNix.Derivation do
           version = "#{drv.version}";
           drv = #{drv.builder} {
             inherit version;
-            name = "#{drv.name}";#{format_app_config_path(drv)}
+            name = "#{drv.name}";#{format_app_config_path(drv)}#{source_root(drv)}
 
             src = #{src(drv.src)}#{beam_deps(drv.beam_deps)}#{patches(drv)}#{post_unpack(drv)}
           };
         in
         drv#{override(drv)};
       """
+    end
+
+    defp source_root(%DepsNix.Derivation{subdir: nil}), do: ""
+
+    defp source_root(%DepsNix.Derivation{subdir: subdir}) do
+      "\nsourceRoot = \"source/#{subdir}\";"
+      |> Util.indent(from: 1)
+      |> Util.indent(from: 1)
+      |> Util.indent(from: 1)
     end
 
     defp patches(%DepsNix.Derivation{name: :unicode}) do
