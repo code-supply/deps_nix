@@ -5,7 +5,13 @@ defmodule DepsNix do
   defmodule Options do
     @type t :: %Options{
             envs: map(),
-            github_prefetcher: (String.t(), String.t(), String.t() -> String.t()),
+            github_prefetcher: (
+              String.t(),
+              String.t(),
+              String.t(),
+              String.t() | nil
+              -> {String.t(), String.t()}
+            ),
             output: String.t(),
             app_config: boolean(),
             app_config_path: String.t() | nil,
@@ -73,7 +79,7 @@ defmodule DepsNix do
     |> to_opts()
   end
 
-  def github_prefetcher(owner, repo, rev) do
+  def github_prefetcher(owner, repo, rev, subdir \\ nil) do
     Mix.shell().info("deps_nix: fetching hash for GitHub dependency #{owner}/#{repo}")
 
     with dir <- System.tmp_dir() |> realpath(),
@@ -85,7 +91,7 @@ defmodule DepsNix do
          nar = ExNar.serialize!(path),
          nar_hash = :crypto.hash(:sha256, nar),
          hash = "sha256-" <> Base.encode64(nar_hash) do
-      {hash, find_builder_from_path(path)}
+      {hash, find_builder_from_path(path, subdir)}
     end
   end
 
@@ -141,10 +147,12 @@ defmodule DepsNix do
     end
   end
 
-  defp find_builder_from_path(path) do
+  defp find_builder_from_path(path, subdir) do
+    root = if subdir, do: Path.join(path, subdir), else: path
+
     cond do
-      File.exists?(Path.join(path, "mix.exs")) -> "buildMix"
-      File.exists?(Path.join(path, "rebar.config")) -> "buildRebar3"
+      File.exists?(Path.join(root, "mix.exs")) -> "buildMix"
+      File.exists?(Path.join(root, "rebar.config")) -> "buildRebar3"
       true -> :unknown
     end
   end
@@ -154,7 +162,7 @@ defmodule DepsNix do
     %Options{
       cwd: File.cwd!(),
       envs: %{"prod" => :all},
-      github_prefetcher: &github_prefetcher/3
+      github_prefetcher: &github_prefetcher/4
     }
   end
 
@@ -259,10 +267,41 @@ defmodule DepsNix do
                   }/overlay.nix"
                 else
                   overrideFenixOverlay;
-              nativeDir = "${old.src}/native/${with builtins; head (attrNames (readDir "${old.src}/native"))}";
+              repoSubdir = if old ? sourceRoot then lib.removePrefix "source/" old.sourceRoot else "";
+              nativeRoot = if repoSubdir == "" then "${old.src}" else "${old.src}/${repoSubdir}";
+              nativeName = with builtins; head (attrNames (readDir "${nativeRoot}/native"));
+              nativeCargoLock = "${nativeRoot}/native/${nativeName}/Cargo.lock";
+              workspaceCrate = !builtins.pathExists nativeCargoLock;
+              nativeBuild =
+                if workspaceCrate then
+                  {
+                    src = old.src;
+                    cargoLock.lockFile = "${old.src}/Cargo.lock";
+                    buildAndTestSubdir = "${repoSubdir}/native/${nativeName}";
+                  }
+                else
+                  {
+                    src = "${nativeRoot}/native/${nativeName}";
+                    cargoLock.lockFile = nativeCargoLock;
+                  };
+              nativeToolchainFile =
+                if builtins.pathExists "${nativeRoot}/rust-toolchain.toml" then
+                  "${nativeRoot}/rust-toolchain.toml"
+                else if repoSubdir != "" && builtins.pathExists "${old.src}/rust-toolchain.toml" then
+                  "${old.src}/rust-toolchain.toml"
+                else
+                  null;
+              nativeToolchain =
+                if nativeToolchainFile == null then
+                  null
+                else
+                  (builtins.fromTOML (builtins.readFile nativeToolchainFile)).toolchain.channel;
               fenix =
                 if toolchain == null then
-                  extendedPkgs.fenix.stable
+                  if nativeToolchain == null || nativeToolchain == "stable" then
+                    extendedPkgs.fenix.stable
+                  else
+                    extendedPkgs.fenix.toolchainOf { channel = nativeToolchain; }
                 else
                   extendedPkgs.fenix.fromToolchainName toolchain;
               native =
@@ -270,17 +309,16 @@ defmodule DepsNix do
                   (extendedPkgs.makeRustPlatform {
                     inherit (fenix) cargo rustc;
                   }).buildRustPackage
-                  {
-                    inherit env buildInputs;
-                    pname = "${old.beamModuleName}-native";
-                    version = old.version;
-                    src = nativeDir;
-                    cargoLock = {
-                      lockFile = "${nativeDir}/Cargo.lock";
-                    };
-                    nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
-                    doCheck = false;
-                  }
+                  (
+                    {
+                      inherit env buildInputs;
+                      pname = "${old.beamModuleName}-native";
+                      version = old.version;
+                      nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
+                      doCheck = false;
+                    }
+                    // nativeBuild
+                  )
                 ).overrideAttrs
                   rustlerPrecompiledOverrides.${old.beamModuleName} or { };
 
@@ -303,6 +341,14 @@ defmodule DepsNix do
                   dest="''${dest#lib}"
                   ln -s "$lib" "priv/native/$dest"
                 done
+              ''
+              + lib.optionalString workspaceCrate ''
+
+                # The native crate is a Cargo workspace member: rustler's
+                # cargo metadata call needs the workspace root, which the
+                # mix source does not ship. The prebuilt library above makes
+                # compiling the crate unnecessary, so remove it.
+                rm -rf native
               '';
 
               preBuild = ''
