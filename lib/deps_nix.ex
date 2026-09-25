@@ -267,30 +267,30 @@ defmodule DepsNix do
                   }/overlay.nix"
                 else
                   overrideFenixOverlay;
-              repoSubdir =
-                if old ? sourceRoot then lib.removePrefix "source/" old.sourceRoot else "";
-              nativeRoot =
-                if repoSubdir == "" then "${old.src}" else "${old.src}/${repoSubdir}";
+              repoSubdir = if old ? sourceRoot then lib.removePrefix "source/" old.sourceRoot else "";
+              nativeRoot = if repoSubdir == "" then "${old.src}" else "${old.src}/${repoSubdir}";
               nativeName = with builtins; head (attrNames (readDir "${nativeRoot}/native"));
               nativeCargoLock = "${nativeRoot}/native/${nativeName}/Cargo.lock";
               workspaceCrate = !builtins.pathExists nativeCargoLock;
               nativeBuild =
-                if workspaceCrate
-                then {
-                  src = old.src;
-                  cargoLock.lockFile = "${old.src}/Cargo.lock";
-                  buildAndTestSubdir = "${repoSubdir}/native/${nativeName}";
-                }
-                else {
-                  src = "${nativeRoot}/native/${nativeName}";
-                  cargoLock.lockFile = nativeCargoLock;
-                };
+                if workspaceCrate then
+                  {
+                    src = old.src;
+                    cargoLock.lockFile = "${old.src}/Cargo.lock";
+                    buildAndTestSubdir = "${repoSubdir}/native/${nativeName}";
+                  }
+                else
+                  {
+                    src = "${nativeRoot}/native/${nativeName}";
+                    cargoLock.lockFile = nativeCargoLock;
+                  };
               nativeToolchainFile =
-                if builtins.pathExists "${nativeRoot}/rust-toolchain.toml"
-                then "${nativeRoot}/rust-toolchain.toml"
-                else if repoSubdir != "" && builtins.pathExists "${old.src}/rust-toolchain.toml"
-                then "${old.src}/rust-toolchain.toml"
-                else null;
+                if builtins.pathExists "${nativeRoot}/rust-toolchain.toml" then
+                  "${nativeRoot}/rust-toolchain.toml"
+                else if repoSubdir != "" && builtins.pathExists "${old.src}/rust-toolchain.toml" then
+                  "${old.src}/rust-toolchain.toml"
+                else
+                  null;
               nativeToolchain =
                 if nativeToolchainFile == null then
                   null
@@ -309,12 +309,16 @@ defmodule DepsNix do
                   (extendedPkgs.makeRustPlatform {
                     inherit (fenix) cargo rustc;
                   }).buildRustPackage
-                  ({ inherit env buildInputs;
-                    pname = "${old.beamModuleName}-native";
-                    version = old.version;
-                    nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
-                    doCheck = false;
-                  } // nativeBuild)
+                  (
+                    {
+                      inherit env buildInputs;
+                      pname = "${old.beamModuleName}-native";
+                      version = old.version;
+                      nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
+                      doCheck = false;
+                    }
+                    // nativeBuild
+                  )
                 ).overrideAttrs
                   rustlerPrecompiledOverrides.${old.beamModuleName} or { };
 
@@ -337,7 +341,8 @@ defmodule DepsNix do
                   dest="''${dest#lib}"
                   ln -s "$lib" "priv/native/$dest"
                 done
-              '' + lib.optionalString workspaceCrate ''
+              ''
+              + lib.optionalString workspaceCrate ''
 
                 # The native crate is a Cargo workspace member: rustler's
                 # cargo metadata call needs the workspace root, which the
