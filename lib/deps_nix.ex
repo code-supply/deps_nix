@@ -5,13 +5,8 @@ defmodule DepsNix do
   defmodule Options do
     @type t :: %Options{
             envs: map(),
-            github_prefetcher: (
-              String.t(),
-              String.t(),
-              String.t(),
-              String.t() | nil
-              -> {String.t(), String.t()}
-            ),
+            github_prefetcher: (String.t(), String.t(), String.t(), String.t() | nil ->
+                                  {String.t(), String.t()}),
             output: String.t(),
             app_config: boolean(),
             app_config_path: String.t() | nil,
