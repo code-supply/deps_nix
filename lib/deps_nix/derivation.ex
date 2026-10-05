@@ -14,7 +14,8 @@ defmodule DepsNix.Derivation do
             | DepsNix.FetchGit.t()
             | DepsNix.FetchHex.t(),
           beam_deps: list(atom()),
-          subdir: String.t() | nil
+          subdir: String.t() | nil,
+          fetch_only: boolean()
         }
 
   @enforce_keys [
@@ -32,7 +33,8 @@ defmodule DepsNix.Derivation do
     :version,
     :src,
     :beam_deps,
-    :subdir
+    :subdir,
+    fetch_only: false
   ]
 
   def new(dep, opts) do
@@ -40,7 +42,8 @@ defmodule DepsNix.Derivation do
       __MODULE__,
       [
         name: dep.app,
-        beam_deps: Enum.map(dep.deps, & &1.app)
+        beam_deps: Enum.map(dep.deps, & &1.app),
+        fetch_only: DepsNix.Packages.fetch_only?(dep)
       ]
       |> Keyword.merge(opts)
     )
@@ -226,10 +229,12 @@ defmodule DepsNix.Derivation do
       """
     end
 
-    def to_string(%DepsNix.Derivation{name: :heroicons} = drv) do
+    # Fetch-only deps aren't BEAM packages; expose the bare checkout so
+    # consumers can symlink ${pkg}/src into deps/.
+    def to_string(%DepsNix.Derivation{fetch_only: true} = drv) do
       """
       #{drv.name} = stdenv.mkDerivation {
-        name = "heroicons";
+        name = "#{drv.name}";
         src = #{drv.src |> Kernel.to_string() |> Util.indent(from: 1)}
         buildPhase = ''
           mkdir $out
