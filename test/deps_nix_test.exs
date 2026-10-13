@@ -53,6 +53,14 @@ defmodule DepsNixTest do
       assert %DepsNix.Options{envs: %{"prod" => :all}} = DepsNix.parse_args(~w())
     end
 
+    test "asks for help" do
+      assert DepsNix.parse_args(~w(--help)) == :help
+    end
+
+    test "asks for the version" do
+      assert DepsNix.parse_args(~w(--version)) == :version
+    end
+
     test "can pick up a single env" do
       assert %DepsNix.Options{envs: %{"dev" => :all}} = DepsNix.parse_args(~w(--env dev))
     end
