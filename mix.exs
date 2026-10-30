@@ -46,6 +46,7 @@ defmodule DepsNix.MixProject do
 
   defp package do
     [
+      files: ["lib", ".formatter.exs", "mix.exs", "README*", "LICENSE*", "VERSION"],
       links: %{"GitHub" => @scm_url},
       licenses: ["MIT"]
     ]

@@ -2,6 +2,7 @@
   beamPackages,
   callPackages,
   gnutar,
+  gzip,
   lib,
 }:
 let
@@ -30,7 +31,12 @@ beamPackages.mixRelease (finalAttrs: {
   postFixup = ''
     wrapProgram $out/bin/deps_nix \
       --suffix ERL_LIBS : ${beamPackages.hex}/lib/erlang/lib \
-      --suffix PATH : ${lib.makeBinPath [ gnutar ]}
+      --suffix PATH : ${
+        lib.makeBinPath [
+          gnutar
+          gzip
+        ]
+      }
   '';
 
   meta = {

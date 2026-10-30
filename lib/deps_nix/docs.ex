@@ -7,6 +7,9 @@ defmodule DepsNix.Docs do
     When run without arguments, generates `deps.nix` in the current directory, but
     only for `:prod` dependencies.
 
+    Run `mix deps.get` first so dependency sources are available. The standalone
+    `deps_nix` command does not require those dependencies to be compiled.
+
     The resulting file contains a Nix function that can be called with an empty
     attribute set:
 

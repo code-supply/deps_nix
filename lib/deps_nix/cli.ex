@@ -20,8 +20,25 @@ defmodule DepsNix.CLI do
 
     Mix.Project.get!()
 
-    {path, output} = DepsNix.run(opts, &Mix.Dep.Converger.converge/1)
+    {path, output} = DepsNix.run(opts, &converge/1)
 
     File.write!(path, output)
+  end
+
+  defp converge(opts) do
+    deps = Mix.Dep.Converger.converge(opts)
+
+    case Enum.filter(deps, &match?(%Mix.Dep{status: {:unavailable, _}}, &1)) do
+      [] ->
+        deps
+
+      missing ->
+        names = Enum.map_join(missing, ", ", & &1.app)
+
+        Mix.raise(
+          "Cannot generate Nix dependencies: dependency sources are missing: #{names}. " <>
+            "Run `mix deps.get`, then retry."
+        )
+    end
   end
 end

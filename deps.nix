@@ -11,6 +11,7 @@
   rustlerPrecompiledOverrides ? { },
   stdenv,
   pkg-config,
+  sqlite,
   vips,
   writeText,
 }:
@@ -56,17 +57,17 @@ let
             (extendedPkgs.makeRustPlatform {
               inherit (fenix) cargo rustc;
             }).buildRustPackage
-            {
-              inherit env buildInputs;
-              pname = "${old.beamModuleName}-native";
-              version = old.version;
-              src = nativeDir;
-              cargoLock = {
-                lockFile = "${nativeDir}/Cargo.lock";
-              };
-              nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
-              doCheck = false;
-            }
+              {
+                inherit env buildInputs;
+                pname = "${old.beamModuleName}-native";
+                version = old.version;
+                src = nativeDir;
+                cargoLock = {
+                  lockFile = "${nativeDir}/Cargo.lock";
+                };
+                nativeBuildInputs = [ extendedPkgs.cmake ] ++ nativeBuildInputs;
+                doCheck = false;
+              }
           ).overrideAttrs
             rustlerPrecompiledOverrides.${old.beamModuleName} or { };
 
