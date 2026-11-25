@@ -4,15 +4,18 @@ defmodule DepsNix.MixProject do
   @scm_url "https://github.com/code-supply/deps_nix"
 
   def project do
+    version = "VERSION" |> Path.expand(__DIR__) |> File.read!() |> String.trim()
+
     [
       app: :deps_nix,
       deps: deps(),
       description: "Mix task that converts Mix dependencies to Nix derivations",
       dialyzer: [plt_add_apps: [:mix]],
+      escript: [main_module: DepsNix.CLI],
       elixir: "~> 1.16",
       package: package(),
       start_permanent: Mix.env() == :prod,
-      version: "3.2.0",
+      version: version,
 
       # Docs
       source_url: @scm_url,
@@ -26,7 +29,7 @@ defmodule DepsNix.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: []
+      extra_applications: [:mix]
     ]
   end
 
@@ -43,6 +46,7 @@ defmodule DepsNix.MixProject do
 
   defp package do
     [
+      files: ["lib", ".formatter.exs", "mix.exs", "README*", "LICENSE*", "VERSION"],
       links: %{"GitHub" => @scm_url},
       licenses: ["MIT"]
     ]
