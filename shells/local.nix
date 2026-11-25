@@ -11,7 +11,7 @@ pkgs.mkShell {
           pkgs.gh
         ];
         text = ''
-          tag=$1
+          tag="v$(tr -d '[:space:]' < VERSION)"
 
           gh release create "$tag" --draft --generate-notes
           mix hex.publish
