@@ -65,6 +65,27 @@ using only the `:prod` dependencies for your project.
 
 See `mix help deps.nix` for more options.
 
+## Standalone usage with Nix
+
+deps_nix is also packaged as a standalone executable, so you can use it without
+adding it to your project's dependencies. It reads your `mix.exs` and
+`mix.lock` but doesn't compile your dependencies, so it's quick and leaves no
+`_build` directory behind.
+
+Fetch your dependency sources first, then run it from your project's root:
+
+```shell
+mix deps.get
+nix run github:code-supply/deps_nix
+```
+
+It accepts the same options as `mix deps.nix`. Put them after `--`:
+
+```shell
+nix run github:code-supply/deps_nix -- --help
+nix run github:code-supply/deps_nix -- --env prod --env dev=ex_doc --output nix/deps.nix
+```
+
 ## Rustler-precompiled
 
 deps_nix will work with some dependencies that use
